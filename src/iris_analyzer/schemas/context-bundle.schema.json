@@ -1,0 +1,419 @@
+{
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "const": "1"
+    },
+    "preprocessorVersion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "policyVersion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "profile": {
+      "const": "deployment_v1"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "source": {
+      "type": "object",
+      "properties": {
+        "snapshotId": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "commit": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "snapshotId",
+        "commit"
+      ],
+      "additionalProperties": false
+    },
+    "manifest": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "fileId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "digest": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "kind": {
+            "type": "string",
+            "minLength": 1
+          },
+          "eligible": {
+            "type": "boolean"
+          },
+          "exclusionReason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "fileId",
+          "path",
+          "size",
+          "digest",
+          "kind",
+          "eligible",
+          "exclusionReason"
+        ],
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "eligible": {
+                  "const": true
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "digest": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "componentRoots": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "deploymentCandidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "candidateId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "root": {
+            "type": "string",
+            "minLength": 1
+          },
+          "role": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evidenceIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true,
+            "minItems": 1
+          },
+          "componentRoots": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "candidateId",
+          "root",
+          "role",
+          "evidenceIds",
+          "componentRoots"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "selectedFiles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "fileId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "role": {
+            "type": "string",
+            "minLength": 1
+          },
+          "selectionReason": {
+            "type": "string",
+            "minLength": 1
+          },
+          "providedRanges": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "startLine": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "endLine": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              },
+              "required": [
+                "startLine",
+                "endLine"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "fileId",
+          "path",
+          "role",
+          "selectionReason",
+          "providedRanges"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "facts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "minLength": 1
+          },
+          "value": {},
+          "scope": {
+            "enum": [
+              "container",
+              "development",
+              "host_mapping",
+              "source",
+              "production"
+            ]
+          },
+          "evidenceIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true,
+            "minItems": 1
+          },
+          "component": {
+            "type": "string",
+            "minLength": 1
+          },
+          "candidateId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "condition": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "key",
+          "value",
+          "scope",
+          "evidenceIds"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "relations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "evidenceIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "evidenceIds"
+        ],
+        "additionalProperties": true
+      }
+    },
+    "unresolved": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "minLength": 1
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "key",
+          "reason"
+        ],
+        "additionalProperties": true
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "properties": {
+        "providedEvidenceIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "omittedRelevantFiles": {
+          "type": "array",
+          "items": {}
+        },
+        "unresolvedReferences": {
+          "type": "array",
+          "items": {}
+        },
+        "truncated": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "providedEvidenceIds",
+        "omittedRelevantFiles",
+        "unresolvedReferences",
+        "truncated"
+      ],
+      "additionalProperties": true
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "evidenceId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "startLine": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "endLine": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "sourceDigest": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "contentDigest": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "redacted": {
+            "type": "boolean"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "evidenceId",
+          "path",
+          "startLine",
+          "endLine",
+          "sourceDigest",
+          "contentDigest",
+          "redacted",
+          "text"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "contextHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "preprocessorVersion",
+    "policyVersion",
+    "profile",
+    "revision",
+    "source",
+    "manifest",
+    "componentRoots",
+    "deploymentCandidates",
+    "selectedFiles",
+    "facts",
+    "relations",
+    "unresolved",
+    "coverage",
+    "evidence",
+    "contextHash"
+  ],
+  "additionalProperties": true,
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

@@ -1,0 +1,1 @@
+{"name":"dynamic","scripts":{"build":"tsc","start":"node dist/index.js"},"dependencies":{"express":"5.2.1"}}
