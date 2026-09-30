@@ -1,0 +1,7 @@
+{
+  "probe": "native json_schema with plain English request",
+  "httpStatus": 400,
+  "provider": "hive-ai",
+  "model": "zai-org/glm-5.3-flash",
+  "cost": null
+}

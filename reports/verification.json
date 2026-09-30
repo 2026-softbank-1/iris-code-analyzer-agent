@@ -1,0 +1,32 @@
+{
+  "date": "2026-10-01",
+  "pythonVersions": [
+    "3.11.4",
+    "3.13.9"
+  ],
+  "testCount": 242,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "ruff": "passed",
+  "format": "passed",
+  "uvLockCheck": "passed",
+  "wheelBuild": "passed",
+  "coverage": {
+    "covered_lines": 2617,
+    "num_statements": 2938,
+    "percent_covered": 86.52094717668488,
+    "percent_covered_display": "87",
+    "missing_lines": 321,
+    "excluded_lines": 4,
+    "percent_statements_covered": 89.07420013614704,
+    "percent_statements_covered_display": "89",
+    "num_branches": 1454,
+    "num_partial_branches": 215,
+    "covered_branches": 1183,
+    "missing_branches": 271,
+    "percent_branches_covered": 81.3617606602476,
+    "percent_branches_covered_display": "81"
+  },
+  "unpaidNativeOpenCodeTests": true
+}

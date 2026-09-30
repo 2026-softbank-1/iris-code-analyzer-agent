@@ -1,0 +1,17 @@
+{
+  "probe": "json_object mode with plain English request",
+  "httpStatus": 200,
+  "provider": "hive-ai",
+  "model": "zai-org/glm-5.3-flash",
+  "cost": null,
+  "usage": {
+    "prompt_tokens": 18,
+    "total_tokens": 34,
+    "completion_tokens": 16,
+    "prompt_tokens_details": null,
+    "reasoning_tokens": 1
+  },
+  "finishReason": "stop",
+  "response": "{\"text\": \"Hello! How can I help you today?\"}",
+  "validJsonObject": true
+}

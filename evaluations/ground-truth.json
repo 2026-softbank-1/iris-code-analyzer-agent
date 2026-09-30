@@ -1,0 +1,285 @@
+{
+  "reviewDate": "2026-10-01",
+  "reviewMethod": "Manually reviewed source statements, Docker final stage, base Compose and mounted Express routers; no analyzed source was executed.",
+  "projects": [
+    {
+      "name": "Temp_log",
+      "serviceCount": 1,
+      "roles": [
+        "web_api"
+      ],
+      "componentRoots": [
+        ".",
+        "client",
+        "server"
+      ],
+      "facts": [
+        {
+          "key": "runtime.port",
+          "scope": "container",
+          "value": 4000
+        },
+        {
+          "key": "runtime.port",
+          "scope": "development",
+          "value": 5173,
+          "component": "client"
+        },
+        {
+          "key": "runtime.port",
+          "scope": "host_mapping",
+          "value": 8080
+        },
+        {
+          "key": "runtime.host",
+          "scope": "production",
+          "value": "0.0.0.0"
+        },
+        {
+          "key": "docker.workdir",
+          "scope": "container",
+          "value": "/app/server"
+        },
+        {
+          "key": "start.command",
+          "scope": "container",
+          "value": "node dist/index.js"
+        },
+        {
+          "key": "build.command",
+          "scope": "source",
+          "value": "npm run build -w server && npm run build -w client"
+        }
+      ],
+      "routes": [
+        [
+          "GET",
+          "/health/live"
+        ],
+        [
+          "GET",
+          "/health/ready"
+        ],
+        [
+          "GET",
+          "/api/health"
+        ],
+        [
+          "GET",
+          "/uploads/:filename"
+        ],
+        [
+          "GET",
+          "/{*path}"
+        ],
+        [
+          "POST",
+          "/api/auth/login"
+        ],
+        [
+          "GET",
+          "/api/auth/me"
+        ],
+        [
+          "POST",
+          "/api/auth/logout"
+        ],
+        [
+          "GET",
+          "/api/posts"
+        ],
+        [
+          "GET",
+          "/api/posts/featured"
+        ],
+        [
+          "GET",
+          "/api/posts/:idOrSlug"
+        ],
+        [
+          "POST",
+          "/api/posts"
+        ],
+        [
+          "PATCH",
+          "/api/posts/:id"
+        ],
+        [
+          "DELETE",
+          "/api/posts/:id"
+        ],
+        [
+          "GET",
+          "/api/comments"
+        ],
+        [
+          "POST",
+          "/api/comments"
+        ],
+        [
+          "DELETE",
+          "/api/comments/:id"
+        ],
+        [
+          "DELETE",
+          "/api/comments/:id/admin"
+        ],
+        [
+          "POST",
+          "/api/upload"
+        ],
+        [
+          "GET",
+          "/api/upload/library"
+        ],
+        [
+          "DELETE",
+          "/api/upload/:filename"
+        ]
+      ],
+      "requiredEnvironmentKeys": [
+        "APP_PORT",
+        "PUBLIC_URL",
+        "SESSION_SECRET",
+        "MONGO_ROOT_PASSWORD",
+        "MONGO_APP_PASSWORD",
+        "MONGO_URI",
+        "PORT",
+        "NODE_ENV",
+        "CLIENT_DIR",
+        "UPLOAD_DIR",
+        "TRUST_PROXY_HOPS",
+        "MAX_FILE_SIZE_MB",
+        "MAX_UPLOAD_TOTAL_MB"
+      ],
+      "dependencies": [
+        {
+          "kind": "database",
+          "name": "mongo",
+          "engine": "mongodb"
+        },
+        {
+          "kind": "volume",
+          "name": "uploads",
+          "mountPath": "/data/uploads"
+        },
+        {
+          "kind": "volume",
+          "name": "mongo-data",
+          "mountPath": "/data/db"
+        }
+      ],
+      "frontendBaseUrls": [
+        "/api"
+      ],
+      "sourceFiles": {
+        "package.json": "24ffdae8ffe3f3f02e55b11ec3a62f1ddf66a229eadb2e0bff89d791089c2926",
+        "client/package.json": "c59a48a42711b43ee1b911f1bf561a91bfdc093ae8bbfaee8938874c604424fd",
+        "server/package.json": "67d49c50e50d33e33a5c78e8b49f40b8915a6e466989fe9b23bd0607aabf6ce8",
+        "Dockerfile": "5f956a5b86a6512eca400c86fd196deaf9b49c541e5635a7d5a9fa234a43110c",
+        "compose.yaml": "f38fc65cc5744fc937e7e52117c1125edad7c7adf6d33415e41033871aa9dad2",
+        "server/src/app.ts": "a4971551ef0fe93e32d356b7d99db3ddfa813c28316d34bfe7eb11093b0d88df",
+        "server/src/index.ts": "403ee8b81e9f42a97379b656804935630463cb723e836eee1f98860e8ac8169b",
+        "server/src/config/env.ts": "8756d4ce812290e1ea3463d5fa0c99a00ad556f04ec84af8182285dd8ff2b984",
+        "client/vite.config.ts": "684f2434383d097dfc309e0091ea6b89e3c7356388c1b33daf005c0585385218",
+        "client/src/lib/api.ts": "31d27d82c07ea5e98f57e5528c447bb769cdf6c39597109e5061ca80b47ae184",
+        "server/src/routes/auth.routes.ts": "77902e66096cdbd819542fb33bfb97623ac7e36299c2742273feab93b340881b",
+        "server/src/routes/post.routes.ts": "b0bf45665b58050eb8c16586f6d0c182fb0e9598e8ff15d51ed9df4598bb3fb7",
+        "server/src/routes/comment.routes.ts": "c6739e599edb94b7bf658342cb3ae3380c3198828cae6638284f305c8b758967",
+        "server/src/routes/upload.routes.ts": "d82afcdf7eeb5334e1620459211fe630809c27a4edd3573b77c45b2458d23c67"
+      },
+      "serviceFields": [
+        {
+          "role": "web_api",
+          "field": "runtime",
+          "value": "node",
+          "scope": "container"
+        },
+        {
+          "role": "web_api",
+          "field": "startCommand",
+          "value": "node dist/index.js",
+          "scope": "container"
+        },
+        {
+          "role": "web_api",
+          "field": "workingDirectory",
+          "value": "/app/server",
+          "scope": "container"
+        },
+        {
+          "role": "web_api",
+          "field": "buildCommand",
+          "value": "npm run build -w server && npm run build -w client",
+          "scope": "source"
+        }
+      ]
+    },
+    {
+      "name": "portpolio-production",
+      "serviceCount": 1,
+      "roles": [
+        "static"
+      ],
+      "componentRoots": [
+        "."
+      ],
+      "facts": [
+        {
+          "key": "framework",
+          "scope": "source",
+          "value": "vite"
+        },
+        {
+          "key": "build.command",
+          "scope": "source",
+          "value": "vite build"
+        },
+        {
+          "key": "output.directory",
+          "scope": "production",
+          "value": "dist"
+        },
+        {
+          "key": "runtime.port",
+          "scope": "container",
+          "value": 8080
+        },
+        {
+          "key": "runtime.port",
+          "scope": "host_mapping",
+          "value": 4387
+        }
+      ],
+      "routes": [],
+      "requiredEnvironmentKeys": [],
+      "dependencies": [],
+      "frontendBaseUrls": [],
+      "sourceFiles": {
+        "package.json": "498fada283f07a88adb1b43c9a262c42719f6e06ed6f5c67cb984e61ee100a11",
+        "ops/compose.yaml": "18f2d71e38f7ee3a5e1bc0e55eb98bec2624d23ba4d0f1855ab5804d879a0f6f",
+        "ops/nginx.conf": "86716cfac2a274a1106d1f0b476c2df3767e2c0ac140f8e80e3b709c81a754af"
+      },
+      "serviceFields": [
+        {
+          "role": "static",
+          "field": "runtime",
+          "value": "nginx",
+          "scope": "container"
+        },
+        {
+          "role": "static",
+          "field": "buildCommand",
+          "value": "vite build",
+          "scope": "source"
+        },
+        {
+          "role": "static",
+          "field": "outputDirectory",
+          "value": "dist",
+          "scope": "production"
+        }
+      ]
+    }
+  ]
+}

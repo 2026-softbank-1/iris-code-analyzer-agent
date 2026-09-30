@@ -1,0 +1,24 @@
+{
+  "date": "2026-10-01",
+  "actualCostUsd": null,
+  "knownUsageEstimatedCostUsd": 0.04907649,
+  "unknownUsageReservedUsd": 0.6803,
+  "estimatedAndReservedTotalUsd": 0.72937649,
+  "ledgerEntryCount": 38,
+  "knownUsageEntryCount": 31,
+  "unknownUsageEntryCount": 5,
+  "finalEvaluationModelCalls": 4,
+  "finalEvaluationEstimatedCostUsd": 0.0038982500000000002,
+  "pricingSource": "https://thehive.ai/models/zai-org/glm-5.3-flash",
+  "note": "Estimates and conservative reservations are not provider invoices. Earlier capability probes lacking usage retained a conservative upper reservation. No KRW exchange-rate or global project billing assertion is made.",
+  "bookkeepingCorrections": [
+    {
+      "state": "not_submitted",
+      "reason": "Run record proves rejection before prompt submission."
+    },
+    {
+      "state": "duplicate_bookkeeping",
+      "reason": "Historical seed duplicated an already accounted request; original metadata retained."
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "probe": "reasoning_effort=low acceptance",
+  "httpStatus": 200,
+  "provider": "hive-ai",
+  "model": "zai-org/glm-5.3-flash",
+  "pricingSource": "https://thehive.ai/models/zai-org/glm-5.3-flash",
+  "cost": null,
+  "usage": {
+    "prompt_tokens": 19,
+    "total_tokens": 123,
+    "completion_tokens": 104,
+    "prompt_tokens_details": null,
+    "reasoning_tokens": 98
+  },
+  "finishReason": "stop",
+  "response": "{\"ok\":true}"
+}

@@ -1,0 +1,62 @@
+{
+  "outcome": "ok",
+  "kind": "needs_files",
+  "status": null,
+  "call": {
+    "snapshotId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "contextHash": "352fd6c66221856ceaae173e70c028d4ca634f29e9ab7b5b8f718de26edf7e64",
+    "revision": 1,
+    "sessionId": "ses_f0d0e0b90ffeHGkpbvAAbOVoPP",
+    "messageId": "msg_0f2f1f4740017WfHK5ibiDLjPe",
+    "responseMessageId": "msg_0f2f1f4a2001OIA86RjL6UIFla",
+    "provider": "hive-ai",
+    "model": "zai-org/glm-5.3-flash",
+    "promptVersion": "deployment_v1.1",
+    "outputMode": "json_text",
+    "serverVersion": "1.18.33",
+    "apiSchemaHash": "cf12e9739510a196c7f25eb938555cfb66d901957f66f840a12d4489ae440ac3",
+    "latencySeconds": 13.842451,
+    "usage": {
+      "total": 3790,
+      "input": 1490,
+      "output": 2300,
+      "reasoning": 0,
+      "cache": {
+        "write": 0,
+        "read": 0
+      }
+    },
+    "cost": null,
+    "error": null,
+    "remoteAbortRequested": false,
+    "remoteAbortConfirmed": null,
+    "httpAttempts": 125,
+    "modelInputDigest": "b47e94b6d8e235094a35aa622bb4daeb5d38d159acc1381e25c207138cdea89b",
+    "requestPayloadDigest": "a9d89be4699edd351a2f0cc9af67537c2bf188020bab98b338fc40d41012458a"
+  },
+  "capabilityProbes": [
+    {
+      "probe": "system string",
+      "httpStatus": 200
+    },
+    {
+      "probe": "system text array",
+      "httpStatus": 200
+    },
+    {
+      "probe": "user text array",
+      "httpStatus": 200
+    },
+    {
+      "probe": "StructuredOutput tool with required choice",
+      "httpStatus": 400
+    }
+  ],
+  "selectedOutputMode": "json_text",
+  "outputModeReason": "Hive GLM rejected the required StructuredOutput function request; the native JSON text mode succeeded and its object passed application-side ModelReply JSON Schema validation.",
+  "runtimeCompatibility": {
+    "version": "1.18.33",
+    "messageIdPolicy": "Pinned chronological 12-hex timestamp plus 14-character suffix",
+    "messagePolling": "Latest assistant only (limit=1); stored structured user format encoder error is treated as pending without replay"
+  }
+}

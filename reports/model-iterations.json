@@ -1,0 +1,1662 @@
+{
+  "date": "2026-10-01",
+  "attempts": [
+    {
+      "attempt": "01-initial",
+      "reason": "Full restatement exhausted output; incompatible detected interpretations were rejected.",
+      "successCount": 0,
+      "failureCount": 4,
+      "projects": [
+        {
+          "name": "Temp_log",
+          "runs": [
+            {
+              "success": false,
+              "resultStatus": null,
+              "errorCode": "RESULT_SCHEMA_INVALID",
+              "calls": [
+                {
+                  "apiSchemaHash": "cf12e9739510a196c7f25eb938555cfb66d901957f66f840a12d4489ae440ac3",
+                  "contextHash": "76781d7b0b4b59ba08e6fa2f7cde13b9febecf2e874e1f0cdb183fbfcf00d6be",
+                  "cost": null,
+                  "error": "RESULT_SCHEMA_INVALID",
+                  "httpAttempts": 758,
+                  "latencySeconds": 79.694418,
+                  "messageId": "msg_0f2f45c63001YZjzMNfSWjOvPM",
+                  "model": "zai-org/glm-5.3-flash",
+                  "modelInputDigest": "59d2a5ae21a37834d327dfc83522f993ff763345634f93f83cb83850321b9252",
+                  "modelPromptDigest": "854008c644b415ff1dc22907552bd3f9411af031b48eda133a3f1bc3f51910a4",
+                  "outputMode": "json_text",
+                  "promptVersion": "deployment_v1.1",
+                  "provider": "hive-ai",
+                  "remoteAbortConfirmed": true,
+                  "remoteAbortRequested": true,
+                  "requestPayloadDigest": "ee89a0970673d9f88d908a2cd8778dfa86da7d487818de32e500d6c1d04d4518",
+                  "responseMessageId": "msg_0f2f45c90001Gw9Zkxrm4QFlX2",
+                  "revision": 1,
+                  "serverVersion": "1.18.33",
+                  "sessionId": "ses_f0d0ba3a1ffeYk9kiJVbfaPWS0",
+                  "snapshotId": "d0892b62daa0e20e6fd7e5459d761a8323430ed2b886af86880f7dd5f33460cd",
+                  "usage": {
+                    "cache": {
+                      "read": 0,
+                      "write": 0
+                    },
+                    "input": 50904,
+                    "output": 16384,
+                    "reasoning": 0,
+                    "total": 67288
+                  }
+                }
+              ]
+            },
+            {
+              "success": false,
+              "resultStatus": null,
+              "errorCode": "RESULT_SCHEMA_INVALID",
+              "calls": [
+                {
+                  "apiSchemaHash": "cf12e9739510a196c7f25eb938555cfb66d901957f66f840a12d4489ae440ac3",
+                  "contextHash": "76781d7b0b4b59ba08e6fa2f7cde13b9febecf2e874e1f0cdb183fbfcf00d6be",
+                  "cost": null,
+                  "error": "RESULT_SCHEMA_INVALID",
+                  "httpAttempts": 792,
+                  "latencySeconds": 81.698751,
+                  "messageId": "msg_0f2f59028001ANMtwqftGHZWfn",
+                  "model": "zai-org/glm-5.3-flash",
+                  "modelInputDigest": "59d2a5ae21a37834d327dfc83522f993ff763345634f93f83cb83850321b9252",
+                  "modelPromptDigest": "854008c644b415ff1dc22907552bd3f9411af031b48eda133a3f1bc3f51910a4",
+                  "outputMode": "json_text",
+                  "promptVersion": "deployment_v1.1",
+                  "provider": "hive-ai",
+                  "remoteAbortConfirmed": true,
+                  "remoteAbortRequested": true,
+                  "requestPayloadDigest": "dad04e087e23a7b968f232f8700095520792aa046a8cb793bf47e26297027bc2",
+                  "responseMessageId": "msg_0f2f5903a001k25Q29nxAOCssS",
+                  "revision": 1,
+                  "serverVersion": "1.18.33",
+                  "sessionId": "ses_f0d0a6fdaffeVQbZUqDkR0hfKZ",
+                  "snapshotId": "d0892b62daa0e20e6fd7e5459d761a8323430ed2b886af86880f7dd5f33460cd",
+                  "usage": {
+                    "cache": {
+                      "read": 50880,
+                      "write": 0
+                    },
+                    "input": 24,
+                    "output": 16384,
+                    "reasoning": 0,
+                    "total": 67288
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "portpolio-production",
+          "runs": [
+            {
+              "success": false,
+              "resultStatus": null,
+              "errorCode": "RESULT_SCHEMA_INVALID",
+              "calls": [
+                {
+                  "apiSchemaHash": "cf12e9739510a196c7f25eb938555cfb66d901957f66f840a12d4489ae440ac3",
+                  "contextHash": "c926225c7f8b88b9101e0a3e632cfbce80411f6431ff323da7f61aaf91fccefb",
+                  "cost": null,
+                  "error": "RESULT_SCHEMA_INVALID",
+                  "httpAttempts": 662,
+                  "latencySeconds": 68.213941,
+                  "messageId": "msg_0f2f6d073001Kob3BlgDpwff71",
+                  "model": "zai-org/glm-5.3-flash",
+                  "modelInputDigest": "388757547aefb77aa6be03a0c82d86538df0aef7c8f5386a4baeb40fb23f51db",
+                  "modelPromptDigest": "b2fb9c8c04210aac5996167f1e8cdedd1429d2af0e59348a6c0363d53c923cd2",
+                  "outputMode": "json_text",
+                  "promptVersion": "deployment_v1.1",
+                  "provider": "hive-ai",
+                  "remoteAbortConfirmed": true,
+                  "remoteAbortRequested": true,
+                  "requestPayloadDigest": "6f15f39d9a2161d9ddf6f4ff72a5fb05bb2c90fe4f52c8ca866c9e4b9227efd6",
+                  "responseMessageId": "msg_0f2f6d084001CqfVfM0PXxesPB",
+                  "revision": 1,
+                  "serverVersion": "1.18.33",
+                  "sessionId": "ses_f0d092f8dffeJAOEVKVyIk6Pzt",
+                  "snapshotId": "dcab384d9e1a6cfe70ee38b024a06b0bce34cee63a645572e01f89b70c1fddca",
+                  "usage": {
+                    "cache": {
+                      "read": 0,
+                      "write": 0
+                    },
+                    "input": 9728,
+                    "output": 16384,
+                    "reasoning": 0,
+                    "total": 26112
+                  }
+                }
+              ]
+            },
+            {
+              "success": false,
+              "resultStatus": null,
+              "errorCode": "RESULT_OBSERVATION_INVALID",
+              "calls": [
+                {
+                  "apiSchemaHash": "cf12e9739510a196c7f25eb938555cfb66d901957f66f840a12d4489ae440ac3",
+                  "contextHash": "c926225c7f8b88b9101e0a3e632cfbce80411f6431ff323da7f61aaf91fccefb",
+                  "cost": null,
+                  "error": null,
+                  "httpAttempts": 487,
+                  "latencySeconds": 50.669542,
+                  "messageId": "msg_0f2f7db50001anizGH8tgYrTo7",
+                  "model": "zai-org/glm-5.3-flash",
+                  "modelInputDigest": "388757547aefb77aa6be03a0c82d86538df0aef7c8f5386a4baeb40fb23f51db",
+                  "modelPromptDigest": "b2fb9c8c04210aac5996167f1e8cdedd1429d2af0e59348a6c0363d53c923cd2",
+                  "outputMode": "json_text",
+                  "promptVersion": "deployment_v1.1",
+                  "provider": "hive-ai",
+                  "remoteAbortConfirmed": null,
+                  "remoteAbortRequested": false,
+                  "requestPayloadDigest": "99a3c0fd5ec00edbf7ce8cdb8581a9f2a6aca52afddfab3a0d47fb06a2a120fc",
+                  "responseMessageId": "msg_0f2f7db5e001Qza8HoboHykpw9",
+                  "revision": 1,
+                  "serverVersion": "1.18.33",
+                  "sessionId": "ses_f0d0824b0ffeyi9uH8o7WOo7ru",
+                  "snapshotId": "dcab384d9e1a6cfe70ee38b024a06b0bce34cee63a645572e01f89b70c1fddca",
+                  "usage": {
+                    "cache": {
+                      "read": 8192,
+                      "write": 0
+                    },
+                    "input": 1536,
+                    "output": 10665,
+                    "reasoning": 0,
+                    "total": 20393
+                  }
+                },
+                {
+                  "apiSchemaHash": "cf12e9739510a196c7f25eb938555cfb66d901957f66f840a12d4489ae440ac3",
+                  "contextHash": "eb2f81f5cd5eab436a84b21df2ebee8f75be664edc3b7d2079febebc65131868",
+                  "cost": null,
+                  "error": null,
+                  "httpAttempts": 755,
+                  "latencySeconds": 78.080351,
+                  "messageId": "msg_0f2f8a1b9001iBY7VRoy8096uD",
+                  "model": "zai-org/glm-5.3-flash",
+                  "modelInputDigest": "636fb78f4f381cbda34b008e39d5dfad46d14a390a531de81f6f1dd8c0b661c3",
+                  "modelPromptDigest": "b8bdb000581ec99fb2743b818b2cb60f6400a61df77f59b37a44f6ed8a9c409d",
+                  "outputMode": "json_text",
+                  "promptVersion": "deployment_v1.1",
+                  "provider": "hive-ai",
+                  "remoteAbortConfirmed": null,
+                  "remoteAbortRequested": false,
+                  "requestPayloadDigest": "b5df9ba84279727718794679abb1949296dbeeb98cae8757ce3066b5a9d2bbb3",
+                  "responseMessageId": "msg_0f2f8a1c700169Ialg7Vz3uJRG",
+                  "revision": 2,
+                  "serverVersion": "1.18.33",
+                  "sessionId": "ses_f0d075e49ffeIZMvid4fBmmMyJ",
+                  "snapshotId": "dcab384d9e1a6cfe70ee38b024a06b0bce34cee63a645572e01f89b70c1fddca",
+                  "usage": {
+                    "cache": {
+                      "read": 0,
+                      "write": 0
+                    },
+                    "input": 11644,
+                    "output": 15905,
+                    "reasoning": 0,
+                    "total": 27549
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "attempt": "02-single-step",
+      "reason": "OpenCode MAX_STEPS instructions caused prose outside JSON.",
+      "successCount": 2,
+      "failureCount": 2,
+      "projects": [
+        {
+          "name": "Temp_log",
+          "runs": [
+            {
+              "success": false,
+              "resultStatus": null,
+              "errorCode": "RESULT_SCHEMA_INVALID",
+              "calls": [
+                {
+                  "apiSchemaHash": "cf12e9739510a196c7f25eb938555cfb66d901957f66f840a12d4489ae440ac3",
+                  "contextHash": "3ac2555dd32d6af0b6c398ecf75ad52827a700270f176ac508b2c744dc76812b",
+                  "cost": null,
+                  "cumulativeEstimatedCostUsd": 0.00339084,
+                  "cumulativeReportedTokens": 56892,
+                  "cumulativeTokensUpperBound": 56892,
+                  "error": "RESULT_SCHEMA_INVALID",
+                  "estimatedCostUsd": 0.00339084,
+                  "finishReason": "stop",
+                  "httpAttempts": 168,
+                  "latencySeconds": 18.159058,
+                  "maxOutputTokens": 8192,
+                  "maxRemoteRetries": 0,
+                  "messageId": "msg_0f30692c6001BsJ5d2yf2VFMqL",
+                  "model": "zai-org/glm-5.3-flash",
+                  "modelInputDigest": "8c956033eb3fdf1ac5bda8abdeba6e3db068f08ac2c46743bd044c23de8ac94c",
+                  "modelPromptDigest": "9dc334b3795a1d6f8bd37455863a2bb186c0df30ad181eef20a2b2341385e9d9",
+                  "outputMode": "json_text",
+                  "pricing": {
+                    "cachedInputPerMillionUsd": 0.01,
+                    "inputPerMillionUsd": 0.05,
+                    "observedDate": "2026-10-01",
+                    "outputPerMillionUsd": 0.17,
+                    "source": "https://thehive.ai/models/zai-org/glm-5.3-flash"
+                  },
+                  "promptVersion": "deployment_v1.2",
+                  "provider": "hive-ai",
+                  "remoteAbortConfirmed": true,
+                  "remoteAbortRequested": true,
+                  "remoteRetryAttempts": 0,
+                  "requestPayloadDigest": "78ebd1012e3ff71e8173580dae53a956871ee6ffa39fa3321e10957580695b83",
+                  "reservedTokensUpperBound": 160054,
+                  "responseMessageId": "msg_0f30692f9001YS91sc1dwJZ4HZ",
+                  "revision": 1,
+                  "serverVersion": "1.18.33",
+                  "sessionId": "ses_f0cf96d3effeRwQsY8qJ4AXO5M",
+                  "snapshotId": "d0892b62daa0e20e6fd7e5459d761a8323430ed2b886af86880f7dd5f33460cd",
+                  "usage": {
+                    "cache": {
+                      "read": 0,
+                      "write": 0
+                    },
+                    "input": 52340,
+                    "output": 4552,
+                    "reasoning": 0,
+                    "total": 56892
+                  }
+                }
+              ]
+            },
+            {
+              "success": true,
+              "resultStatus": "complete",
+              "errorCode": null,
+              "calls": [
+                {
+                  "apiSchemaHash": "cf12e9739510a196c7f25eb938555cfb66d901957f66f840a12d4489ae440ac3",
+                  "contextHash": "3ac2555dd32d6af0b6c398ecf75ad52827a700270f176ac508b2c744dc76812b",
+                  "cost": null,
+                  "cumulativeEstimatedCostUsd": 0.00479284,
+                  "cumulativeReportedTokens": 114388,
+                  "cumulativeTokensUpperBound": 114388,
+                  "error": null,
+                  "estimatedCostUsd": 0.001402,
+                  "finishReason": "stop",
+                  "httpAttempts": 227,
+                  "latencySeconds": 22.934794,
+                  "maxOutputTokens": 8192,
+                  "maxRemoteRetries": 0,
+                  "messageId": "msg_0f306d64e0014T1qR5709Ow9Qm",
+                  "model": "zai-org/glm-5.3-flash",
+                  "modelInputDigest": "8c956033eb3fdf1ac5bda8abdeba6e3db068f08ac2c46743bd044c23de8ac94c",
+                  "modelPromptDigest": "9dc334b3795a1d6f8bd37455863a2bb186c0df30ad181eef20a2b2341385e9d9",
+                  "outputMode": "json_text",
+                  "pricing": {
+                    "cachedInputPerMillionUsd": 0.01,
+                    "inputPerMillionUsd": 0.05,
+                    "observedDate": "2026-10-01",
+                    "outputPerMillionUsd": 0.17,
+                    "source": "https://thehive.ai/models/zai-org/glm-5.3-flash"
+                  },
+                  "promptVersion": "deployment_v1.2",
+                  "provider": "hive-ai",
+                  "remoteAbortConfirmed": null,
+                  "remoteAbortRequested": false,
+                  "remoteRetryAttempts": 0,
+                  "requestPayloadDigest": "b0364d4920f4dc8f78911adb4cab53892ced15126fdbff084e22743d68ae1b7c",
+                  "reservedTokensUpperBound": 160054,
+                  "responseMessageId": "msg_0f306d661001qukFZ5vSrDL2NU",
+                  "revision": 1,
+                  "serverVersion": "1.18.33",
+                  "sessionId": "ses_f0cf929b3ffeq2QYi18t5H7nMJ",
+                  "snapshotId": "d0892b62daa0e20e6fd7e5459d761a8323430ed2b886af86880f7dd5f33460cd",
+                  "usage": {
+                    "cache": {
+                      "read": 52288,
+                      "write": 0
+                    },
+                    "input": 52,
+                    "output": 5156,
+                    "reasoning": 0,
+                    "total": 57496
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "portpolio-production",
+          "runs": [
+            {
+              "success": true,
+              "resultStatus": "needs_input",
+              "errorCode": null,
+              "calls": [
+                {
+                  "apiSchemaHash": "cf12e9739510a196c7f25eb938555cfb66d901957f66f840a12d4489ae440ac3",
+                  "contextHash": "98fb0099f9d148f4f9bb21e44cc67c29b95c0e7a72b32e072d19a3f65a025700",
+                  "cost": null,
+                  "cumulativeEstimatedCostUsd": 0.00635352,
+                  "cumulativeReportedTokens": 131048,
+                  "cumulativeTokensUpperBound": 131048,
+                  "error": null,
+                  "estimatedCostUsd": 0.00156068,
+                  "finishReason": "stop",
+                  "httpAttempts": 311,
+                  "latencySeconds": 31.781546,
+                  "maxOutputTokens": 8192,
+                  "maxRemoteRetries": 0,
+                  "messageId": "msg_0f30731350018HElseJ0mlod0d",
+                  "model": "zai-org/glm-5.3-flash",
+                  "modelInputDigest": "5a150aea8f643e17dea92733d974b6f1ec347f9eb43ed281a50605e205047b7c",
+                  "modelPromptDigest": "813729a4bc3bedbf5709a340934996a5e0354927dc64103aaa8864bbc75ea943",
+                  "outputMode": "json_text",
+                  "pricing": {
+                    "cachedInputPerMillionUsd": 0.01,
+                    "inputPerMillionUsd": 0.05,
+                    "observedDate": "2026-10-01",
+                    "outputPerMillionUsd": 0.17,
+                    "source": "https://thehive.ai/models/zai-org/glm-5.3-flash"
+                  },
+                  "promptVersion": "deployment_v1.2",
+                  "provider": "hive-ai",
+                  "remoteAbortConfirmed": null,
+                  "remoteAbortRequested": false,
+                  "remoteRetryAttempts": 0,
+                  "requestPayloadDigest": "e4d12973b2ab34a3d486e3f73858ec8134ffb57c5aca9c4664976392a655615f",
+                  "reservedTokensUpperBound": 45588,
+                  "responseMessageId": "msg_0f30731420016NtdVXTzP8ZnQ4",
+                  "revision": 1,
+                  "serverVersion": "1.18.33",
+                  "sessionId": "ses_f0cf8ceccffet1OLGO5vB52C5X",
+                  "snapshotId": "dcab384d9e1a6cfe70ee38b024a06b0bce34cee63a645572e01f89b70c1fddca",
+                  "usage": {
+                    "cache": {
+                      "read": 0,
+                      "write": 0
+                    },
+                    "input": 10596,
+                    "output": 6064,
+                    "reasoning": 0,
+                    "total": 16660
+                  }
+                }
+              ]
+            },
+            {
+              "success": false,
+              "resultStatus": null,
+              "errorCode": "RESULT_SCHEMA_INVALID",
+              "calls": [
+                {
+                  "apiSchemaHash": "cf12e9739510a196c7f25eb938555cfb66d901957f66f840a12d4489ae440ac3",
+                  "contextHash": "98fb0099f9d148f4f9bb21e44cc67c29b95c0e7a72b32e072d19a3f65a025700",
+                  "cost": null,
+                  "cumulativeEstimatedCostUsd": 0.00742346,
+                  "cumulativeReportedTokens": 147306,
+                  "cumulativeTokensUpperBound": 147306,
+                  "error": "RESULT_SCHEMA_INVALID",
+                  "estimatedCostUsd": 0.00106994,
+                  "finishReason": "stop",
+                  "httpAttempts": 278,
+                  "latencySeconds": 28.925496,
+                  "maxOutputTokens": 8192,
+                  "maxRemoteRetries": 0,
+                  "messageId": "msg_0f307addc001pTZwORXPxGRfF9",
+                  "model": "zai-org/glm-5.3-flash",
+                  "modelInputDigest": "5a150aea8f643e17dea92733d974b6f1ec347f9eb43ed281a50605e205047b7c",
+                  "modelPromptDigest": "813729a4bc3bedbf5709a340934996a5e0354927dc64103aaa8864bbc75ea943",
+                  "outputMode": "json_text",
+                  "pricing": {
+                    "cachedInputPerMillionUsd": 0.01,
+                    "inputPerMillionUsd": 0.05,
+                    "observedDate": "2026-10-01",
+                    "outputPerMillionUsd": 0.17,
+                    "source": "https://thehive.ai/models/zai-org/glm-5.3-flash"
+                  },
+                  "promptVersion": "deployment_v1.2",
+                  "provider": "hive-ai",
+                  "remoteAbortConfirmed": true,
+                  "remoteAbortRequested": true,
+                  "remoteRetryAttempts": 0,
+                  "requestPayloadDigest": "d6ccf4c84e96b72e5c9b65199f0c91d966e00be19096a2827722abc7ca634006",
+                  "reservedTokensUpperBound": 45588,
+                  "responseMessageId": "msg_0f307ade6001G3DEJWUZ5aRwcv",
+                  "revision": 1,
+                  "serverVersion": "1.18.33",
+                  "sessionId": "ses_f0cf85225ffeqC0YsTifFiFHYs",
+                  "snapshotId": "dcab384d9e1a6cfe70ee38b024a06b0bce34cee63a645572e01f89b70c1fddca",
+                  "usage": {
+                    "cache": {
+                      "read": 10560,
+                      "write": 0
+                    },
+                    "input": 36,
+                    "output": 5662,
+                    "reasoning": 0,
+                    "total": 16258
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "attempt": "03-two-step",
+      "reason": "Protocol improved; one GLM call exhausted all output in hidden reasoning.",
+      "successCount": 3,
+      "failureCount": 1,
+      "projects": [
+        {
+          "name": "Temp_log",
+          "runs": [
+            {
+              "success": true,
+              "resultStatus": "needs_input",
+              "errorCode": null,
+              "calls": [
+                {
+                  "apiSchemaHash": "cf12e9739510a196c7f25eb938555cfb66d901957f66f840a12d4489ae440ac3",
+                  "contextHash": "3ac2555dd32d6af0b6c398ecf75ad52827a700270f176ac508b2c744dc76812b",
+                  "cost": null,
+                  "cumulativeEstimatedCostUsd": 0.00353999,
+                  "cumulativeReportedTokens": 57655,
+                  "cumulativeTokensUpperBound": 57655,
+                  "error": null,
+                  "estimatedCostUsd": 0.00353999,
+                  "finishReason": "stop",
+                  "httpAttempts": 263,
+                  "latencySeconds": 28.308405,
+                  "maxInferenceSteps": 2,
+                  "maxOutputTokens": 8192,
+                  "maxRemoteRetries": 0,
+                  "messageId": "msg_0f30fe8f2001v71ntAw2l8iKKU",
+                  "model": "zai-org/glm-5.3-flash",
+                  "modelInputDigest": "8c956033eb3fdf1ac5bda8abdeba6e3db068f08ac2c46743bd044c23de8ac94c",
+                  "modelPromptDigest": "9dc334b3795a1d6f8bd37455863a2bb186c0df30ad181eef20a2b2341385e9d9",
+                  "outputMode": "json_text",
+                  "pricing": {
+                    "cachedInputPerMillionUsd": 0.01,
+                    "inputPerMillionUsd": 0.05,
+                    "observedDate": "2026-10-01",
+                    "outputPerMillionUsd": 0.17,
+                    "source": "https://thehive.ai/models/zai-org/glm-5.3-flash",
+                    "usageConventionSource": "https://github.com/anomalyco/opencode/blob/v1.18.33/packages/opencode/src/session/session.ts#L338"
+                  },
+                  "promptVersion": "deployment_v1.2",
+                  "provider": "hive-ai",
+                  "remoteAbortConfirmed": null,
+                  "remoteAbortRequested": false,
+                  "remoteRetryAttempts": 0,
+                  "requestPayloadDigest": "07292e14d051837774158881aeb1af222cfdc7a6aeaa28570c1ef05d0b1175e5",
+                  "reservedTokensUpperBound": 328300,
+                  "responseMessageId": "msg_0f30fe948001p0qwitib27eYGe",
+                  "revision": 1,
+                  "serverVersion": "1.18.33",
+                  "sessionId": "ses_f0cf01713ffeBb5ym6MtL0a7vU",
+                  "snapshotId": "d0892b62daa0e20e6fd7e5459d761a8323430ed2b886af86880f7dd5f33460cd",
+                  "usage": {
+                    "cache": {
+                      "read": 0,
+                      "write": 0
+                    },
+                    "input": 52178,
+                    "output": 5477,
+                    "reasoning": 0,
+                    "total": 57655
+                  },
+                  "usageCompleteForCall": true
+                }
+              ]
+            },
+            {
+              "success": false,
+              "resultStatus": null,
+              "errorCode": "RESULT_SCHEMA_INVALID",
+              "calls": [
+                {
+                  "apiSchemaHash": "cf12e9739510a196c7f25eb938555cfb66d901957f66f840a12d4489ae440ac3",
+                  "contextHash": "3ac2555dd32d6af0b6c398ecf75ad52827a700270f176ac508b2c744dc76812b",
+                  "cost": null,
+                  "cumulativeEstimatedCostUsd": 0.00545513,
+                  "cumulativeReportedTokens": 118025,
+                  "cumulativeTokensUpperBound": 118025,
+                  "error": "RESULT_SCHEMA_INVALID",
+                  "estimatedCostUsd": 0.00191514,
+                  "finishReason": "length",
+                  "httpAttempts": 386,
+                  "latencySeconds": 39.809359,
+                  "maxInferenceSteps": 2,
+                  "maxOutputTokens": 8192,
+                  "maxRemoteRetries": 0,
+                  "messageId": "msg_0f31054ca001qPtbdpdXBvYsuu",
+                  "model": "zai-org/glm-5.3-flash",
+                  "modelInputDigest": "8c956033eb3fdf1ac5bda8abdeba6e3db068f08ac2c46743bd044c23de8ac94c",
+                  "modelPromptDigest": "9dc334b3795a1d6f8bd37455863a2bb186c0df30ad181eef20a2b2341385e9d9",
+                  "outputMode": "json_text",
+                  "pricing": {
+                    "cachedInputPerMillionUsd": 0.01,
+                    "inputPerMillionUsd": 0.05,
+                    "observedDate": "2026-10-01",
+                    "outputPerMillionUsd": 0.17,
+                    "source": "https://thehive.ai/models/zai-org/glm-5.3-flash",
+                    "usageConventionSource": "https://github.com/anomalyco/opencode/blob/v1.18.33/packages/opencode/src/session/session.ts#L338"
+                  },
+                  "promptVersion": "deployment_v1.2",
+                  "provider": "hive-ai",
+                  "remoteAbortConfirmed": true,
+                  "remoteAbortRequested": true,
+                  "remoteRetryAttempts": 0,
+                  "requestPayloadDigest": "ca87c433a43b6cfee139afe73a42a23392c075311d89fa972f25a050949bae1e",
+                  "reservedTokensUpperBound": 328300,
+                  "responseMessageId": "msg_0f31054e0001W5OMe20Braeg1K",
+                  "revision": 1,
+                  "serverVersion": "1.18.33",
+                  "sessionId": "ses_f0cefab38ffeHwviPLjRkelenV",
+                  "snapshotId": "d0892b62daa0e20e6fd7e5459d761a8323430ed2b886af86880f7dd5f33460cd",
+                  "usage": {
+                    "cache": {
+                      "read": 52160,
+                      "write": 0
+                    },
+                    "input": 18,
+                    "output": 8192,
+                    "reasoning": 0,
+                    "total": 60370
+                  },
+                  "usageCompleteForCall": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "portpolio-production",
+          "runs": [
+            {
+              "success": true,
+              "resultStatus": "needs_input",
+              "errorCode": null,
+              "calls": [
+                {
+                  "apiSchemaHash": "cf12e9739510a196c7f25eb938555cfb66d901957f66f840a12d4489ae440ac3",
+                  "contextHash": "98fb0099f9d148f4f9bb21e44cc67c29b95c0e7a72b32e072d19a3f65a025700",
+                  "cost": null,
+                  "cumulativeEstimatedCostUsd": 0.0070191,
+                  "cumulativeReportedTokens": 134590,
+                  "cumulativeTokensUpperBound": 134590,
+                  "error": null,
+                  "estimatedCostUsd": 0.00156397,
+                  "finishReason": "stop",
+                  "httpAttempts": 311,
+                  "latencySeconds": 32.128096,
+                  "maxInferenceSteps": 2,
+                  "maxOutputTokens": 8192,
+                  "maxRemoteRetries": 0,
+                  "messageId": "msg_0f310f1680013KXvWo0GpJAy9O",
+                  "model": "zai-org/glm-5.3-flash",
+                  "modelInputDigest": "5a150aea8f643e17dea92733d974b6f1ec347f9eb43ed281a50605e205047b7c",
+                  "modelPromptDigest": "813729a4bc3bedbf5709a340934996a5e0354927dc64103aaa8864bbc75ea943",
+                  "outputMode": "json_text",
+                  "pricing": {
+                    "cachedInputPerMillionUsd": 0.01,
+                    "inputPerMillionUsd": 0.05,
+                    "observedDate": "2026-10-01",
+                    "outputPerMillionUsd": 0.17,
+                    "source": "https://thehive.ai/models/zai-org/glm-5.3-flash",
+                    "usageConventionSource": "https://github.com/anomalyco/opencode/blob/v1.18.33/packages/opencode/src/session/session.ts#L338"
+                  },
+                  "promptVersion": "deployment_v1.2",
+                  "provider": "hive-ai",
+                  "remoteAbortConfirmed": null,
+                  "remoteAbortRequested": false,
+                  "remoteRetryAttempts": 0,
+                  "requestPayloadDigest": "bd63ed14b1a372ebd96bac47929dfbff592cc839439f38ea426725569463f8b2",
+                  "reservedTokensUpperBound": 99368,
+                  "responseMessageId": "msg_0f310f176001c1pw1wVYWBwGoh",
+                  "revision": 1,
+                  "serverVersion": "1.18.33",
+                  "sessionId": "ses_f0cef0e99ffezHn8MHVOAC0Kd9",
+                  "snapshotId": "dcab384d9e1a6cfe70ee38b024a06b0bce34cee63a645572e01f89b70c1fddca",
+                  "usage": {
+                    "cache": {
+                      "read": 0,
+                      "write": 0
+                    },
+                    "input": 10434,
+                    "output": 6131,
+                    "reasoning": 0,
+                    "total": 16565
+                  },
+                  "usageCompleteForCall": true
+                },
+                {
+                  "apiSchemaHash": "cf12e9739510a196c7f25eb938555cfb66d901957f66f840a12d4489ae440ac3",
+                  "contextHash": "0112cf370eddbcee3c4c04cb08d975df2c15fc483ab04a4f5352e8ce72f90ca7",
+                  "cost": null,
+                  "cumulativeEstimatedCostUsd": 0.0088987,
+                  "cumulativeReportedTokens": 156894,
+                  "cumulativeTokensUpperBound": 156894,
+                  "error": null,
+                  "estimatedCostUsd": 0.0018796,
+                  "finishReason": "stop",
+                  "httpAttempts": 281,
+                  "latencySeconds": 28.895559,
+                  "maxInferenceSteps": 2,
+                  "maxOutputTokens": 8192,
+                  "maxRemoteRetries": 0,
+                  "messageId": "msg_0f3116f49001eN1q10iEzsRUXk",
+                  "model": "zai-org/glm-5.3-flash",
+                  "modelInputDigest": "a68acbe2b529b0def33fecaf5a3af3c6c73e8dd7cc530e90f852f66bb399ebdb",
+                  "modelPromptDigest": "4f159a2b50e166cda6f95d0f2e4a079bb9591a7492f6e9763a6d98edc69a2c6a",
+                  "outputMode": "json_text",
+                  "pricing": {
+                    "cachedInputPerMillionUsd": 0.01,
+                    "inputPerMillionUsd": 0.05,
+                    "observedDate": "2026-10-01",
+                    "outputPerMillionUsd": 0.17,
+                    "source": "https://thehive.ai/models/zai-org/glm-5.3-flash",
+                    "usageConventionSource": "https://github.com/anomalyco/opencode/blob/v1.18.33/packages/opencode/src/session/session.ts#L338"
+                  },
+                  "promptVersion": "deployment_v1.2",
+                  "provider": "hive-ai",
+                  "remoteAbortConfirmed": null,
+                  "remoteAbortRequested": false,
+                  "remoteRetryAttempts": 0,
+                  "requestPayloadDigest": "d3aca7844b276d5017873589aa773dadb5985a6016f2cbdb409d12c2d683e527",
+                  "reservedTokensUpperBound": 141800,
+                  "responseMessageId": "msg_0f3116f54001Ee0ZiTDfR0zkxK",
+                  "revision": 2,
+                  "serverVersion": "1.18.33",
+                  "sessionId": "ses_f0cee90b7ffe5KoXbrtWA6TZhG",
+                  "snapshotId": "dcab384d9e1a6cfe70ee38b024a06b0bce34cee63a645572e01f89b70c1fddca",
+                  "usage": {
+                    "cache": {
+                      "read": 0,
+                      "write": 0
+                    },
+                    "input": 15934,
+                    "output": 6370,
+                    "reasoning": 0,
+                    "total": 22304
+                  },
+                  "usageCompleteForCall": true
+                }
+              ]
+            },
+            {
+              "success": true,
+              "resultStatus": "needs_input",
+              "errorCode": null,
+              "calls": [
+                {
+                  "apiSchemaHash": "cf12e9739510a196c7f25eb938555cfb66d901957f66f840a12d4489ae440ac3",
+                  "contextHash": "98fb0099f9d148f4f9bb21e44cc67c29b95c0e7a72b32e072d19a3f65a025700",
+                  "cost": null,
+                  "cumulativeEstimatedCostUsd": 0.01049242,
+                  "cumulativeReportedTokens": 173634,
+                  "cumulativeTokensUpperBound": 173634,
+                  "error": null,
+                  "estimatedCostUsd": 0.00159372,
+                  "finishReason": "stop",
+                  "httpAttempts": 307,
+                  "latencySeconds": 31.76612,
+                  "maxInferenceSteps": 2,
+                  "maxOutputTokens": 8192,
+                  "maxRemoteRetries": 0,
+                  "messageId": "msg_0f311e0a600121Z4qiXNlfG5EN",
+                  "model": "zai-org/glm-5.3-flash",
+                  "modelInputDigest": "5a150aea8f643e17dea92733d974b6f1ec347f9eb43ed281a50605e205047b7c",
+                  "modelPromptDigest": "813729a4bc3bedbf5709a340934996a5e0354927dc64103aaa8864bbc75ea943",
+                  "outputMode": "json_text",
+                  "pricing": {
+                    "cachedInputPerMillionUsd": 0.01,
+                    "inputPerMillionUsd": 0.05,
+                    "observedDate": "2026-10-01",
+                    "outputPerMillionUsd": 0.17,
+                    "source": "https://thehive.ai/models/zai-org/glm-5.3-flash",
+                    "usageConventionSource": "https://github.com/anomalyco/opencode/blob/v1.18.33/packages/opencode/src/session/session.ts#L338"
+                  },
+                  "promptVersion": "deployment_v1.2",
+                  "provider": "hive-ai",
+                  "remoteAbortConfirmed": null,
+                  "remoteAbortRequested": false,
+                  "remoteRetryAttempts": 0,
+                  "requestPayloadDigest": "5ae4d153abb3d400829aa9c8c60539d85cc1dc67f58f661aabb9c1fcaff5d355",
+                  "reservedTokensUpperBound": 99368,
+                  "responseMessageId": "msg_0f311e0b2001go8TWGFS6CAUhZ",
+                  "revision": 1,
+                  "serverVersion": "1.18.33",
+                  "sessionId": "ses_f0cee1f5cffet3ByvCB68ja0KV",
+                  "snapshotId": "dcab384d9e1a6cfe70ee38b024a06b0bce34cee63a645572e01f89b70c1fddca",
+                  "usage": {
+                    "cache": {
+                      "read": 0,
+                      "write": 0
+                    },
+                    "input": 10434,
+                    "output": 6306,
+                    "reasoning": 0,
+                    "total": 16740
+                  },
+                  "usageCompleteForCall": true
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "attempt": "04-low-effort",
+      "reason": "Effort/temperature reduced usage; Temp_log still repeated observations and appended prose.",
+      "successCount": 2,
+      "failureCount": 2,
+      "projects": [
+        {
+          "name": "Temp_log",
+          "runs": [
+            {
+              "success": false,
+              "resultStatus": null,
+              "errorCode": "RESULT_SCHEMA_INVALID",
+              "calls": [
+                {
+                  "apiSchemaHash": "cf12e9739510a196c7f25eb938555cfb66d901957f66f840a12d4489ae440ac3",
+                  "contextHash": "3ac2555dd32d6af0b6c398ecf75ad52827a700270f176ac508b2c744dc76812b",
+                  "cost": null,
+                  "cumulativeEstimatedCostUsd": 0.00283454,
+                  "cumulativeReportedTokens": 53506,
+                  "cumulativeTokensUpperBound": 53506,
+                  "error": "RESULT_SCHEMA_INVALID",
+                  "estimatedCostUsd": 0.00283454,
+                  "finishReason": "stop",
+                  "httpAttempts": 76,
+                  "inferenceOptions": {
+                    "maxOutputTokens": 16384,
+                    "reasoningEffort": "low",
+                    "temperature": 0
+                  },
+                  "latencySeconds": 8.653847,
+                  "maxInferenceSteps": 2,
+                  "maxOutputTokens": 16384,
+                  "maxRemoteRetries": 0,
+                  "messageId": "msg_0f31ad304001rMKOJyLfy83LDf",
+                  "model": "zai-org/glm-5.3-flash",
+                  "modelInputDigest": "8c956033eb3fdf1ac5bda8abdeba6e3db068f08ac2c46743bd044c23de8ac94c",
+                  "modelPromptDigest": "9dc334b3795a1d6f8bd37455863a2bb186c0df30ad181eef20a2b2341385e9d9",
+                  "outputMode": "json_text",
+                  "pricing": {
+                    "cachedInputPerMillionUsd": 0.01,
+                    "inputPerMillionUsd": 0.05,
+                    "observedDate": "2026-10-01",
+                    "outputPerMillionUsd": 0.17,
+                    "source": "https://thehive.ai/models/zai-org/glm-5.3-flash",
+                    "usageConventionSource": "https://github.com/anomalyco/opencode/blob/v1.18.33/packages/opencode/src/session/session.ts#L338"
+                  },
+                  "promptVersion": "deployment_v1.2",
+                  "provider": "hive-ai",
+                  "remoteAbortConfirmed": true,
+                  "remoteAbortRequested": true,
+                  "remoteRetryAttempts": 0,
+                  "requestPayloadDigest": "9f148ffde1bf1601b66e5d267b12f3c4ff0737b85e829bc95a2f372981de2243",
+                  "reservedTokensUpperBound": 352876,
+                  "responseMessageId": "msg_0f31ad336001sn1UYLnkiiHKLU",
+                  "responseTextBytes": 3788,
+                  "revision": 1,
+                  "serverVersion": "1.18.33",
+                  "sessionId": "ses_f0ce52cffffeRE5C91l4zkUfvO",
+                  "snapshotId": "d0892b62daa0e20e6fd7e5459d761a8323430ed2b886af86880f7dd5f33460cd",
+                  "usage": {
+                    "cache": {
+                      "read": 0,
+                      "write": 0
+                    },
+                    "input": 52179,
+                    "output": 1327,
+                    "reasoning": 0,
+                    "total": 53506
+                  },
+                  "usageCompleteForCall": true
+                }
+              ]
+            },
+            {
+              "success": false,
+              "resultStatus": null,
+              "errorCode": "RESULT_SCHEMA_INVALID",
+              "calls": [
+                {
+                  "apiSchemaHash": "cf12e9739510a196c7f25eb938555cfb66d901957f66f840a12d4489ae440ac3",
+                  "contextHash": "3ac2555dd32d6af0b6c398ecf75ad52827a700270f176ac508b2c744dc76812b",
+                  "cost": null,
+                  "cumulativeEstimatedCostUsd": 0.0036398,
+                  "cumulativeReportedTokens": 107348,
+                  "cumulativeTokensUpperBound": 107348,
+                  "error": "RESULT_SCHEMA_INVALID",
+                  "estimatedCostUsd": 0.00080526,
+                  "finishReason": "stop",
+                  "httpAttempts": 62,
+                  "inferenceOptions": {
+                    "maxOutputTokens": 16384,
+                    "reasoningEffort": "low",
+                    "temperature": 0
+                  },
+                  "latencySeconds": 5.790978,
+                  "maxInferenceSteps": 2,
+                  "maxOutputTokens": 16384,
+                  "maxRemoteRetries": 0,
+                  "messageId": "msg_0f31af180001NKTE7ya7A5rJTe",
+                  "model": "zai-org/glm-5.3-flash",
+                  "modelInputDigest": "8c956033eb3fdf1ac5bda8abdeba6e3db068f08ac2c46743bd044c23de8ac94c",
+                  "modelPromptDigest": "9dc334b3795a1d6f8bd37455863a2bb186c0df30ad181eef20a2b2341385e9d9",
+                  "outputMode": "json_text",
+                  "pricing": {
+                    "cachedInputPerMillionUsd": 0.01,
+                    "inputPerMillionUsd": 0.05,
+                    "observedDate": "2026-10-01",
+                    "outputPerMillionUsd": 0.17,
+                    "source": "https://thehive.ai/models/zai-org/glm-5.3-flash",
+                    "usageConventionSource": "https://github.com/anomalyco/opencode/blob/v1.18.33/packages/opencode/src/session/session.ts#L338"
+                  },
+                  "promptVersion": "deployment_v1.2",
+                  "provider": "hive-ai",
+                  "remoteAbortConfirmed": true,
+                  "remoteAbortRequested": true,
+                  "remoteRetryAttempts": 0,
+                  "requestPayloadDigest": "a771c871c0e794dd25b28d088a8dad94a5a486880c55ce3456d31241a475fc93",
+                  "reservedTokensUpperBound": 352876,
+                  "responseMessageId": "msg_0f31af194001U7mzYJbp0cxtZF",
+                  "responseTextBytes": 6137,
+                  "revision": 1,
+                  "serverVersion": "1.18.33",
+                  "sessionId": "ses_f0ce50e81ffeu42Isbgf1TcJy6",
+                  "snapshotId": "d0892b62daa0e20e6fd7e5459d761a8323430ed2b886af86880f7dd5f33460cd",
+                  "usage": {
+                    "cache": {
+                      "read": 52160,
+                      "write": 0
+                    },
+                    "input": 19,
+                    "output": 1663,
+                    "reasoning": 0,
+                    "total": 53842
+                  },
+                  "usageCompleteForCall": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "portpolio-production",
+          "runs": [
+            {
+              "success": true,
+              "resultStatus": "complete",
+              "errorCode": null,
+              "calls": [
+                {
+                  "apiSchemaHash": "cf12e9739510a196c7f25eb938555cfb66d901957f66f840a12d4489ae440ac3",
+                  "contextHash": "98fb0099f9d148f4f9bb21e44cc67c29b95c0e7a72b32e072d19a3f65a025700",
+                  "cost": null,
+                  "cumulativeEstimatedCostUsd": 0.00418892,
+                  "cumulativeReportedTokens": 117944,
+                  "cumulativeTokensUpperBound": 117944,
+                  "error": null,
+                  "estimatedCostUsd": 0.00054912,
+                  "finishReason": "stop",
+                  "httpAttempts": 21,
+                  "inferenceOptions": {
+                    "maxOutputTokens": 16384,
+                    "reasoningEffort": "low",
+                    "temperature": 0
+                  },
+                  "latencySeconds": 1.511261,
+                  "maxInferenceSteps": 2,
+                  "maxOutputTokens": 16384,
+                  "maxRemoteRetries": 0,
+                  "messageId": "msg_0f31b092d001EbyV5EDGsn1oH1",
+                  "model": "zai-org/glm-5.3-flash",
+                  "modelInputDigest": "5a150aea8f643e17dea92733d974b6f1ec347f9eb43ed281a50605e205047b7c",
+                  "modelPromptDigest": "813729a4bc3bedbf5709a340934996a5e0354927dc64103aaa8864bbc75ea943",
+                  "outputMode": "json_text",
+                  "pricing": {
+                    "cachedInputPerMillionUsd": 0.01,
+                    "inputPerMillionUsd": 0.05,
+                    "observedDate": "2026-10-01",
+                    "outputPerMillionUsd": 0.17,
+                    "source": "https://thehive.ai/models/zai-org/glm-5.3-flash",
+                    "usageConventionSource": "https://github.com/anomalyco/opencode/blob/v1.18.33/packages/opencode/src/session/session.ts#L338"
+                  },
+                  "promptVersion": "deployment_v1.2",
+                  "provider": "hive-ai",
+                  "remoteAbortConfirmed": null,
+                  "remoteAbortRequested": false,
+                  "remoteRetryAttempts": 0,
+                  "requestPayloadDigest": "f373b616bd65c238a149993c19da8ad92cacb3ad86253d0f8f3233a84f16d24f",
+                  "reservedTokensUpperBound": 123944,
+                  "responseMessageId": "msg_0f31b093d0010MCQBdSzJt7mye",
+                  "responseTextBytes": 393,
+                  "revision": 1,
+                  "serverVersion": "1.18.33",
+                  "sessionId": "ses_f0ce4f6d4ffeUpBL2Ww7tTG8Cq",
+                  "snapshotId": "dcab384d9e1a6cfe70ee38b024a06b0bce34cee63a645572e01f89b70c1fddca",
+                  "usage": {
+                    "cache": {
+                      "read": 0,
+                      "write": 0
+                    },
+                    "input": 10435,
+                    "output": 161,
+                    "reasoning": 0,
+                    "total": 10596
+                  },
+                  "usageCompleteForCall": true
+                }
+              ]
+            },
+            {
+              "success": true,
+              "resultStatus": "complete",
+              "errorCode": null,
+              "calls": [
+                {
+                  "apiSchemaHash": "cf12e9739510a196c7f25eb938555cfb66d901957f66f840a12d4489ae440ac3",
+                  "contextHash": "98fb0099f9d148f4f9bb21e44cc67c29b95c0e7a72b32e072d19a3f65a025700",
+                  "cost": null,
+                  "cumulativeEstimatedCostUsd": 0.00432076,
+                  "cumulativeReportedTokens": 128540,
+                  "cumulativeTokensUpperBound": 128540,
+                  "error": null,
+                  "estimatedCostUsd": 0.00013184,
+                  "finishReason": "stop",
+                  "httpAttempts": 17,
+                  "inferenceOptions": {
+                    "maxOutputTokens": 16384,
+                    "reasoningEffort": "low",
+                    "temperature": 0
+                  },
+                  "latencySeconds": 1.132653,
+                  "maxInferenceSteps": 2,
+                  "maxOutputTokens": 16384,
+                  "maxRemoteRetries": 0,
+                  "messageId": "msg_0f31b0f8d001ikhm2Df7xFvIol",
+                  "model": "zai-org/glm-5.3-flash",
+                  "modelInputDigest": "5a150aea8f643e17dea92733d974b6f1ec347f9eb43ed281a50605e205047b7c",
+                  "modelPromptDigest": "813729a4bc3bedbf5709a340934996a5e0354927dc64103aaa8864bbc75ea943",
+                  "outputMode": "json_text",
+                  "pricing": {
+                    "cachedInputPerMillionUsd": 0.01,
+                    "inputPerMillionUsd": 0.05,
+                    "observedDate": "2026-10-01",
+                    "outputPerMillionUsd": 0.17,
+                    "source": "https://thehive.ai/models/zai-org/glm-5.3-flash",
+                    "usageConventionSource": "https://github.com/anomalyco/opencode/blob/v1.18.33/packages/opencode/src/session/session.ts#L338"
+                  },
+                  "promptVersion": "deployment_v1.2",
+                  "provider": "hive-ai",
+                  "remoteAbortConfirmed": null,
+                  "remoteAbortRequested": false,
+                  "remoteRetryAttempts": 0,
+                  "requestPayloadDigest": "c210c3a857097779315b23691fc64b1ed470a75643b3d88ba462c8ebdae16a58",
+                  "reservedTokensUpperBound": 123944,
+                  "responseMessageId": "msg_0f31b0f97001vd364tJiK6pJ91",
+                  "responseTextBytes": 393,
+                  "revision": 1,
+                  "serverVersion": "1.18.33",
+                  "sessionId": "ses_f0ce4f074ffekXYNEnUuoiTBv6",
+                  "snapshotId": "dcab384d9e1a6cfe70ee38b024a06b0bce34cee63a645572e01f89b70c1fddca",
+                  "usage": {
+                    "cache": {
+                      "read": 10432,
+                      "write": 0
+                    },
+                    "input": 3,
+                    "output": 161,
+                    "reasoning": 0,
+                    "total": 10596
+                  },
+                  "usageCompleteForCall": true
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "attempt": "05-native-json",
+      "reason": "Native JSON + supplemental proposal contract passed all four calls.",
+      "successCount": 4,
+      "failureCount": 0,
+      "projects": [
+        {
+          "name": "Temp_log",
+          "runs": [
+            {
+              "success": true,
+              "resultStatus": "complete",
+              "errorCode": null,
+              "calls": [
+                {
+                  "apiSchemaHash": "cf12e9739510a196c7f25eb938555cfb66d901957f66f840a12d4489ae440ac3",
+                  "contextHash": "3ac2555dd32d6af0b6c398ecf75ad52827a700270f176ac508b2c744dc76812b",
+                  "cost": null,
+                  "cumulativeEstimatedCostUsd": 0.00264047,
+                  "cumulativeReportedTokens": 52387,
+                  "cumulativeTokensUpperBound": 52387,
+                  "error": null,
+                  "estimatedCostUsd": 0.00264047,
+                  "finishReason": "stop",
+                  "formatRecovery": false,
+                  "httpAttempts": 41,
+                  "inferenceOptions": {
+                    "maxOutputTokens": 8192,
+                    "reasoningEffort": "low",
+                    "responseFormat": {
+                      "type": "json_object"
+                    },
+                    "temperature": 0
+                  },
+                  "latencySeconds": 5.069877,
+                  "maxInferenceSteps": 2,
+                  "maxOutputTokens": 8192,
+                  "maxRemoteRetries": 0,
+                  "messageId": "msg_0f32c9cfb001fwVjI8k0lgZwRo",
+                  "model": "zai-org/glm-5.3-flash",
+                  "modelInputDigest": "8c956033eb3fdf1ac5bda8abdeba6e3db068f08ac2c46743bd044c23de8ac94c",
+                  "modelPromptDigest": "8df61f52649d8df73886f8c4504d784841dd061a2c12ef9fb2e4ae68da1fe444",
+                  "outputMode": "json_text",
+                  "pricing": {
+                    "cachedInputPerMillionUsd": 0.01,
+                    "inputPerMillionUsd": 0.05,
+                    "observedDate": "2026-10-01",
+                    "outputPerMillionUsd": 0.17,
+                    "source": "https://thehive.ai/models/zai-org/glm-5.3-flash",
+                    "usageConventionSource": "https://github.com/anomalyco/opencode/blob/v1.18.33/packages/opencode/src/session/session.ts#L338"
+                  },
+                  "promptVersion": "deployment_v1.3",
+                  "provider": "hive-ai",
+                  "remoteAbortConfirmed": null,
+                  "remoteAbortRequested": false,
+                  "remoteRetryAttempts": 0,
+                  "requestPayloadDigest": "8b7063d8463f626f334e5991f2d1794042de859790bba92f680a1efb2ed9284a",
+                  "reservedTokensUpperBound": 328790,
+                  "responseMessageId": "msg_0f32c9d31001ex2n1lIWsFwRl3",
+                  "responseTextBytes": 393,
+                  "revision": 1,
+                  "serverVersion": "1.18.33",
+                  "sessionId": "ses_f0cd36308ffe4la8mgR0btz7hW",
+                  "snapshotId": "d0892b62daa0e20e6fd7e5459d761a8323430ed2b886af86880f7dd5f33460cd",
+                  "usage": {
+                    "cache": {
+                      "read": 0,
+                      "write": 0
+                    },
+                    "input": 52211,
+                    "output": 176,
+                    "reasoning": 0,
+                    "total": 52387
+                  },
+                  "usageCompleteForCall": true
+                }
+              ]
+            },
+            {
+              "success": true,
+              "resultStatus": "complete",
+              "errorCode": null,
+              "calls": [
+                {
+                  "apiSchemaHash": "cf12e9739510a196c7f25eb938555cfb66d901957f66f840a12d4489ae440ac3",
+                  "contextHash": "3ac2555dd32d6af0b6c398ecf75ad52827a700270f176ac508b2c744dc76812b",
+                  "cost": null,
+                  "cumulativeEstimatedCostUsd": 0.00319862,
+                  "cumulativeReportedTokens": 104798,
+                  "cumulativeTokensUpperBound": 104798,
+                  "error": null,
+                  "estimatedCostUsd": 0.00055815,
+                  "finishReason": "stop",
+                  "formatRecovery": false,
+                  "httpAttempts": 23,
+                  "inferenceOptions": {
+                    "maxOutputTokens": 8192,
+                    "reasoningEffort": "low",
+                    "responseFormat": {
+                      "type": "json_object"
+                    },
+                    "temperature": 0
+                  },
+                  "latencySeconds": 1.749024,
+                  "maxInferenceSteps": 2,
+                  "maxOutputTokens": 8192,
+                  "maxRemoteRetries": 0,
+                  "messageId": "msg_0f32cad76001VWNhHfn469SsD5",
+                  "model": "zai-org/glm-5.3-flash",
+                  "modelInputDigest": "8c956033eb3fdf1ac5bda8abdeba6e3db068f08ac2c46743bd044c23de8ac94c",
+                  "modelPromptDigest": "8df61f52649d8df73886f8c4504d784841dd061a2c12ef9fb2e4ae68da1fe444",
+                  "outputMode": "json_text",
+                  "pricing": {
+                    "cachedInputPerMillionUsd": 0.01,
+                    "inputPerMillionUsd": 0.05,
+                    "observedDate": "2026-10-01",
+                    "outputPerMillionUsd": 0.17,
+                    "source": "https://thehive.ai/models/zai-org/glm-5.3-flash",
+                    "usageConventionSource": "https://github.com/anomalyco/opencode/blob/v1.18.33/packages/opencode/src/session/session.ts#L338"
+                  },
+                  "promptVersion": "deployment_v1.3",
+                  "provider": "hive-ai",
+                  "remoteAbortConfirmed": null,
+                  "remoteAbortRequested": false,
+                  "remoteRetryAttempts": 0,
+                  "requestPayloadDigest": "b3de4a2b0b47c899f0b65870a36c1b9dc350cab52f16b60fa6e2f1ed4249795e",
+                  "reservedTokensUpperBound": 328790,
+                  "responseMessageId": "msg_0f32cad93001LBwiIJ3dFtCRLm",
+                  "responseTextBytes": 397,
+                  "revision": 1,
+                  "serverVersion": "1.18.33",
+                  "sessionId": "ses_f0cd3528bffeZEaA1y07r1DUwM",
+                  "snapshotId": "d0892b62daa0e20e6fd7e5459d761a8323430ed2b886af86880f7dd5f33460cd",
+                  "usage": {
+                    "cache": {
+                      "read": 52160,
+                      "write": 0
+                    },
+                    "input": 51,
+                    "output": 200,
+                    "reasoning": 0,
+                    "total": 52411
+                  },
+                  "usageCompleteForCall": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "portpolio-production",
+          "runs": [
+            {
+              "success": true,
+              "resultStatus": "complete",
+              "errorCode": null,
+              "calls": [
+                {
+                  "apiSchemaHash": "cf12e9739510a196c7f25eb938555cfb66d901957f66f840a12d4489ae440ac3",
+                  "contextHash": "98fb0099f9d148f4f9bb21e44cc67c29b95c0e7a72b32e072d19a3f65a025700",
+                  "cost": null,
+                  "cumulativeEstimatedCostUsd": 0.00375223,
+                  "cumulativeReportedTokens": 115443,
+                  "cumulativeTokensUpperBound": 115443,
+                  "error": null,
+                  "estimatedCostUsd": 0.00055361,
+                  "finishReason": "stop",
+                  "formatRecovery": false,
+                  "httpAttempts": 23,
+                  "inferenceOptions": {
+                    "maxOutputTokens": 8192,
+                    "reasoningEffort": "low",
+                    "responseFormat": {
+                      "type": "json_object"
+                    },
+                    "temperature": 0
+                  },
+                  "latencySeconds": 1.72668,
+                  "maxInferenceSteps": 2,
+                  "maxOutputTokens": 8192,
+                  "maxRemoteRetries": 0,
+                  "messageId": "msg_0f32cb5b3001LOSNE99dZZu0bl",
+                  "model": "zai-org/glm-5.3-flash",
+                  "modelInputDigest": "5a150aea8f643e17dea92733d974b6f1ec347f9eb43ed281a50605e205047b7c",
+                  "modelPromptDigest": "833a19ef52dcef577e857ce1ab7e24d9e34d2da3f426a23adf861b034210d0f6",
+                  "outputMode": "json_text",
+                  "pricing": {
+                    "cachedInputPerMillionUsd": 0.01,
+                    "inputPerMillionUsd": 0.05,
+                    "observedDate": "2026-10-01",
+                    "outputPerMillionUsd": 0.17,
+                    "source": "https://thehive.ai/models/zai-org/glm-5.3-flash",
+                    "usageConventionSource": "https://github.com/anomalyco/opencode/blob/v1.18.33/packages/opencode/src/session/session.ts#L338"
+                  },
+                  "promptVersion": "deployment_v1.3",
+                  "provider": "hive-ai",
+                  "remoteAbortConfirmed": null,
+                  "remoteAbortRequested": false,
+                  "remoteRetryAttempts": 0,
+                  "requestPayloadDigest": "bcd985a4828ff54c61cbbdf4fe33c73bc3cad631b04bea5a5a1bed96fdf7173b",
+                  "reservedTokensUpperBound": 99858,
+                  "responseMessageId": "msg_0f32cb5c4001AAtgkZlRPzP3S1",
+                  "responseTextBytes": 393,
+                  "revision": 1,
+                  "serverVersion": "1.18.33",
+                  "sessionId": "ses_f0cd34a4effeQUm0TSI2HdAWJt",
+                  "snapshotId": "dcab384d9e1a6cfe70ee38b024a06b0bce34cee63a645572e01f89b70c1fddca",
+                  "usage": {
+                    "cache": {
+                      "read": 0,
+                      "write": 0
+                    },
+                    "input": 10467,
+                    "output": 178,
+                    "reasoning": 0,
+                    "total": 10645
+                  },
+                  "usageCompleteForCall": true
+                }
+              ]
+            },
+            {
+              "success": true,
+              "resultStatus": "complete",
+              "errorCode": null,
+              "calls": [
+                {
+                  "apiSchemaHash": "cf12e9739510a196c7f25eb938555cfb66d901957f66f840a12d4489ae440ac3",
+                  "contextHash": "98fb0099f9d148f4f9bb21e44cc67c29b95c0e7a72b32e072d19a3f65a025700",
+                  "cost": null,
+                  "cumulativeEstimatedCostUsd": 0.00388839,
+                  "cumulativeReportedTokens": 126087,
+                  "cumulativeTokensUpperBound": 126087,
+                  "error": null,
+                  "estimatedCostUsd": 0.00013616,
+                  "finishReason": "stop",
+                  "formatRecovery": false,
+                  "httpAttempts": 27,
+                  "inferenceOptions": {
+                    "maxOutputTokens": 8192,
+                    "reasoningEffort": "low",
+                    "responseFormat": {
+                      "type": "json_object"
+                    },
+                    "temperature": 0
+                  },
+                  "latencySeconds": 2.179418,
+                  "maxInferenceSteps": 2,
+                  "maxOutputTokens": 8192,
+                  "maxRemoteRetries": 0,
+                  "messageId": "msg_0f32cbcee001cTUU40haWXz5Bs",
+                  "model": "zai-org/glm-5.3-flash",
+                  "modelInputDigest": "5a150aea8f643e17dea92733d974b6f1ec347f9eb43ed281a50605e205047b7c",
+                  "modelPromptDigest": "833a19ef52dcef577e857ce1ab7e24d9e34d2da3f426a23adf861b034210d0f6",
+                  "outputMode": "json_text",
+                  "pricing": {
+                    "cachedInputPerMillionUsd": 0.01,
+                    "inputPerMillionUsd": 0.05,
+                    "observedDate": "2026-10-01",
+                    "outputPerMillionUsd": 0.17,
+                    "source": "https://thehive.ai/models/zai-org/glm-5.3-flash",
+                    "usageConventionSource": "https://github.com/anomalyco/opencode/blob/v1.18.33/packages/opencode/src/session/session.ts#L338"
+                  },
+                  "promptVersion": "deployment_v1.3",
+                  "provider": "hive-ai",
+                  "remoteAbortConfirmed": null,
+                  "remoteAbortRequested": false,
+                  "remoteRetryAttempts": 0,
+                  "requestPayloadDigest": "ad6ae369e70992d213d16b3cd55aac326b724da160ec22f20bcd504c21e258db",
+                  "reservedTokensUpperBound": 99858,
+                  "responseMessageId": "msg_0f32cbcf9001X8hE0sMVN0ZfWd",
+                  "responseTextBytes": 393,
+                  "revision": 1,
+                  "serverVersion": "1.18.33",
+                  "sessionId": "ses_f0cd34313ffe3EzRqqrFxp5QG8",
+                  "snapshotId": "dcab384d9e1a6cfe70ee38b024a06b0bce34cee63a645572e01f89b70c1fddca",
+                  "usage": {
+                    "cache": {
+                      "read": 10432,
+                      "write": 0
+                    },
+                    "input": 35,
+                    "output": 177,
+                    "reasoning": 0,
+                    "total": 10644
+                  },
+                  "usageCompleteForCall": true
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "attempt": "06-final-projection",
+      "reason": "Final container runtime and working directory projection; all four calls passed.",
+      "successCount": 4,
+      "failureCount": 0,
+      "projects": [
+        {
+          "name": "Temp_log",
+          "runs": [
+            {
+              "success": true,
+              "resultStatus": "complete",
+              "errorCode": null,
+              "calls": [
+                {
+                  "apiSchemaHash": "cf12e9739510a196c7f25eb938555cfb66d901957f66f840a12d4489ae440ac3",
+                  "contextHash": "3ac2555dd32d6af0b6c398ecf75ad52827a700270f176ac508b2c744dc76812b",
+                  "cost": null,
+                  "cumulativeEstimatedCostUsd": 0.00264173,
+                  "cumulativeReportedTokens": 52405,
+                  "cumulativeTokensUpperBound": 52405,
+                  "effectiveInferenceOptions": {
+                    "maxOutputTokens": 8192,
+                    "reasoningEffort": "low",
+                    "responseFormat": {
+                      "type": "json_object"
+                    },
+                    "temperature": 0
+                  },
+                  "error": null,
+                  "estimatedCostUsd": 0.00264173,
+                  "finishReason": "stop",
+                  "formatRecovery": false,
+                  "httpAttempts": 39,
+                  "inferenceOptions": {
+                    "maxOutputTokens": 8192,
+                    "reasoningEffort": "low",
+                    "responseFormat": {
+                      "type": "json_object"
+                    },
+                    "temperature": 0
+                  },
+                  "latencySeconds": 5.008305,
+                  "maxInferenceSteps": 2,
+                  "maxOutputTokens": 8192,
+                  "maxRemoteRetries": 0,
+                  "messageId": "msg_0f33db2e6001tY2nFwmNwFbZwz",
+                  "model": "zai-org/glm-5.3-flash",
+                  "modelInputDigest": "8c956033eb3fdf1ac5bda8abdeba6e3db068f08ac2c46743bd044c23de8ac94c",
+                  "modelPromptDigest": "b0e9ca884f7ea00fdc1a83ebe4b17fe7bb1ab885ab5e25524d2a832b0fdf4dba",
+                  "outputMode": "json_text",
+                  "pricing": {
+                    "cachedInputPerMillionUsd": 0.01,
+                    "inputPerMillionUsd": 0.05,
+                    "observedDate": "2026-10-01",
+                    "outputPerMillionUsd": 0.17,
+                    "source": "https://thehive.ai/models/zai-org/glm-5.3-flash",
+                    "usageConventionSource": "https://github.com/anomalyco/opencode/blob/v1.18.33/packages/opencode/src/session/session.ts#L338"
+                  },
+                  "promptVersion": "deployment_v1.3",
+                  "provider": "hive-ai",
+                  "remoteAbortConfirmed": null,
+                  "remoteAbortRequested": false,
+                  "remoteRetryAttempts": 0,
+                  "requestPayloadDigest": "0f184b9cde6632a673e0e43f9c9f7eb77d02ccf41e61c6e8aa05d4b72fdf3bfa",
+                  "reservedTokensUpperBound": 328890,
+                  "responseMessageId": "msg_0f33db30e001EKyiR5rHpSQ51E",
+                  "responseTextBytes": 393,
+                  "revision": 1,
+                  "serverVersion": "1.18.33",
+                  "sessionId": "ses_f0cc24d1effeRLWLIKfZT3R2Gi",
+                  "snapshotId": "d0892b62daa0e20e6fd7e5459d761a8323430ed2b886af86880f7dd5f33460cd",
+                  "usage": {
+                    "cache": {
+                      "read": 0,
+                      "write": 0
+                    },
+                    "input": 52226,
+                    "output": 179,
+                    "reasoning": 0,
+                    "total": 52405
+                  },
+                  "usageCompleteForCall": true
+                }
+              ]
+            },
+            {
+              "success": true,
+              "resultStatus": "complete",
+              "errorCode": null,
+              "calls": [
+                {
+                  "apiSchemaHash": "cf12e9739510a196c7f25eb938555cfb66d901957f66f840a12d4489ae440ac3",
+                  "contextHash": "3ac2555dd32d6af0b6c398ecf75ad52827a700270f176ac508b2c744dc76812b",
+                  "cost": null,
+                  "cumulativeEstimatedCostUsd": 0.00319552,
+                  "cumulativeReportedTokens": 104816,
+                  "cumulativeTokensUpperBound": 104816,
+                  "effectiveInferenceOptions": {
+                    "maxOutputTokens": 8192,
+                    "reasoningEffort": "low",
+                    "responseFormat": {
+                      "type": "json_object"
+                    },
+                    "temperature": 0
+                  },
+                  "error": null,
+                  "estimatedCostUsd": 0.00055379,
+                  "finishReason": "stop",
+                  "formatRecovery": false,
+                  "httpAttempts": 21,
+                  "inferenceOptions": {
+                    "maxOutputTokens": 8192,
+                    "reasoningEffort": "low",
+                    "responseFormat": {
+                      "type": "json_object"
+                    },
+                    "temperature": 0
+                  },
+                  "latencySeconds": 1.538982,
+                  "maxInferenceSteps": 2,
+                  "maxOutputTokens": 8192,
+                  "maxRemoteRetries": 0,
+                  "messageId": "msg_0f33dc33d001Du48F0cSR1nBUt",
+                  "model": "zai-org/glm-5.3-flash",
+                  "modelInputDigest": "8c956033eb3fdf1ac5bda8abdeba6e3db068f08ac2c46743bd044c23de8ac94c",
+                  "modelPromptDigest": "b0e9ca884f7ea00fdc1a83ebe4b17fe7bb1ab885ab5e25524d2a832b0fdf4dba",
+                  "outputMode": "json_text",
+                  "pricing": {
+                    "cachedInputPerMillionUsd": 0.01,
+                    "inputPerMillionUsd": 0.05,
+                    "observedDate": "2026-10-01",
+                    "outputPerMillionUsd": 0.17,
+                    "source": "https://thehive.ai/models/zai-org/glm-5.3-flash",
+                    "usageConventionSource": "https://github.com/anomalyco/opencode/blob/v1.18.33/packages/opencode/src/session/session.ts#L338"
+                  },
+                  "promptVersion": "deployment_v1.3",
+                  "provider": "hive-ai",
+                  "remoteAbortConfirmed": null,
+                  "remoteAbortRequested": false,
+                  "remoteRetryAttempts": 0,
+                  "requestPayloadDigest": "e0b6745ef4fa1590a9a732f02dcdbfa5f187193ed0016b01923f10abe7bd34dc",
+                  "reservedTokensUpperBound": 328890,
+                  "responseMessageId": "msg_0f33dc3560018hfrnY56EMSHF6",
+                  "responseTextBytes": 393,
+                  "revision": 1,
+                  "serverVersion": "1.18.33",
+                  "sessionId": "ses_f0cc23cc4ffef9ZfL6iUo0gp7n",
+                  "snapshotId": "d0892b62daa0e20e6fd7e5459d761a8323430ed2b886af86880f7dd5f33460cd",
+                  "usage": {
+                    "cache": {
+                      "read": 52224,
+                      "write": 0
+                    },
+                    "input": 2,
+                    "output": 185,
+                    "reasoning": 0,
+                    "total": 52411
+                  },
+                  "usageCompleteForCall": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "portpolio-production",
+          "runs": [
+            {
+              "success": true,
+              "resultStatus": "complete",
+              "errorCode": null,
+              "calls": [
+                {
+                  "apiSchemaHash": "cf12e9739510a196c7f25eb938555cfb66d901957f66f840a12d4489ae440ac3",
+                  "contextHash": "4fc4ffbc553924ebe4a0a4b96c4770475e1dbadb18e5f9495992411e7d9ab8b3",
+                  "cost": null,
+                  "cumulativeEstimatedCostUsd": 0.0037615,
+                  "cumulativeReportedTokens": 115742,
+                  "cumulativeTokensUpperBound": 115742,
+                  "effectiveInferenceOptions": {
+                    "maxOutputTokens": 8192,
+                    "reasoningEffort": "low",
+                    "responseFormat": {
+                      "type": "json_object"
+                    },
+                    "temperature": 0
+                  },
+                  "error": null,
+                  "estimatedCostUsd": 0.00056598,
+                  "finishReason": "stop",
+                  "formatRecovery": false,
+                  "httpAttempts": 19,
+                  "inferenceOptions": {
+                    "maxOutputTokens": 8192,
+                    "reasoningEffort": "low",
+                    "responseFormat": {
+                      "type": "json_object"
+                    },
+                    "temperature": 0
+                  },
+                  "latencySeconds": 1.325819,
+                  "maxInferenceSteps": 2,
+                  "maxOutputTokens": 8192,
+                  "maxRemoteRetries": 0,
+                  "messageId": "msg_0f33dca90001TjqBafcg4iyhzk",
+                  "model": "zai-org/glm-5.3-flash",
+                  "modelInputDigest": "767c2018b1c7832550809dab907b5d741ad9678653e964ac1cfdde5704789817",
+                  "modelPromptDigest": "9caf5b125f6a1072c03efea3ccf8504a5d6e9a065cf2686839c31671eb278d29",
+                  "outputMode": "json_text",
+                  "pricing": {
+                    "cachedInputPerMillionUsd": 0.01,
+                    "inputPerMillionUsd": 0.05,
+                    "observedDate": "2026-10-01",
+                    "outputPerMillionUsd": 0.17,
+                    "source": "https://thehive.ai/models/zai-org/glm-5.3-flash",
+                    "usageConventionSource": "https://github.com/anomalyco/opencode/blob/v1.18.33/packages/opencode/src/session/session.ts#L338"
+                  },
+                  "promptVersion": "deployment_v1.3",
+                  "provider": "hive-ai",
+                  "remoteAbortConfirmed": null,
+                  "remoteAbortRequested": false,
+                  "remoteRetryAttempts": 0,
+                  "requestPayloadDigest": "08e40b825de5a0df208ea20a91144deb318d894fe381c6c74c3df62a8b1180ec",
+                  "reservedTokensUpperBound": 101226,
+                  "responseMessageId": "msg_0f33dcaa0001UfpA1W1f8SnuFO",
+                  "responseTextBytes": 393,
+                  "revision": 1,
+                  "serverVersion": "1.18.33",
+                  "sessionId": "ses_f0cc23570ffexO7F00QTjaqMOZ",
+                  "snapshotId": "dcab384d9e1a6cfe70ee38b024a06b0bce34cee63a645572e01f89b70c1fddca",
+                  "usage": {
+                    "cache": {
+                      "read": 0,
+                      "write": 0
+                    },
+                    "input": 10762,
+                    "output": 164,
+                    "reasoning": 0,
+                    "total": 10926
+                  },
+                  "usageCompleteForCall": true
+                }
+              ]
+            },
+            {
+              "success": true,
+              "resultStatus": "complete",
+              "errorCode": null,
+              "calls": [
+                {
+                  "apiSchemaHash": "cf12e9739510a196c7f25eb938555cfb66d901957f66f840a12d4489ae440ac3",
+                  "contextHash": "4fc4ffbc553924ebe4a0a4b96c4770475e1dbadb18e5f9495992411e7d9ab8b3",
+                  "cost": null,
+                  "cumulativeEstimatedCostUsd": 0.00389825,
+                  "cumulativeReportedTokens": 126673,
+                  "cumulativeTokensUpperBound": 126673,
+                  "effectiveInferenceOptions": {
+                    "maxOutputTokens": 8192,
+                    "reasoningEffort": "low",
+                    "responseFormat": {
+                      "type": "json_object"
+                    },
+                    "temperature": 0
+                  },
+                  "error": null,
+                  "estimatedCostUsd": 0.00013675,
+                  "finishReason": "stop",
+                  "formatRecovery": false,
+                  "httpAttempts": 21,
+                  "inferenceOptions": {
+                    "maxOutputTokens": 8192,
+                    "reasoningEffort": "low",
+                    "responseFormat": {
+                      "type": "json_object"
+                    },
+                    "temperature": 0
+                  },
+                  "latencySeconds": 1.5339,
+                  "maxInferenceSteps": 2,
+                  "maxOutputTokens": 8192,
+                  "maxRemoteRetries": 0,
+                  "messageId": "msg_0f33dd033001FGFkasvJgTV0oO",
+                  "model": "zai-org/glm-5.3-flash",
+                  "modelInputDigest": "767c2018b1c7832550809dab907b5d741ad9678653e964ac1cfdde5704789817",
+                  "modelPromptDigest": "9caf5b125f6a1072c03efea3ccf8504a5d6e9a065cf2686839c31671eb278d29",
+                  "outputMode": "json_text",
+                  "pricing": {
+                    "cachedInputPerMillionUsd": 0.01,
+                    "inputPerMillionUsd": 0.05,
+                    "observedDate": "2026-10-01",
+                    "outputPerMillionUsd": 0.17,
+                    "source": "https://thehive.ai/models/zai-org/glm-5.3-flash",
+                    "usageConventionSource": "https://github.com/anomalyco/opencode/blob/v1.18.33/packages/opencode/src/session/session.ts#L338"
+                  },
+                  "promptVersion": "deployment_v1.3",
+                  "provider": "hive-ai",
+                  "remoteAbortConfirmed": null,
+                  "remoteAbortRequested": false,
+                  "remoteRetryAttempts": 0,
+                  "requestPayloadDigest": "ed574b9092f301846580d98d27b3d4a6a3aefbb743d1fe0a483c7e2c492c6779",
+                  "reservedTokensUpperBound": 101226,
+                  "responseMessageId": "msg_0f33dd040001GfqrYQrKOTNQGg",
+                  "responseTextBytes": 393,
+                  "revision": 1,
+                  "serverVersion": "1.18.33",
+                  "sessionId": "ses_f0cc22fceffeYGfq8bjXXHVa5x",
+                  "snapshotId": "dcab384d9e1a6cfe70ee38b024a06b0bce34cee63a645572e01f89b70c1fddca",
+                  "usage": {
+                    "cache": {
+                      "read": 10752,
+                      "write": 0
+                    },
+                    "input": 10,
+                    "output": 169,
+                    "reasoning": 0,
+                    "total": 10931
+                  },
+                  "usageCompleteForCall": true
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
