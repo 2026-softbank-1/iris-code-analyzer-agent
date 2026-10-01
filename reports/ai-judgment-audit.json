@@ -1,0 +1,76 @@
+{
+  "schemaVersion": "iris.ai-judgment-audit.v1",
+  "date": "2026-10-01",
+  "codeRevision": "8cc8cb0431c21dd299257c73a069bce4ad3b4fa2",
+  "evaluationType": "offline_constructed_validator_counterexample",
+  "modelEvaluationPerformed": false,
+  "policyGatePassed": false,
+  "knownGap": "suggested conclusion is not semantically supported by its existing evidence ID",
+  "result": {
+    "staticStatus": "complete",
+    "unresolved": [],
+    "unrelatedCitedEvidence": {
+      "path": "index.js",
+      "text": "app.listen(3000);"
+    },
+    "suggestedCase": {
+      "status": "complete",
+      "dependencies": [
+        {
+          "value": {
+            "name": "postgres",
+            "kind": "database",
+            "engine": "postgresql",
+            "component": "."
+          },
+          "status": "suggested",
+          "scope": "production",
+          "evidenceIds": [
+            "e-a1a9b6c07426a5c372ce"
+          ],
+          "reason": "PostgreSQL is required"
+        }
+      ],
+      "questions": []
+    },
+    "sameClaimAsDetected": "RESULT_OBSERVATION_INVALID",
+    "questionCase": {
+      "status": "needs_input",
+      "questions": [
+        {
+          "key": "runtime.port",
+          "reason": "Review whether the observed listener is the production entrypoint",
+          "kind": "code_review"
+        }
+      ],
+      "portsPreserved": [
+        {
+          "value": 3000,
+          "status": "detected",
+          "scope": "container",
+          "evidenceIds": [
+            "e-1d7a7ee1adc7808ec36d",
+            "e-a1a9b6c07426a5c372ce",
+            "e-b0bd7d7d42403fe5c02c"
+          ],
+          "reason": "Static observation: runtime.port"
+        }
+      ]
+    }
+  },
+  "priorLiveEvidence": {
+    "provider": "openai",
+    "model": "gpt-6-luna",
+    "projects": {
+      "Temp_log": {
+        "additionalProposals": 0,
+        "additionalQuestions": 0
+      },
+      "portpolio-production": {
+        "additionalProposals": 0,
+        "additionalQuestions": 0
+      }
+    },
+    "interpretation": "No supplemental discovery observed in the two prior final source runs; merged score is not AI contribution score."
+  }
+}
