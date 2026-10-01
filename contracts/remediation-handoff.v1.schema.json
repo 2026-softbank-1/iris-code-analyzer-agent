@@ -1,0 +1,356 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://iris.example/contracts/remediation-handoff.v1-draft.schema.json",
+  "$comment": "DRAFT data contract only. Matching this schema does not authenticate receipts, prove a defect, grant patch execution, or enqueue work. Trusted service must resolve and bind all receipt/artifact refs to caller/service/source/run/policy and check attempts/budget atomically.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": "iris.remediation-handoff.v1-draft"
+    },
+    "handoffId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$"
+    },
+    "incidentId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$"
+    },
+    "idempotencyKey": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "serviceId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "repositoryId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "commitSha": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$"
+        },
+        "sourceSnapshotId": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "contextHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "sourceManifestSha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "repositoryId",
+        "commitSha",
+        "sourceSnapshotId",
+        "contextHash",
+        "sourceManifestSha256"
+      ]
+    },
+    "analysis": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "analysisDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "verificationReceiptRef": {
+          "type": "string",
+          "pattern": "^receipt:[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "analysisDigest",
+        "verificationReceiptRef"
+      ]
+    },
+    "failure": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "stage": {
+          "enum": [
+            "static_check",
+            "build",
+            "test",
+            "runtime",
+            "smoke"
+          ]
+        },
+        "runId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$"
+        },
+        "executionConfigDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "failureFingerprint": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "outcome": {
+          "const": "failed"
+        },
+        "classification": {
+          "enum": [
+            "code_defect",
+            "unclassified_failure"
+          ]
+        },
+        "causeStatus": {
+          "enum": [
+            "verified",
+            "undetermined"
+          ]
+        },
+        "exitCode": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "failureReceiptRef": {
+          "type": "string",
+          "pattern": "^receipt:[a-f0-9]{64}$"
+        },
+        "logArtifacts": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 10,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "artifactRef": {
+                "type": "string",
+                "pattern": "^artifact:[a-f0-9]{64}$"
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "kind": {
+                "enum": [
+                  "checker_log",
+                  "build_log",
+                  "test_log",
+                  "runtime_log",
+                  "smoke_log"
+                ]
+              },
+              "redacted": {
+                "const": true
+              },
+              "redactionPolicyVersion": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "byteLength": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 2097152
+              }
+            },
+            "required": [
+              "artifactRef",
+              "sha256",
+              "kind",
+              "redacted",
+              "redactionPolicyVersion",
+              "byteLength"
+            ]
+          }
+        },
+        "findingReceiptRefs": {
+          "type": "array",
+          "maxItems": 20,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^receipt:[a-f0-9]{64}$"
+          }
+        }
+      },
+      "required": [
+        "stage",
+        "runId",
+        "executionConfigDigest",
+        "failureFingerprint",
+        "outcome",
+        "classification",
+        "causeStatus",
+        "exitCode",
+        "failureReceiptRef",
+        "logArtifacts",
+        "findingReceiptRefs"
+      ]
+    },
+    "repairPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "enum": [
+            "diagnose_only",
+            "propose_patch"
+          ]
+        },
+        "authorizationReceiptRef": {
+          "type": "string",
+          "pattern": "^receipt:[a-f0-9]{64}$"
+        },
+        "attempt": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3
+        },
+        "maxPatchAttempts": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3
+        },
+        "maxDiagnosisRounds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3
+        },
+        "maxElapsedSeconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1800
+        },
+        "maxCostUsd": {
+          "type": "number",
+          "minimum": 0
+        },
+        "allowedPaths": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 30,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "maxLength": 300,
+            "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))[A-Za-z0-9_.*?/-]+$"
+          }
+        },
+        "protectedPaths": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 30,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "maxLength": 300,
+            "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))[A-Za-z0-9_.*?/-]+$"
+          }
+        },
+        "validationPlanRef": {
+          "type": "string",
+          "pattern": "^artifact:[a-f0-9]{64}$"
+        },
+        "repositoryPushAuthorized": {
+          "const": false
+        },
+        "deploymentAuthorized": {
+          "const": false
+        }
+      },
+      "required": [
+        "mode",
+        "authorizationReceiptRef",
+        "attempt",
+        "maxPatchAttempts",
+        "maxDiagnosisRounds",
+        "maxElapsedSeconds",
+        "maxCostUsd",
+        "allowedPaths",
+        "protectedPaths",
+        "validationPlanRef",
+        "repositoryPushAuthorized",
+        "deploymentAuthorized"
+      ]
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "handoffId",
+    "incidentId",
+    "idempotencyKey",
+    "serviceId",
+    "source",
+    "analysis",
+    "failure",
+    "repairPolicy"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "repairPolicy": {
+            "properties": {
+              "mode": {
+                "const": "propose_patch"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "failure": {
+            "properties": {
+              "classification": {
+                "const": "code_defect"
+              },
+              "causeStatus": {
+                "const": "verified"
+              },
+              "findingReceiptRefs": {
+                "minItems": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "failure": {
+            "properties": {
+              "causeStatus": {
+                "const": "undetermined"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "repairPolicy": {
+            "properties": {
+              "mode": {
+                "const": "diagnose_only"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

@@ -95,6 +95,12 @@ class BudgetedRunner:
         # UTF-8 bytes give a deliberately conservative token ceiling. Account
         # for the response schema, template, harness prompt and protocol space.
         input_ceiling = len(canonical_bytes(bundle)) + len(canonical_bytes(MODEL_REPLY_SCHEMA)) + 16_384
+        estimate_input = getattr(self.runner, "input_token_upper_bound", None)
+        if callable(estimate_input):
+            actual_ceiling = estimate_input(bundle)
+            if type(actual_ceiling) is not int or actual_ceiling < 0:
+                raise AnalyzerError("MODEL_BUDGET_ESTIMATE_INVALID", "Invalid model input reservation")
+            input_ceiling = max(input_ceiling, actual_ceiling)
         output_ceiling = self.runner.config.max_output_tokens
         one_attempt_reserve = (
             input_ceiling * self.pricing.get("reservationInput", self.pricing["input"])

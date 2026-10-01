@@ -1,0 +1,89 @@
+{
+  "schemaVersion": "iris.railpack-handoff-validation.v1",
+  "date": "2026-10-01",
+  "actualRailpackBuildExecuted": false,
+  "cloudCalls": 0,
+  "modelCalls": 0,
+  "scenarios": [
+    {
+      "scenario": "existing_auto",
+      "project": "Temp_log",
+      "sourceSha": "54fa8072d9fbf817e3352f8eeee2344f37c8a813",
+      "status": "ready",
+      "builder": "dockerfile",
+      "buildHandoff": {
+        "owner": "service",
+        "requested_builder": null,
+        "recommended_builder": "dockerfile",
+        "decision_required": true,
+        "reason_code": "source_dockerfile"
+      },
+      "sourceManifestSha256": "3286a730e927d90bae538450534848527f9de0b96c95a7d0a21805b2813f3863",
+      "archiveSha256": "59d24f70bc207c330035881a41ad1c982937b5b4cab61503308294a2445e5481",
+      "originalOnlyArchiveVerified": true,
+      "dockerfileInArchive": true,
+      "templateId": null,
+      "executionAuthorized": false
+    },
+    {
+      "scenario": "missing_auto",
+      "project": "portpolio-production",
+      "sourceSha": "f54230346fbfca4e34ae2cdd1a370217611d2191",
+      "status": "ready",
+      "builder": "railpack",
+      "buildHandoff": {
+        "owner": "service",
+        "requested_builder": null,
+        "recommended_builder": "railpack",
+        "decision_required": true,
+        "reason_code": "dockerfile_absent"
+      },
+      "sourceManifestSha256": "57ade0e91973d20f4f6dc3479b04cb17c91a61b2af59687a96a40689120d9239",
+      "archiveSha256": "e3791e0a48251843c5a28703d628270e2140a45a18174c8050bdda530a5a7e33",
+      "originalOnlyArchiveVerified": true,
+      "dockerfileInArchive": false,
+      "templateId": null,
+      "executionAuthorized": false
+    },
+    {
+      "scenario": "explicit_railpack",
+      "project": "Temp_log",
+      "sourceSha": "54fa8072d9fbf817e3352f8eeee2344f37c8a813",
+      "status": "ready",
+      "builder": "railpack",
+      "buildHandoff": {
+        "owner": "service",
+        "requested_builder": "railpack",
+        "recommended_builder": "railpack",
+        "decision_required": false,
+        "reason_code": "explicit_railpack"
+      },
+      "sourceManifestSha256": "3286a730e927d90bae538450534848527f9de0b96c95a7d0a21805b2813f3863",
+      "archiveSha256": "59d24f70bc207c330035881a41ad1c982937b5b4cab61503308294a2445e5481",
+      "originalOnlyArchiveVerified": true,
+      "dockerfileInArchive": true,
+      "templateId": null,
+      "executionAuthorized": false
+    },
+    {
+      "scenario": "explicit_dockerfile_missing",
+      "project": "portpolio-production",
+      "sourceSha": "f54230346fbfca4e34ae2cdd1a370217611d2191",
+      "status": "needs_input",
+      "builder": "dockerfile",
+      "buildHandoff": {
+        "owner": "service",
+        "requested_builder": "dockerfile",
+        "recommended_builder": "dockerfile",
+        "decision_required": true,
+        "reason_code": "explicit_dockerfile_missing"
+      },
+      "sourceManifestSha256": "57ade0e91973d20f4f6dc3479b04cb17c91a61b2af59687a96a40689120d9239",
+      "archiveSha256": null,
+      "originalOnlyArchiveVerified": false,
+      "dockerfileInArchive": false,
+      "templateId": null,
+      "executionAuthorized": false
+    }
+  ]
+}

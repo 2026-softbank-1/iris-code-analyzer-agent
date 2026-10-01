@@ -239,3 +239,30 @@ def test_quality_checks_result_workdir_separately_from_correct_context(repositor
     assert not score["passed"]
     assert any(check["passed"] for check in score["checks"] if check["key"].startswith("docker.workdir:"))
     release_snapshot(bundle["source"]["snapshotId"])
+
+
+def test_partial_selected_declaration_is_exposed_for_bounded_expansion(tmp_path):
+    from iris_analyzer.preprocess import (
+        compact_model_input,
+        expand_context,
+        prepare_context,
+        release_snapshot,
+    )
+
+    (tmp_path / "package.json").write_text(
+        '{"dependencies":{"express":"5"},"scripts":{"start":"node index.js"}}'
+    )
+    (tmp_path / "index.js").write_text(
+        "const express=require('express');\nconst app=express();\nconst path='/x/'+'ready';\napp.get(path,(_,r)=>r.send('ok'));\napp.listen(3000);\n"
+    )
+    bundle = prepare_context(tmp_path)
+    try:
+        payload = compact_model_input(bundle)
+        assert "index.js" in {row["path"] for row in payload["expandableSelectedPaths"]}
+        expanded = expand_context(bundle, ["index.js"])
+        assert "index.js" not in {
+            row["path"] for row in compact_model_input(expanded)["expandableSelectedPaths"]
+        }
+        assert any("'/x/'+'ready'" in row["text"] for row in expanded["evidence"])
+    finally:
+        release_snapshot(bundle["source"]["snapshotId"])

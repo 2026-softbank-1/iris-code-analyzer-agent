@@ -398,3 +398,19 @@ def test_unrelated_or_dynamic_rate_limit_does_not_invent_a_literal_ceiling():
         )
     )
     assert not any(f["ruleId"] == "traffic.configured_rate_limit" for f in report["findings"])
+
+
+@pytest.mark.parametrize("final_base", ["base", "intermediate", "0", "BASE"])
+def test_final_docker_stage_inherits_runtime_and_detects_source_conflict(final_base):
+    report = build_readiness(
+        bundle_from_files(
+            {
+                "Dockerfile": f"FROM node:22-alpine AS base\nFROM base AS intermediate\nFROM {final_base} AS runtime\n",
+                "package.json": '{"engines":{"node":"<20"}}',
+            }
+        )
+    )
+    runtime = next(row for row in report["runtimeVersions"] if row["scope"] == "runtime")
+    assert runtime["constraint"] == "22-alpine"
+    assert runtime["imageReference"] == "node:22-alpine"
+    assert any(row["ruleId"] == "runtime.incompatible_major_constraint" for row in report["findings"])

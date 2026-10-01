@@ -422,8 +422,25 @@ def _manifests(plan: dict) -> list[dict]:
             if workload.get(key) is not None:
                 container[key] = copy.deepcopy(workload[key])
         secret_refs = _value(workload["secretRefs"])
-        if secret_refs:
-            container["env"] = [
+        environment = [
+            {"name": item["environmentKey"], "value": item["value"]}
+            for item in (_value(workload.get("runtimeEnv")) or [])
+        ]
+        environment.extend(
+            {
+                "name": ref["environmentKey"],
+                "valueFrom": {
+                    "configMapKeyRef": {
+                        "name": ref["name"],
+                        "key": ref["key"],
+                        "optional": False,
+                    }
+                },
+            }
+            for ref in (_value(workload.get("configMapRefs")) or [])
+        )
+        environment.extend(
+            [
                 {
                     "name": ref["environmentKey"],
                     "valueFrom": {
@@ -432,6 +449,9 @@ def _manifests(plan: dict) -> list[dict]:
                 }
                 for ref in secret_refs
             ]
+        )
+        if environment:
+            container["env"] = environment
         for name_key, probe in _value(workload["probes"]).items():
             if probe:
                 container[name_key + "Probe"] = _probe(probe)

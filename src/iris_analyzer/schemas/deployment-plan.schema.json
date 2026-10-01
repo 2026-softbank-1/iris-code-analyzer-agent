@@ -2388,6 +2388,183 @@
                   "value",
                   "provenance"
                 ]
+              },
+              "runtimeEnv": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "value": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "environmentKey": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                        },
+                        "value": {
+                          "type": "string",
+                          "maxLength": 8192
+                        }
+                      },
+                      "required": [
+                        "environmentKey",
+                        "value"
+                      ]
+                    },
+                    "minItems": 0
+                  },
+                  "provenance": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "basis": {
+                        "type": "array",
+                        "items": {
+                          "enum": [
+                            "source",
+                            "user",
+                            "measurement",
+                            "policy"
+                          ]
+                        },
+                        "minItems": 1,
+                        "uniqueItems": true
+                      },
+                      "evidenceIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "uniqueItems": true
+                      },
+                      "measurementIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "uniqueItems": true
+                      },
+                      "assumptionIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "uniqueItems": true
+                      },
+                      "reason": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "required": [
+                      "basis",
+                      "evidenceIds",
+                      "measurementIds",
+                      "assumptionIds",
+                      "reason"
+                    ]
+                  }
+                },
+                "required": [
+                  "value",
+                  "provenance"
+                ]
+              },
+              "configMapRefs": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "value": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "environmentKey": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                        },
+                        "name": {
+                          "type": "string",
+                          "pattern": "^[a-z0-9]([-a-z0-9]{0,61}[a-z0-9])?$"
+                        },
+                        "key": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9._-]+$"
+                        }
+                      },
+                      "required": [
+                        "environmentKey",
+                        "name",
+                        "key"
+                      ]
+                    },
+                    "minItems": 0
+                  },
+                  "provenance": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "basis": {
+                        "type": "array",
+                        "items": {
+                          "enum": [
+                            "source",
+                            "user",
+                            "measurement",
+                            "policy"
+                          ]
+                        },
+                        "minItems": 1,
+                        "uniqueItems": true
+                      },
+                      "evidenceIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "uniqueItems": true
+                      },
+                      "measurementIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "uniqueItems": true
+                      },
+                      "assumptionIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "uniqueItems": true
+                      },
+                      "reason": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "required": [
+                      "basis",
+                      "evidenceIds",
+                      "measurementIds",
+                      "assumptionIds",
+                      "reason"
+                    ]
+                  }
+                },
+                "required": [
+                  "value",
+                  "provenance"
+                ]
               }
             },
             "required": [
@@ -2445,6 +2622,8 @@
   ],
   "$defs": {
     "planningRequest": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://iris.example/contracts/planning-request.v1.schema.json",
       "type": "object",
       "additionalProperties": false,
       "properties": {
@@ -3326,6 +3505,65 @@
                   "type": "null"
                 }
               ]
+            },
+            "configMapRefs": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "serviceId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "environmentKey": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                  },
+                  "name": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9]([-a-z0-9]{0,61}[a-z0-9])?$"
+                  },
+                  "key": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9._-]+$"
+                  }
+                },
+                "required": [
+                  "serviceId",
+                  "environmentKey",
+                  "name",
+                  "key"
+                ]
+              },
+              "minItems": 0
+            },
+            "runtimeEnv": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "serviceId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "environmentKey": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                  },
+                  "value": {
+                    "type": "string",
+                    "maxLength": 8192
+                  }
+                },
+                "required": [
+                  "serviceId",
+                  "environmentKey",
+                  "value"
+                ]
+              },
+              "minItems": 0
             }
           },
           "required": []

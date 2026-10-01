@@ -14,7 +14,12 @@ from datetime import datetime, timezone
 from importlib.resources import files
 
 from ..contracts import AnalyzerError, digest, validate_result
-from .contracts import normalize_planning_request, plan_digest, validate_deployment_plan
+from .contracts import (
+    is_secret_environment_key,
+    normalize_planning_request,
+    plan_digest,
+    validate_deployment_plan,
+)
 from .lifecycle import eks_support
 
 INSTANCE_SPECS = [
@@ -49,6 +54,29 @@ def _name(value: str) -> str:
 
 def _round(value: float, quantum: int) -> int:
     return max(quantum, math.ceil(value / quantum) * quantum)
+
+
+def _environment_owners(item: dict, services: list[dict]) -> list[str]:
+    """Only explicit consumer metadata can establish ownership of an env key."""
+    component = item.get("component")
+    if not isinstance(component, str) or component.startswith("compose:"):
+        return []
+    if item.get("serviceName"):
+        service_id = "svc-" + digest({"service": item["serviceName"], "root": component})[:16]
+        if any(service["serviceId"] == service_id for service in services):
+            return [service_id]
+        # Never fall through to another Compose service sharing the same context.
+        return []
+    candidates = []
+    for service in services:
+        for root in service["componentRoots"]:
+            if component == root or (root != "." and component.startswith(root.rstrip("/") + "/")):
+                candidates.append((len(root), service["serviceId"]))
+    if not candidates:
+        return []
+    longest = max(length for length, _ in candidates)
+    owners = sorted({sid for length, sid in candidates if length == longest})
+    return owners if len(owners) == 1 else []
 
 
 def usable_measurements(
@@ -161,6 +189,57 @@ def create_deployment_plan(
             "Requested stack/cloud has no controlled compiler adapter; request preserved.",
         )
     constraints, bindings, overrides = request["constraints"], request["bindings"], request["overrides"]
+    env_observations = (readiness or {}).get("environmentVariables", [])
+    observed_keys = {item["key"] for item in env_observations}
+    owned_keys = {
+        item["key"]
+        for item in env_observations
+        if item["phase"] != "unknown"
+        and (
+            _environment_owners(item, analysis["services"])
+            or str(item.get("component", "")).startswith("compose:")
+        )
+    }
+    # Old v1 results contain repository-wide names only. Never copy those
+    # requirements to every app; ask for consumer/phase once instead.
+    unknown_keys = {
+        item["value"]: True
+        for item in analysis["environmentKeys"]
+        if isinstance(item["value"], str) and item["value"] not in observed_keys
+    }
+    for item in env_observations:
+        owners = _environment_owners(item, analysis["services"])
+        external = str(item.get("component", "")).startswith("compose:")
+        if item["key"] not in owned_keys and not external and (not owners or item["phase"] == "unknown"):
+            component = item.get("component", "")
+            intersects_app = any(
+                component == root or (root != "." and component.startswith(root.rstrip("/") + "/"))
+                for service in analysis["services"]
+                for root in service["componentRoots"]
+            )
+            unresolved_runtime = (
+                item["phase"] == "runtime"
+                and item["required"] is not False
+                and not item.get("condition")
+                and (intersects_app or item["origin"] == "compose")
+            )
+            # Examples, host-side Compose aliases and source outside all app
+            # components (such as QA tooling) do not establish app requirements.
+            unknown_keys[item["key"]] = unknown_keys.get(item["key"], False) or unresolved_runtime
+    explicitly_scoped = {
+        item["environmentKey"]
+        for name in ("secretRefs", "runtimeEnv", "configMapRefs")
+        for item in bindings[name]
+    }
+    for key in sorted(unknown_keys.keys() - explicitly_scoped):
+        question(
+            "environment-owner-" + key,
+            "sourceReadiness.environmentVariables",
+            "Confirm consumer service and build/runtime phase for observed environment key "
+            + key
+            + "; repository-wide names are not application requirements.",
+            unknown_keys[key],
+        )
     availability = (
         constraints.get("availability")
         or advice.get("availability")
@@ -328,10 +407,17 @@ def create_deployment_plan(
             if not mount or any(v["mountPath"] == mount for v in volumes):
                 continue
             if value.get("type") == "bind":
+                # v1 source fields preserve optional-file conditions in reason.
+                # An unselected optional input must not become an execution gate.
+                condition = dependency["reason"].partition("; condition: ")[2]
+                reason = "Source bind mount requires an explicit PVC/ConfigMap/Secret migration; host paths are not copied automatically."
+                if condition:
+                    reason += f" Applies only {condition}; confirm selection before requiring this binding."
                 question(
-                    "bind-" + sid + "-" + _name(mount),
+                    "bind-" + sid + "-" + _name(mount) + ("-" + digest(condition)[:8] if condition else ""),
                     "bindings.volumes",
-                    "Source bind mount requires an explicit PVC/ConfigMap/Secret migration; host paths are not copied automatically.",
+                    reason,
+                    not bool(condition),
                 )
                 continue
             name = _name(value.get("name", "data"))
@@ -359,20 +445,55 @@ def create_deployment_plan(
             for item in bindings["secretRefs"]
             if item["serviceId"] == sid
         ]
-        secret_keys = {x["environmentKey"] for x in refs}
-        for item in analysis["environmentKeys"]:
-            key = item["value"]
-            if (
-                isinstance(key, str)
-                and re.search(r"SECRET|PASSWORD|TOKEN|API_KEY|MONGO_URI|DATABASE_URL", key)
-                and key not in secret_keys
-            ):
+        runtime_env = [
+            {k: v for k, v in item.items() if k != "serviceId"}
+            for item in bindings["runtimeEnv"]
+            if item["serviceId"] == sid
+        ]
+        config_map_refs = [
+            {k: v for k, v in item.items() if k != "serviceId"}
+            for item in bindings["configMapRefs"]
+            if item["serviceId"] == sid
+        ]
+        supplied_keys = {x["environmentKey"] for x in refs + runtime_env + config_map_refs}
+        required_runtime = {}
+        for item in env_observations:
+            if item["phase"] != "runtime" or sid not in _environment_owners(item, analysis["services"]):
+                continue
+            previous = required_runtime.get(item["key"])
+
+            def requirement_rank(observation):
+                return (
+                    not bool(observation.get("condition")),
+                    {True: 3, False: 2, None: 1}[observation["required"]],
+                )
+
+            if previous is None or requirement_rank(item) > requirement_rank(previous):
+                required_runtime[item["key"]] = item
+        for key, item in required_runtime.items():
+            if key not in supplied_keys:
+                secret = is_secret_environment_key(key)
+                conditional = bool(item.get("condition"))
                 question(
-                    "secret-" + sid + "-" + key,
-                    "bindings.secretRefs",
-                    "Confirm runtime requirement and supply external Secret reference for observed key "
+                    ("secret-" if secret else "environment-") + sid + "-" + key,
+                    "bindings.secretRefs" if secret else "bindings.runtimeEnv/configMapRefs",
+                    "Observed runtime consumer "
+                    + sid
+                    + " reads "
                     + key
-                    + "; values never belong in a plan.",
+                    + ". "
+                    + (
+                        "Supply an external Secret reference."
+                        if secret
+                        else "Supply a nonsecret value or external ConfigMap reference when required."
+                    )
+                    + (" Conditional: " + item["condition"] if conditional else "")
+                    + (
+                        " Source default/optional access; verify whether an override is needed."
+                        if item["required"] is False
+                        else ""
+                    ),
+                    item["required"] is not False and not conditional,
                 )
         for volume in volumes:
             if not bindings["storageDriverVerified"] or not (volume["claimName"] or volume["storageClass"]):
@@ -443,6 +564,16 @@ def create_deployment_plan(
                     refs,
                     "External Secret names/keys only; credentials are never emitted.",
                     basis=["user"] if refs else ["policy"],
+                ),
+                "runtimeEnv": rec(
+                    runtime_env,
+                    "Explicit nonsecret runtime values only; build-time settings are separate.",
+                    basis=["user"] if runtime_env else ["policy"],
+                ),
+                "configMapRefs": rec(
+                    config_map_refs,
+                    "External ConfigMap key references; same workload namespace, required when supplied.",
+                    basis=["user"] if config_map_refs else ["policy"],
                 ),
                 "rollout": rec(
                     {

@@ -324,3 +324,66 @@ def test_preparation_on_user_samples_reports_real_bounded_syntax_coverage(name):
     assert report["coverage"]["containerCheckedFiles"]
     assert report["coverage"]["targetCodeExecuted"] is False
     assert not any(item["ruleId"] == "syntax.javascript_parser" for item in report["findings"])
+
+
+@pytest.mark.parametrize("compose_name,required", [("compose.tunnel.yaml", False), ("compose.yaml", True)])
+def test_source_conditions_and_inherited_runtime_survive_ai_recommendation(source, compose_name, required):
+    from iris_analyzer.deployment.advisor import advisor_input
+
+    (source / "Dockerfile").write_text(
+        "FROM node:24-alpine AS base\nFROM base AS intermediate\nFROM intermediate AS runtime\n"
+        'WORKDIR /app\nEXPOSE 3000\nCMD ["node", "src/index.js"]\n'
+    )
+    (source / compose_name).write_text(
+        "services:\n  app:\n    build: .\n    volumes:\n      - ./secrets/token:/run/secrets/token:ro\n"
+    )
+    bundle = prepare_context(source)
+    try:
+        analysis = static_analysis(bundle)
+        expanded = expand_context(bundle, ["Dockerfile", "package.json", compose_name])
+        readiness = build_readiness(expanded)
+        request = prepare_planning_request()
+        ai_input = advisor_input(analysis, request, readiness=readiness)
+        dependency = next(
+            d
+            for d in analysis["dependencies"]
+            if isinstance(d["value"], dict) and d["value"].get("mountPath") == "/run/secrets/token"
+        )
+        assert dependency in ai_input["analysisResult"]["dependencies"]
+        assert ai_input["sourceReadiness"] == readiness
+        assert any(
+            v["scope"] == "runtime" and v["constraint"] == "24-alpine" for v in readiness["runtimeVersions"]
+        )
+        assert any(f["ruleId"] == "runtime.incompatible_major_constraint" for f in readiness["findings"])
+        advice = {
+            "schemaVersion": "iris.planning-advice.v1",
+            "analysisDigest": digest(analysis),
+            "requestDigest": digest(request),
+            "target": {
+                "stack": "aws_eks",
+                "cloud": "aws",
+                "region": "ap-northeast-2",
+                "architecture": "x86_64",
+            },
+            "instanceType": None,
+            "availability": "single_az",
+            "expectedRps": 20,
+            "reason": "Synthetic offline policy proposal",
+            "workloads": [],
+        }
+        dossier = build_deployment_dossier_from_readiness(
+            analysis, readiness, request, policy_proposal=advice
+        )
+        assert dossier["sourceReadiness"] == readiness
+        assert dossier["deploymentPlan"]["plannerMode"] == "ai"
+        question = next(
+            q
+            for q in dossier["deploymentPlan"]["questions"]
+            if q["id"].startswith("bind-") and "token" in q["id"]
+        )
+        assert question["requiredForExecution"] is required
+        if not required:
+            assert f"when Compose file {compose_name} is selected" in question["reason"]
+        assert dependency == next(d for d in ai_input["analysisResult"]["dependencies"] if d == dependency)
+    finally:
+        release_snapshot(bundle["source"]["snapshotId"])

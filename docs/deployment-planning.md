@@ -76,11 +76,27 @@ flowchart TB
 
 WAS는 공개 사용자 입력과 worker가 검증한 자료를 분리해야 한다. verified 가격·측정·imagePlatforms·runtime/network/storage/DB 조건은 trusted worker의 확인 값이며, 사용자 JSON의 boolean만으로 실제 검증이 이루어지는 것은 아니다. SHA256은 변조·혼합 검출용이며 서명이나 인증을 대신하지 않는다. executor는 원본 analysis도 전달해 service/port/evidence와 plan을 검증한다.
 
+### 서비스별 환경설정 전달
+
+`sourceReadiness.environmentVariables`는 키·소비 component/Compose service·build/runtime/unknown 단계·필수 여부·조건·근거를 전달한다. 값은 추출하지 않는다. `required: null`은 필수 여부 미확정이다. 런타임 소비자와 매핑되는 서비스에만 입력 질문을 붙이며, DB 초기화용 환경변수는 앱 Secret 요구사항으로 전파하지 않는다. 기존 v1의 전역 `environmentKeys`만 있고 소비자가 확인되지 않으면 소유 서비스/단계를 묻는 질문 하나를 남긴다. 선택 조건이 붙은 입력과 소스 기본값이 확인된 입력은 검토 항목이며 무조건 필수 입력으로 승격하지 않는다.
+
+런타임 바인딩은 다음 세 배열을 사용한다. 같은 서비스의 같은 키를 여러 배열에 중복 지정할 수 없다. 다른 서비스에는 같은 키를 별도 지정할 수 있다.
+
+```json
+{
+  "secretRefs": [{"serviceId": "<analysis serviceId>", "environmentKey": "SESSION_SECRET", "name": "app-secrets", "key": "session-secret"}],
+  "runtimeEnv": [{"serviceId": "<analysis serviceId>", "environmentKey": "PUBLIC_URL", "value": "https://app.example"}],
+  "configMapRefs": [{"serviceId": "<analysis serviceId>", "environmentKey": "TRUST_PROXY_HOPS", "name": "app-settings", "key": "proxy-hops"}]
+}
+```
+
+이 배열들은 `request.bindings`에서 서비스별 workload 설정으로 보존되고 동일한 Helm/native `container.env`로 변환된다. ConfigMap과 Secret은 workload namespace의 기존 객체를 참조하며 `optional: false`로 출력한다. 외부 객체의 실제 존재와 키는 executor가 검증한다. `runtimeEnv`에는 명시적인 일반 문자열만 넣는다. 자격증명 형태의 키·값, 마스킹 placeholder, 제어 문자, 암묵적인 Kubernetes `$(VAR)` 확장은 거절한다. 일반 문자열의 민감성 여부를 완전히 증명하는 검사는 아니므로 호출자는 공개 가능한 값만 제공해야 한다. ingress host를 PUBLIC_URL로 임의 복사하지 않으며, build 단계 변수도 runtime으로 자동 복사하지 않는다.
+
 ## 고정 템플릿의 지원 범위
 
 - AWS EKS: **기존 VPC의 private subnet과 두 AZ**를 입력받고 IAM, private API cluster, managed node group, encrypted gp3 launch template을 구성한다. 검증한 administrator role, 지원 Kubernetes 버전, private egress와 executor 접근이 필요하다. 이 템플릿은 VPC/NAT/DB를 생성하지 않는다.
 - 기존 Kubernetes: cluster context와 실제 allocatable capacity가 필요하다.
-- 앱: Deployment, ClusterIP Service, TLS Ingress, HTTP/TCP startup/readiness/liveness probe, requests/limits, replicas, Secret key reference, PVC, PDB, rolling update와 Helm atomic/wait 정책을 출력한다.
+- 앱: Deployment, ClusterIP Service, TLS Ingress, HTTP/TCP startup/readiness/liveness probe, requests/limits, replicas, 일반 runtime 환경값·ConfigMap/Secret key reference, PVC, PDB, rolling update와 Helm atomic/wait 정책을 출력한다.
 - replicas가 많을 때 zone affinity는 preferred 정책이다. 실제 zone placement나 HA/SLA를 보장하지 않는다. RWO multi-writer·surge 충돌과 단일 pod의 자원 fit은 차단한다.
 - 기존 claimName은 참조만 한다. 새 볼륨은 명시된 size/StorageClass로 이름을 고정해 PVC를 만든다. source host bind mount와 Secret의 실제 값은 자동 복사하지 않는다.
 - 실행 이미지는 immutable digest와 검증된 platform을 요구한다. 모델이 source command를 Terraform shell로 넣지 못한다. restricted securityContext와 실제 이미지의 호환성을 먼저 확인해야 한다.

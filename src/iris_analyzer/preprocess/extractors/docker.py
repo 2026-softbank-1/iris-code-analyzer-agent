@@ -15,7 +15,8 @@ import yaml
 from iris_analyzer.contracts import digest
 
 from ..observations import Observations
-from ..selector import Selection
+from ..selector import Selection, component_of
+from .execution import safe_repository_path
 
 
 def extract_docker(selection: Selection, observations: Observations, components: dict) -> list[dict]:
@@ -73,23 +74,23 @@ def extract_docker(selection: Selection, observations: Observations, components:
             adjunct = bool(re.search(r"(?:^|/)(?:cloudflared|traefik|caddy|haproxy)(?:[:@]|$)", image))
             build = service.get("build")
             context = (
-                build if isinstance(build, str) else build.get("context") if isinstance(build, dict) else None
-            )
-            root = (
-                posixpath.normpath(posixpath.join(posixpath.dirname(path), context))
-                if isinstance(context, str)
+                build
+                if isinstance(build, str)
+                else build.get("context", ".")
+                if isinstance(build, dict)
                 else None
             )
+            root = safe_repository_path(posixpath.dirname(path), context)
             if root == "" or root == ".":
                 root = "."
-            if root is not None and (root.startswith("../") or root.startswith("/")):
+            if isinstance(build, (str, dict)) and root is None:
                 observations.unknown(
                     "deployment.root",
-                    "Compose build context leaves repository",
+                    "Compose build context is dynamic, remote or leaves repository",
                     path=path,
                     service=service_name,
                 )
-                root = None
+                continue
             if root is None:
                 deployable = [item for item, info in components.items() if info["role"]]
                 root = deployable[0] if len(deployable) == 1 else "."
@@ -105,7 +106,15 @@ def extract_docker(selection: Selection, observations: Observations, components:
                 docker_name = (
                     build.get("dockerfile", "Dockerfile") if isinstance(build, dict) else "Dockerfile"
                 )
-                docker_path = posixpath.normpath(posixpath.join(root, docker_name))
+                docker_path = safe_repository_path(root, docker_name)
+                if docker_path is None:
+                    observations.unknown(
+                        "deployment.dockerfile",
+                        "Compose Dockerfile path is dynamic, remote or leaves repository",
+                        path=path,
+                        service=service_name,
+                    )
+                    continue
             docker = dockerfiles.get(docker_path, {})
             if docker.get("component") in components and docker["component"] != ".":
                 participating = {docker["component"]} | set(docker.get("copiedComponents", []))
@@ -427,14 +436,13 @@ def _dockerfile(path: str, selection: Selection, observations: Observations, com
         value = ""
     stages = [index for index, instruction in enumerate(instructions) if instruction[0] == "FROM"]
     final = instructions[stages[-1] :] if stages else instructions
-    root = PurePosixPath(path).parent.as_posix()
     workdir = next((value for name, value, _, _ in reversed(final) if name == "WORKDIR"), None)
     matching = [
         component
         for component in components
         if component != "." and workdir and workdir.rstrip("/").endswith("/" + component)
     ]
-    runtime_component = max(matching, key=len) if matching else root
+    runtime_component = max(matching, key=len) if matching else component_of(path, selection.roots)
     provisional = "docker-" + digest({"path": path})[:16]
     observations.current_candidate_id = provisional
     record = {
@@ -460,6 +468,8 @@ def _dockerfile(path: str, selection: Selection, observations: Observations, com
             )
             if re.search(r"(?:^|/)nginx(?:[:@]|$)", image):
                 record["imageRuntime"] = "nginx"
+                observations.fact("runtime.name", "nginx", runtime_component, "container", [evidence])
+                observations.fact("runtime.image", image, runtime_component, "container", [evidence])
             if image.startswith("node:"):
                 observations.fact("runtime.name", "node", runtime_component, "container", [evidence])
                 observations.fact("runtime.image", image, runtime_component, "container", [evidence])
@@ -521,7 +531,11 @@ def _dockerfile(path: str, selection: Selection, observations: Observations, com
     for name, value, start, end in instructions:
         if name == "RUN" and re.match(r"(?:npm|pnpm|yarn|bun)\s+(?:run\s+)?build(?:\s|$)", value):
             observations.fact(
-                "docker.build.command", value, root, "source", [observations.snippet(path, start, end)]
+                "docker.build.command",
+                value,
+                component_of(path, selection.roots),
+                "source",
+                [observations.snippet(path, start, end)],
             )
     if entrypoint and not any(name == "CMD" for name, _, _, _ in final):
         evidence = next(

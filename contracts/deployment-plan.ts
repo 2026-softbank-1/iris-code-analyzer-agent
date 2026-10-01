@@ -105,6 +105,17 @@ export interface SecretReference {
   name: string;
   key: string;
 }
+/** Nonsecret, literal runtime value; build-time settings are separate. */
+export interface RuntimeEnvironmentValue {
+  environmentKey: string;
+  value: string;
+}
+/** Existing ConfigMap in the workload namespace; no secret values permitted. */
+export interface ConfigMapReference {
+  environmentKey: string;
+  name: string;
+  key: string;
+}
 export interface IngressConfiguration {
   enabled: boolean;
   host: string | null;
@@ -138,6 +149,8 @@ export interface Bindings {
   images?: Array<{ serviceId: string; reference: string }>;
   imagePlatforms?: Record<string, ImagePlatform>;
   secretRefs?: Array<SecretReference & { serviceId: string }>;
+  runtimeEnv?: Array<RuntimeEnvironmentValue & { serviceId: string }>;
+  configMapRefs?: Array<ConfigMapReference & { serviceId: string }>;
   ingress?: Array<IngressConfiguration & { serviceId: string }>;
   databases?: DatabaseConfiguration[];
   volumes?: Array<VolumeConfiguration & { serviceId: string }>;
@@ -204,6 +217,8 @@ export interface Workload {
   }>;
   volumes: Recommendation<VolumeConfiguration[]>;
   secretRefs: Recommendation<SecretReference[]>;
+  runtimeEnv?: Recommendation<RuntimeEnvironmentValue[]>;
+  configMapRefs?: Recommendation<ConfigMapReference[]>;
   rollout: Recommendation<{
     strategy: "RollingUpdate";
     maxSurge: number;

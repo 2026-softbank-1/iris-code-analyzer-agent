@@ -57,6 +57,26 @@ def test_budget_reservation_rejects_before_inference(tmp_path):
     assert runner.calls == []
 
 
+def test_expanded_request_envelope_is_reserved_before_inference(tmp_path):
+    runner = FakeRunner()
+    runner.input_token_upper_bound = lambda bundle: 2_000_000
+    budget = BudgetedRunner(runner, tmp_path / "ledger.json", max_cost_usd=0.1)
+    with pytest.raises(AnalyzerError) as exc:
+        budget.invoke_model({"contextHash": "f" * 64})
+    assert exc.value.code == "MODEL_BUDGET_EXCEEDED"
+    assert runner.calls == []
+
+
+@pytest.mark.parametrize("invalid", [True, -1, None, 1.5])
+def test_invalid_request_estimate_cannot_bypass_budget(tmp_path, invalid):
+    runner = FakeRunner()
+    runner.input_token_upper_bound = lambda bundle: invalid
+    with pytest.raises(AnalyzerError) as exc:
+        BudgetedRunner(runner, tmp_path / "ledger.json").invoke_model({"contextHash": "f" * 64})
+    assert exc.value.code == "MODEL_BUDGET_ESTIMATE_INVALID"
+    assert runner.calls == []
+
+
 def test_two_runner_instances_share_durable_spending(tmp_path):
     ledger = tmp_path / "ledger.json"
     first = BudgetedRunner(FakeRunner({"input": 1_000_000, "output": 0}), ledger, max_cost_usd=0.06)

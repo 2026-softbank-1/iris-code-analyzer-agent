@@ -1,0 +1,97 @@
+{
+  "staticStatus": "complete",
+  "unresolved": [],
+  "unrelatedCitedEvidence": {
+    "path": "index.js",
+    "text": "app.listen(3000);"
+  },
+  "suggestedCase": {
+    "status": "complete",
+    "dependencies": [],
+    "questions": [],
+    "verification": {
+      "schemaVersion": "iris.analysis-verification.v1",
+      "verifierVersion": "iris.semantic.v1",
+      "sourceSnapshotId": "58763fccf7b56504b99f14b74ab4bbb8880258ed640d2f8e4db8385acad87d03",
+      "contextHash": "a20f9954366e2c79c9072cdeb2d4f8b0ef6fb6ab8283a1be0cdd646d0c09b511",
+      "baselineDigest": "baa0519a4384e96fc624578ea6a6b792ca69ac3f4fe2628886cb624952102815",
+      "proposalDigest": "3dded8d3bc8da7ca3de5c8c4c2a80eafd1aafed1873ec9ecec753953f53f61f6",
+      "decisions": [
+        {
+          "fieldPath": [
+            "result",
+            "dependencies",
+            0
+          ],
+          "decision": "rejected",
+          "ruleId": "iris.database.declaration.v1",
+          "reasonCode": "EVIDENCE_PREDICATE_MISMATCH",
+          "reason": "The supplied source does not establish this proposed relationship; the value is excluded from admitted analysis.",
+          "evidenceIds": [
+            "e-a1a9b6c07426a5c372ce"
+          ],
+          "proposedDigest": "0421b4e48b69859bd3f02539e732c8a6abfdb5ad458c0032c32e37830f52044f",
+          "inspectedPaths": [
+            "index.js"
+          ],
+          "supportingLocators": [
+            {
+              "path": "index.js",
+              "sourceDigest": "46d37690d157832dd71a863ef90cc28b2166dbd0657b3d5f8bd6bc4cf201962e",
+              "startLine": 1,
+              "endLine": 3
+            }
+          ],
+          "missingObligations": [
+            "Provide a source-supported relationship in the correct service/scope, or retain it as unverified review."
+          ]
+        }
+      ],
+      "reviewFindings": [
+        {
+          "category": "missing_evidence",
+          "reason": "An individual model claim cites source that does not support the proposed relationship; baseline observations are preserved.",
+          "evidenceIds": [
+            "e-a1a9b6c07426a5c372ce"
+          ],
+          "decision": "supported",
+          "ruleId": "iris.review.rejected-proposal.v1",
+          "reasonCode": "EVIDENCE_PREDICATE_MISMATCH",
+          "blocking": false,
+          "origin": "verifier",
+          "inspectedPaths": [
+            "index.js"
+          ]
+        }
+      ],
+      "resolvedObligations": [],
+      "unavailableSourcePaths": [],
+      "limitations": [
+        "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+      ],
+      "resultDigest": "baa0519a4384e96fc624578ea6a6b792ca69ac3f4fe2628886cb624952102815",
+      "deploymentAuthorized": false
+    }
+  },
+  "sameClaimAsDetected": "RESULT_OBSERVATION_INVALID",
+  "questionCase": {
+    "status": "complete",
+    "questions": [],
+    "portsPreserved": [
+      {
+        "value": 3000,
+        "status": "detected",
+        "scope": "container",
+        "evidenceIds": [
+          "e-1d7a7ee1adc7808ec36d",
+          "e-a1a9b6c07426a5c372ce",
+          "e-b0bd7d7d42403fe5c02c"
+        ],
+        "reason": "Static observation: runtime.port"
+      }
+    ]
+  },
+  "modelEvaluationPerformed": false,
+  "policyGatePassed": true,
+  "evaluationType": "constructed_validator_counterexample"
+}

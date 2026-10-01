@@ -9,6 +9,7 @@ from iris_analyzer.contracts import AnalyzerError, Limits, canonical_bytes, dige
 
 from .extractors.connections import extract_connections
 from .extractors.docker import extract_docker
+from .extractors.execution import extract_execution
 from .extractors.express import extract_express
 from .extractors.node import extract_node
 from .observations import Observations
@@ -122,6 +123,7 @@ def _build(
     extract_express(selection, observations)
     extract_connections(selection, observations)
     candidates = extract_docker(selection, observations, components)
+    extract_execution(selection, observations)
     selected = []
     manifest = {item["path"]: item for item in snapshot.manifest}
     for path in selection.ordered():
@@ -305,6 +307,20 @@ def compact_model_input(bundle: dict) -> dict:
         {"path": item["path"], "kind": item["kind"]}
         for item in bundle["manifest"]
         if item["eligible"] and item["path"] not in selected_paths
+    ]
+    # Selected means some snippets are present, not that the whole file was
+    # supplied. Keep bounded expansion possible for an omitted declaration.
+    from iris_analyzer.readiness.source import _verified_text
+
+    already_requested = set(bundle.get("policy", {}).get("requestedPaths", []))
+    model["expandableSelectedPaths"] = [
+        {"path": item["path"], "kind": item["kind"], "reason": "incomplete_supplied_ranges"}
+        for item in bundle["manifest"]
+        if item["eligible"]
+        and item["path"] in selected_paths
+        and item["path"] not in already_requested
+        and _verified_text([e for e in bundle["evidence"] if e["path"] == item["path"]], item["digest"])
+        is None
     ]
     return model
 
