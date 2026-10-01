@@ -1,0 +1,56 @@
+{
+  "date": "2026-10-01",
+  "tests": {
+    "python311Passed": 426,
+    "python313Passed": 426,
+    "nativeOpenCodeTestsIncluded": true,
+    "branchAwareCoveragePercent": 86.13
+  },
+  "aiPlanning": {
+    "provider": "hive-ai",
+    "model": "zai-org/glm-5.3-flash",
+    "paidCalls": 2,
+    "estimatedCostUsd": 0.0010621699999999999,
+    "actualCostUsd": null,
+    "formatRecovery": false,
+    "usage": [
+      {
+        "cache": {
+          "read": 0,
+          "write": 0
+        },
+        "input": 4140,
+        "output": 645,
+        "reasoning": 77,
+        "total": 4862
+      },
+      {
+        "cache": {
+          "read": 0,
+          "write": 0
+        },
+        "input": 12255,
+        "output": 596,
+        "reasoning": 108,
+        "total": 12959
+      }
+    ],
+    "finalAdviceReplayValidatedWithoutNewModelCalls": true
+  },
+  "templates": {
+    "terraformVersion": "1.13.3",
+    "awsProviderVersion": "6.14.1",
+    "terraformValidate": true,
+    "helmVersion": "3.19.0",
+    "helmLint": true,
+    "helmNativeParity": true,
+    "kubeconformVersion": "0.8.0",
+    "kubernetesSchemaVersion": "1.33.0",
+    "validResources": 5,
+    "invalidResources": 0
+  },
+  "runtimeEvaluation": "runtime-capacity-evaluation.json",
+  "cloudActions": 0,
+  "sourceAnalysisV1Retained": true,
+  "deploymentAuthorized": false
+}

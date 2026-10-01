@@ -1,0 +1,532 @@
+{
+  "date": "2026-10-01",
+  "hardware": {
+    "platform": "Docker Desktop / native ARM64",
+    "availableVcpus": 10,
+    "vmMemoryBytes": 8217059328
+  },
+  "sourceIdentities": {
+    "Temp_log": {
+      "repository": "Temp_log",
+      "serviceId": "svc-9bc425e830b1b855",
+      "snapshotId": "d0892b62daa0e20e6fd7e5459d761a8323430ed2b886af86880f7dd5f33460cd",
+      "sourceGitCommit": "54fa8072d9fbf817e3352f8eeee2344f37c8a813"
+    },
+    "portpolio-production": {
+      "repository": "portpolio-production",
+      "serviceId": "svc-3e0606d62bc74dc8",
+      "snapshotId": "dcab384d9e1a6cfe70ee38b024a06b0bce34cee63a645572e01f89b70c1fddca",
+      "sourceGitCommit": "f54230346fbfca4e34ae2cdd1a370217611d2191"
+    }
+  },
+  "builds": {
+    "Temp_log": {
+      "passed": true,
+      "sourceTestsPassed": 17,
+      "cacheReused": true,
+      "runtimeNodeVersion": "24.21.0",
+      "cpuLimit": 1,
+      "memoryLimitMiB": 512
+    },
+    "portpolio-production": {
+      "passed": true,
+      "sourceTestsPassed": 9,
+      "cacheReused": true,
+      "runtimeNginxVersion": "1.30.5",
+      "cpuLimit": 0.5,
+      "memoryLimitMiB": 64
+    }
+  },
+  "scenarios": [
+    {
+      "repository": "Temp_log",
+      "offeredRps": 20,
+      "status": "completed",
+      "measurement": {
+        "id": "measure-902a5ff806c910c574ae7239",
+        "serviceId": "svc-9bc425e830b1b855",
+        "sourceSnapshotId": "d0892b62daa0e20e6fd7e5459d761a8323430ed2b886af86880f7dd5f33460cd",
+        "kind": "load",
+        "verified": true,
+        "measuredAt": "2026-10-01T09:06:10.742359+00:00",
+        "metrics": {
+          "peakMemoryMiB": 56.04,
+          "cpuMillicores": 172.3,
+          "achievedRps": 19.642896841531776,
+          "p95LatencyMs": 17.950999999811756,
+          "errorRate": 0.9166666666666666
+        },
+        "conditions": {
+          "durationSeconds": 61.090785624999626,
+          "concurrency": 4,
+          "command": "iris-measure: existing container; approved loopback HTTP GET",
+          "architecture": "arm64",
+          "imageDigest": "sha256:76d758934308bef24ea6a74c2009d559a3d09c518f52b42be93419a25aa6bfad",
+          "capacityValidated": false
+        }
+      },
+      "collectorReport": {
+        "schemaVersion": "iris.measurement-collector.v1",
+        "scope": "existing_local_container",
+        "deploymentAuthorized": false,
+        "targetCreatedOrStarted": false,
+        "capacityEstablished": false,
+        "limitations": [
+          "Only the explicitly approved GET path and supplied traffic scenario are measured.",
+          "Docker memory is container working-set usage, not host RSS or source test-process memory.",
+          "CPU/memory and latency observations do not establish production capacity or availability.",
+          "Image architecture does not establish equivalent host CPU, emulation behavior or cloud-instance performance."
+        ],
+        "scenario": {
+          "url": "http://127.0.0.1:18081/api/posts",
+          "method": "GET",
+          "requestedRps": 20,
+          "concurrency": 4,
+          "requestedDurationSeconds": 60
+        },
+        "target": {
+          "containerId": "390e43f4a8425ebe28eda0d87e5520e4459392ef9894c9f66b1949ef9fecf7df",
+          "imageId": "sha256:76d758934308bef24ea6a74c2009d559a3d09c518f52b42be93419a25aa6bfad",
+          "sourceSnapshotIdLabel": "d0892b62daa0e20e6fd7e5459d761a8323430ed2b886af86880f7dd5f33460cd",
+          "serviceIdLabel": "svc-9bc425e830b1b855",
+          "publishedContainerPorts": [
+            "4000/tcp"
+          ],
+          "hardwareLimits": {
+            "Memory": 536870912,
+            "NanoCpus": 1000000000,
+            "CpuQuota": 0,
+            "CpuPeriod": 0,
+            "CpusetCpus": ""
+          },
+          "architecture": "arm64"
+        },
+        "observation": {
+          "durationSeconds": 61.090785624999626,
+          "completedResponses": 1200,
+          "successfulResponses": 100,
+          "responseBytes": 456300,
+          "scheduledCallLimit": 1200,
+          "resourceSampleCount": 17,
+          "observedCpuPeakMillicores": 172.3,
+          "httpStatusCounts": {
+            "200": 100,
+            "429": 1100
+          }
+        }
+      }
+    },
+    {
+      "repository": "Temp_log",
+      "offeredRps": 1,
+      "status": "completed",
+      "measurement": {
+        "id": "measure-f0a68ca71df555d7637ff63a",
+        "serviceId": "svc-9bc425e830b1b855",
+        "sourceSnapshotId": "d0892b62daa0e20e6fd7e5459d761a8323430ed2b886af86880f7dd5f33460cd",
+        "kind": "load",
+        "verified": true,
+        "measuredAt": "2026-10-01T09:10:23.685577+00:00",
+        "metrics": {
+          "peakMemoryMiB": 53.61,
+          "cpuMillicores": 62.400000000000006,
+          "achievedRps": 0.9846724754205509,
+          "p95LatencyMs": 26.894167000136804,
+          "errorRate": 0.0
+        },
+        "conditions": {
+          "durationSeconds": 60.933966874999896,
+          "concurrency": 2,
+          "command": "iris-measure: existing container; approved loopback HTTP GET",
+          "architecture": "arm64",
+          "imageDigest": "sha256:76d758934308bef24ea6a74c2009d559a3d09c518f52b42be93419a25aa6bfad",
+          "capacityValidated": false
+        }
+      },
+      "collectorReport": {
+        "schemaVersion": "iris.measurement-collector.v1",
+        "scope": "existing_local_container",
+        "deploymentAuthorized": false,
+        "targetCreatedOrStarted": false,
+        "capacityEstablished": false,
+        "limitations": [
+          "Only the explicitly approved GET path and supplied traffic scenario are measured.",
+          "Docker memory is container working-set usage, not host RSS or source test-process memory.",
+          "CPU/memory and latency observations do not establish production capacity or availability.",
+          "Image architecture does not establish equivalent host CPU, emulation behavior or cloud-instance performance."
+        ],
+        "scenario": {
+          "url": "http://127.0.0.1:18081/api/posts",
+          "method": "GET",
+          "requestedRps": 1,
+          "concurrency": 2,
+          "requestedDurationSeconds": 60
+        },
+        "target": {
+          "containerId": "390e43f4a8425ebe28eda0d87e5520e4459392ef9894c9f66b1949ef9fecf7df",
+          "imageId": "sha256:76d758934308bef24ea6a74c2009d559a3d09c518f52b42be93419a25aa6bfad",
+          "sourceSnapshotIdLabel": "d0892b62daa0e20e6fd7e5459d761a8323430ed2b886af86880f7dd5f33460cd",
+          "serviceIdLabel": "svc-9bc425e830b1b855",
+          "publishedContainerPorts": [
+            "4000/tcp"
+          ],
+          "hardwareLimits": {
+            "Memory": 536870912,
+            "NanoCpus": 1000000000,
+            "CpuQuota": 0,
+            "CpuPeriod": 0,
+            "CpusetCpus": ""
+          },
+          "architecture": "arm64"
+        },
+        "observation": {
+          "durationSeconds": 60.933966874999896,
+          "completedResponses": 60,
+          "successfulResponses": 60,
+          "responseBytes": 210420,
+          "scheduledCallLimit": 60,
+          "resourceSampleCount": 17,
+          "observedCpuPeakMillicores": 62.400000000000006,
+          "httpStatusCounts": {
+            "200": 60
+          }
+        }
+      }
+    },
+    {
+      "repository": "portpolio-production",
+      "offeredRps": 50,
+      "status": "completed",
+      "measurement": {
+        "id": "measure-bcf86ba0df1701ae47afd7a3",
+        "serviceId": "svc-3e0606d62bc74dc8",
+        "sourceSnapshotId": "dcab384d9e1a6cfe70ee38b024a06b0bce34cee63a645572e01f89b70c1fddca",
+        "kind": "load",
+        "verified": true,
+        "measuredAt": "2026-10-01T09:07:12.016701+00:00",
+        "metrics": {
+          "peakMemoryMiB": 3.477,
+          "cpuMillicores": 37.2,
+          "achievedRps": 49.05589795282157,
+          "p95LatencyMs": 14.783833001274616,
+          "errorRate": 0.0
+        },
+        "conditions": {
+          "durationSeconds": 61.15472604099887,
+          "concurrency": 4,
+          "command": "iris-measure: existing container; approved loopback HTTP GET",
+          "architecture": "arm64",
+          "imageDigest": "sha256:a6b9d497a3e336b58972f5aaaf4ca6ba864c7b2c5d8f87956586bd4c1add9081",
+          "capacityValidated": false
+        }
+      },
+      "collectorReport": {
+        "schemaVersion": "iris.measurement-collector.v1",
+        "scope": "existing_local_container",
+        "deploymentAuthorized": false,
+        "targetCreatedOrStarted": false,
+        "capacityEstablished": false,
+        "limitations": [
+          "Only the explicitly approved GET path and supplied traffic scenario are measured.",
+          "Docker memory is container working-set usage, not host RSS or source test-process memory.",
+          "CPU/memory and latency observations do not establish production capacity or availability.",
+          "Image architecture does not establish equivalent host CPU, emulation behavior or cloud-instance performance."
+        ],
+        "scenario": {
+          "url": "http://127.0.0.1:18082/",
+          "method": "GET",
+          "requestedRps": 50,
+          "concurrency": 4,
+          "requestedDurationSeconds": 60
+        },
+        "target": {
+          "containerId": "701a89a22a8238eb49d14f6f1806d0ac9ea6b60ad33efdc5c6e58845100d2a52",
+          "imageId": "sha256:a6b9d497a3e336b58972f5aaaf4ca6ba864c7b2c5d8f87956586bd4c1add9081",
+          "sourceSnapshotIdLabel": "dcab384d9e1a6cfe70ee38b024a06b0bce34cee63a645572e01f89b70c1fddca",
+          "serviceIdLabel": "svc-3e0606d62bc74dc8",
+          "publishedContainerPorts": [
+            "8080/tcp"
+          ],
+          "hardwareLimits": {
+            "Memory": 67108864,
+            "NanoCpus": 500000000,
+            "CpuQuota": 0,
+            "CpuPeriod": 0,
+            "CpusetCpus": ""
+          },
+          "architecture": "arm64"
+        },
+        "observation": {
+          "durationSeconds": 61.15472604099887,
+          "completedResponses": 3000,
+          "successfulResponses": 3000,
+          "responseBytes": 1917000,
+          "scheduledCallLimit": 3000,
+          "resourceSampleCount": 17,
+          "observedCpuPeakMillicores": 37.2,
+          "httpStatusCounts": {
+            "200": 3000
+          }
+        }
+      }
+    }
+  ],
+  "sizingComparisons": {
+    "Temp_log": {
+      "after": {
+        "provenance": {
+          "assumptionIds": [
+            "resources-svc-9bc425e830b1b855"
+          ],
+          "basis": [
+            "measurement",
+            "policy"
+          ],
+          "evidenceIds": [],
+          "measurementIds": [
+            "measure-f0a68ca71df555d7637ff63a"
+          ],
+          "reason": "Same-snapshot sustained load measurements with 50% CPU/memory headroom; valid only for tested local container scenario/hardware/limits. Production instance performance requires retest."
+        },
+        "value": {
+          "limits": {
+            "cpuMillicores": 500,
+            "memoryMiB": 256
+          },
+          "requests": {
+            "cpuMillicores": 100,
+            "memoryMiB": 128
+          }
+        }
+      },
+      "before": {
+        "provenance": {
+          "assumptionIds": [
+            "resources-svc-9bc425e830b1b855"
+          ],
+          "basis": [
+            "policy"
+          ],
+          "evidenceIds": [],
+          "measurementIds": [],
+          "reason": "Conservative initial profile for a static server or Node service; source cannot establish needed capacity."
+        },
+        "value": {
+          "limits": {
+            "cpuMillicores": 500,
+            "memoryMiB": 1024
+          },
+          "requests": {
+            "cpuMillicores": 250,
+            "memoryMiB": 512
+          }
+        }
+      },
+      "instance": {
+        "provenance": {
+          "assumptionIds": [
+            "planning-baseline"
+          ],
+          "basis": [
+            "policy"
+          ],
+          "evidenceIds": [],
+          "measurementIds": [],
+          "reason": "Choose catalog capacity for surge, node overhead and sustained CPU baseline; instance fit is not throughput proof."
+        },
+        "value": {
+          "cpuMillicores": 2000,
+          "instanceType": "t4g.medium",
+          "maxNodes": 3,
+          "memoryMiB": 4096,
+          "minNodes": 1
+        }
+      },
+      "replicas": {
+        "provenance": {
+          "assumptionIds": [
+            "availability"
+          ],
+          "basis": [
+            "policy"
+          ],
+          "evidenceIds": [],
+          "measurementIds": [],
+          "reason": "Explicit override or availability/throughput policy; does not claim verified HA."
+        },
+        "value": 1
+      },
+      "sourceFindings": [
+        {
+          "endLine": 47,
+          "evidenceIds": [
+            "e-59ddeba434d34a504f0d"
+          ],
+          "path": "server/package.json",
+          "reason": "Script 'start' references 'dist/index.js', which is absent from the captured source inventory. It may be generated by the build; this check did not execute the build.",
+          "ruleId": "commands.missing_literal_target",
+          "severity": "warning",
+          "startLine": 1,
+          "status": "needs_review"
+        },
+        {
+          "endLine": 13,
+          "evidenceIds": [
+            "e-64451b9102bea389cc59"
+          ],
+          "path": "server/src/middlewares/rateLimit.middleware.ts",
+          "reason": "Observed express-rate-limit configuration limit=10, windowMs='15 * 60 * 1000'. Check the traffic scenario and limiter key/proxy scope; this setting is not maximum server capacity.",
+          "ruleId": "traffic.configured_rate_limit",
+          "severity": "info",
+          "startLine": 4,
+          "status": "needs_review"
+        },
+        {
+          "endLine": 25,
+          "evidenceIds": [
+            "e-64451b9102bea389cc59"
+          ],
+          "path": "server/src/middlewares/rateLimit.middleware.ts",
+          "reason": "Observed express-rate-limit configuration limit=5, windowMs='1 * 60 * 1000'. Check the traffic scenario and limiter key/proxy scope; this setting is not maximum server capacity.",
+          "ruleId": "traffic.configured_rate_limit",
+          "severity": "info",
+          "startLine": 16,
+          "status": "needs_review"
+        },
+        {
+          "endLine": 37,
+          "evidenceIds": [
+            "e-64451b9102bea389cc59"
+          ],
+          "path": "server/src/middlewares/rateLimit.middleware.ts",
+          "reason": "Observed express-rate-limit configuration limit=20, windowMs='1 * 60 * 1000'. Check the traffic scenario and limiter key/proxy scope; this setting is not maximum server capacity.",
+          "ruleId": "traffic.configured_rate_limit",
+          "severity": "info",
+          "startLine": 28,
+          "status": "needs_review"
+        },
+        {
+          "endLine": 49,
+          "evidenceIds": [
+            "e-64451b9102bea389cc59"
+          ],
+          "path": "server/src/middlewares/rateLimit.middleware.ts",
+          "reason": "Observed express-rate-limit configuration limit=100, windowMs='1 * 60 * 1000'. Check the traffic scenario and limiter key/proxy scope; this setting is not maximum server capacity.",
+          "ruleId": "traffic.configured_rate_limit",
+          "severity": "info",
+          "startLine": 40,
+          "status": "needs_review"
+        }
+      ],
+      "sourceSnapshotId": "d0892b62daa0e20e6fd7e5459d761a8323430ed2b886af86880f7dd5f33460cd",
+      "status": "needs_input",
+      "testedDemandScenarioRps": 1
+    },
+    "portpolio-production": {
+      "after": {
+        "provenance": {
+          "assumptionIds": [
+            "resources-svc-3e0606d62bc74dc8"
+          ],
+          "basis": [
+            "measurement",
+            "policy"
+          ],
+          "evidenceIds": [],
+          "measurementIds": [
+            "measure-bcf86ba0df1701ae47afd7a3"
+          ],
+          "reason": "Same-snapshot sustained load measurements with 50% CPU/memory headroom; valid only for tested local container scenario/hardware/limits. Production instance performance requires retest."
+        },
+        "value": {
+          "limits": {
+            "cpuMillicores": 500,
+            "memoryMiB": 128
+          },
+          "requests": {
+            "cpuMillicores": 100,
+            "memoryMiB": 64
+          }
+        }
+      },
+      "before": {
+        "provenance": {
+          "assumptionIds": [
+            "resources-svc-3e0606d62bc74dc8"
+          ],
+          "basis": [
+            "policy"
+          ],
+          "evidenceIds": [],
+          "measurementIds": [],
+          "reason": "Conservative initial profile for a static server or Node service; source cannot establish needed capacity."
+        },
+        "value": {
+          "limits": {
+            "cpuMillicores": 500,
+            "memoryMiB": 256
+          },
+          "requests": {
+            "cpuMillicores": 100,
+            "memoryMiB": 128
+          }
+        }
+      },
+      "instance": {
+        "provenance": {
+          "assumptionIds": [
+            "planning-baseline"
+          ],
+          "basis": [
+            "policy"
+          ],
+          "evidenceIds": [],
+          "measurementIds": [],
+          "reason": "Choose catalog capacity for surge, node overhead and sustained CPU baseline; instance fit is not throughput proof."
+        },
+        "value": {
+          "cpuMillicores": 2000,
+          "instanceType": "t4g.medium",
+          "maxNodes": 3,
+          "memoryMiB": 4096,
+          "minNodes": 1
+        }
+      },
+      "replicas": {
+        "provenance": {
+          "assumptionIds": [
+            "availability"
+          ],
+          "basis": [
+            "policy"
+          ],
+          "evidenceIds": [],
+          "measurementIds": [],
+          "reason": "Explicit override or availability/throughput policy; does not claim verified HA."
+        },
+        "value": 1
+      },
+      "sourceFindings": [],
+      "sourceSnapshotId": "dcab384d9e1a6cfe70ee38b024a06b0bce34cee63a645572e01f89b70c1fddca",
+      "status": "needs_input",
+      "testedDemandScenarioRps": 20
+    }
+  },
+  "findings": [
+    {
+      "kind": "configuration_mismatch",
+      "repository": "Temp_log",
+      "reason": "Single-client 20 RPS exceeds configured 100 requests/minute/key, producing 100 HTTP200 and 1100 HTTP429; this sample is excluded from sizing."
+    },
+    {
+      "kind": "measurement_semantics",
+      "reason": "Observed offered RPS is not maximum capacity; collector marks capacityValidated=false and planner does not infer replicas or extrapolate CPU from it."
+    }
+  ],
+  "limitations": [
+    "Synthetic database:100 posts; public GET /api/posts only. Writes/auth/upload performance not measured.",
+    "Portfolio GET / only; browser rendering, all assets/CDN paths and distributed workloads not measured.",
+    "Local ARM64 hardware/limits differ from cloud instances; no production SLA or maximum sustainable capacity established.",
+    "No cloud resources deployed, no Terraform apply or Helm installation performed."
+  ]
+}
