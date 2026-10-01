@@ -36,7 +36,18 @@ uv run --extra demo iris-review-demo --env-file ../.env
 
 소스와 분석 산출물은 Git에서 제외된 `artifacts/review-demo/<id>/`에 남습니다. 화면의 근거와 모델 입력에는 기존 비밀 제외·마스킹을 적용하며, 소스 캐시는 운영자가 로컬에서 관리합니다. AI 요청은 기존 `artifacts/model-budget-ledger.json`과 누적 USD 1 상한을 공유합니다. 이 화면의 `/api/reviews`는 독립 테스트용 API입니다. 팀 WAS 연결 범위와 사용 예시는 [연결 준비 문서](docs/control-plane-readiness.md), 검증 결과는 [프론트 검증 보고서](reports/review-demo-validation.md)에 있습니다.
 
-### 분석 CLI
+### 배포 계획과 실행 설정
+
+```sh
+uv run iris-deployment --repo ../tested_code/Temp_log --offline --out artifacts/deployment-static
+uv run iris-deployment --repo ../tested_code/Temp_log --env-file ../.env --out artifacts/deployment-ai
+```
+
+미정인 클라우드·리전·트래픽·가용성·예산도 초기 가정으로 제안합니다. 소스 언어/버전 선언과 빠른 코드 검사, 사양·부분 비용·Kubernetes 계획을 별도 JSON으로 제공합니다. 측정한 부하 자료가 있으면 사양을 보정하며 build/test 성공을 실제 용량의 근거로 쓰지 않습니다. 준비된 이미지·네트워크·Secret·스토리지 등을 검증한 계획만 고정 Terraform/Helm 템플릿으로 변환합니다. 실제 apply·배포 승인은 수행하지 않습니다.
+
+테스트 프론트에서는 배포 조건을 바꾸고 같은 소스의 계획만 다시 생성할 수 있습니다. [배포 계획 계약과 아키텍처](docs/deployment-planning.md)에 모듈 경계, 입력, 가정·측정 처리, 비용과 템플릿 지원 범위를 설명했습니다.
+
+### 기존 분석 CLI
 
 ```sh
 uv run python scripts/preprocess_repository.py \

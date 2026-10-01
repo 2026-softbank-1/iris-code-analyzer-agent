@@ -185,6 +185,9 @@ def test_review_http_source_to_result_and_evidence(tmp_path, monkeypatch):
                 assert job["state"] == "succeeded", job
                 assert job["sourceSha"] == "b" * 40
                 assert job["result"]["analysisStatus"] == "complete"
+                assert job["deploymentDossier"]["deploymentPlan"]["status"] == "needs_input"
+                assert job["deploymentDossier"]["execution"]["status"] == "blocked"
+                assert not job["deploymentDossier"]["deploymentPlan"]["deploymentAuthorized"]
                 assert len(job["result"]["analysisResult"]["services"]) == 2
                 evidence_id = job["result"]["analysisResult"]["services"][0]["root"]["evidenceIds"][0]
                 evidence = await client.get(f"/api/reviews/{id}/evidence/{evidence_id}")
@@ -195,5 +198,51 @@ def test_review_http_source_to_result_and_evidence(tmp_path, monkeypatch):
                 assert download.json()["sourceSha"] == "b" * 40
                 assert download.json()["analysisResult"] == job["result"]["analysisResult"]
                 assert str(tmp_path) not in str(job)
+                original = job["result"]
+                replan = await client.post(
+                    f"/api/reviews/{id}/plan",
+                    json={
+                        "planning_request": {
+                            "schemaVersion": "iris.planning-request.v1",
+                            "target": {
+                                "stack": "gcp_gke",
+                                "cloud": "gcp",
+                                "region": "asia-northeast3",
+                                "environment": "test",
+                            },
+                        },
+                        "use_ai": False,
+                    },
+                )
+                assert replan.status_code == 202
+                for _ in range(100):
+                    changed = (await client.get("/api/reviews/" + id)).json()
+                    if changed["state"] in {"succeeded", "failed"}:
+                        break
+                    await asyncio.sleep(0.02)
+                assert changed["state"] == "succeeded", changed
+                assert changed["result"] == original
+                assert changed["deploymentDossier"]["deploymentPlan"]["status"] == "unsupported"
+                assert (
+                    changed["deploymentDossier"]["deploymentPlan"]["recommendations"]["target"]["value"][
+                        "stack"
+                    ]
+                    == "gcp_gke"
+                )
+                dossier_download = await client.get(f"/api/reviews/{id}/plan")
+                assert dossier_download.status_code == 200
+                assert dossier_download.json() == changed["deploymentDossier"]
+
+                restarted = create_app(model_config=ModelConfig(api_key=None), artifact_root=tmp_path)
+                async with restarted.router.lifespan_context(restarted):
+                    async with httpx.AsyncClient(
+                        transport=httpx.ASGITransport(app=restarted), base_url="http://testserver"
+                    ) as after:
+                        loaded = (await after.get("/api/reviews/" + id)).json()
+                        assert loaded["result"] == original
+                        assert loaded["deploymentDossier"] == changed["deploymentDossier"]
+                        assert (
+                            await after.get(f"/api/reviews/{id}/evidence/{evidence_id}")
+                        ).status_code == 200
 
     asyncio.run(check())

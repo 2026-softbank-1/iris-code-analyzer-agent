@@ -873,3 +873,313 @@ pre {
 .question {
   overflow-wrap: anywhere;
 }
+.deployment-conditions {
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  margin-top: 22px;
+  padding: 15px 0;
+}
+.deployment-conditions summary,
+.json-detail summary,
+.question-card summary {
+  font-size: 11px;
+  cursor: pointer;
+  color: #596d88;
+  line-height: 1.8;
+}
+.deployment-conditions summary span {
+  color: #929ba9;
+  font-size: 10px;
+  margin-left: 10px;
+}
+.form-hint {
+  color: #929ba9;
+  font-size: 10px;
+  line-height: 1.8;
+  margin: 13px 0 18px;
+}
+.planning-fields {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px 14px;
+}
+.planning-fields > div {
+  min-width: 0;
+}
+.planning-fields input,
+.planning-fields select {
+  width: 100%;
+  height: 39px;
+  padding: 0 10px;
+  font: inherit;
+  font-size: 10px;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid #e2e5eb;
+  border-radius: 6px;
+  outline: none;
+}
+.planning-fields input:focus,
+.planning-fields select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px #445ad80a;
+}
+.replan-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+.replan-controls > span {
+  color: #929baa;
+  font-size: 10px;
+}
+.secondary-button {
+  border: 1px solid #dce2ee;
+  border-radius: 6px;
+  background: #f7f8fc;
+  color: #526a98;
+  font: inherit;
+  font-size: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  line-height: 1.6;
+}
+.secondary-button:hover {
+  background: #eef1fb;
+}
+.secondary-button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+.planning-empty {
+  margin-top: 30px;
+}
+.plan-section-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: start;
+  flex-wrap: wrap;
+}
+.runtime-grid,
+.plan-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+.runtime-row {
+  min-width: 0;
+  font-size: 11px;
+  background: #fafbfe;
+  border: 1px solid #eef0f6;
+  border-radius: 6px;
+  padding: 14px;
+  line-height: 1.9;
+  overflow-wrap: anywhere;
+}
+.runtime-row small {
+  color: #909aa9;
+  font-size: 9px;
+}
+.image-reference {
+  font-family: monospace;
+  color: #929cad;
+  font-size: 9px;
+  margin-top: 6px;
+  overflow-wrap: anywhere;
+}
+.coverage-note {
+  padding: 14px;
+  background: #f6f8fc;
+  color: #7c8ba2;
+  border-radius: 6px;
+  font-size: 10px;
+  line-height: 1.9;
+  margin: 20px 0 10px;
+}
+.finding {
+  margin-top: 12px;
+  padding: 13px;
+  background: #fffaf0;
+  border: 1px solid #efe8d8;
+  border-radius: 6px;
+  font-size: 10px;
+  overflow-wrap: anywhere;
+  line-height: 1.8;
+}
+.finding-error {
+  background: #fff4f1;
+  border-color: #f0ded8;
+}
+.finding b {
+  margin-left: 5px;
+  font-weight: 500;
+}
+.finding small {
+  color: #9b8e75;
+  display: block;
+  margin-top: 6px;
+}
+.finding p {
+  color: #7f775f;
+  margin-bottom: 0;
+}
+.plan-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 22px;
+  background: #f0f3fc;
+  border: 1px solid #e0e6f5;
+  border-radius: 9px;
+}
+.plan-banner h3 {
+  font-size: 14px;
+  margin: 0 0 8px;
+}
+.plan-banner p {
+  color: #7c89a1;
+  font-size: 10px;
+  line-height: 1.8;
+  margin: 0;
+}
+.planning-reason {
+  font-size: 10px;
+  color: #8a95a5;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+.planning-reason p {
+  margin: 7px 0 14px;
+}
+.subheading {
+  margin-top: 24px !important;
+}
+.cost-divider {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+.cost-reason {
+  font-size: 9px;
+  color: #9aa3b1;
+  line-height: 1.8;
+  margin: 0 0 8px;
+  overflow-wrap: anywhere;
+}
+.cost-unknown {
+  color: #a27f35;
+  font-weight: 500;
+}
+.json-detail {
+  margin-top: 15px;
+}
+.json-detail pre {
+  max-height: 340px;
+  overflow-wrap: anywhere;
+}
+.plan-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 20px;
+}
+.plan-questions {
+  margin-top: 14px;
+}
+.service-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.service-head {
+  gap: 12px;
+}
+.role-badge {
+  flex-shrink: 0;
+}
+.field-value {
+  min-width: 0;
+}
+.progress-stages {
+  flex-wrap: wrap;
+}
+.progress-stages > div {
+  min-width: 75px;
+}
+pre {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 1050px) {
+  .planning-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .plan-summary-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 650px) {
+  .runtime-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .plan-banner {
+    flex-wrap: wrap;
+  }
+  .plan-banner .status-badge {
+    white-space: normal;
+  }
+  .planning-fields {
+    gap: 15px 10px;
+  }
+  .deployment-conditions summary span {
+    display: block;
+    margin-left: 14px;
+  }
+  .planning-fields input,
+  .planning-fields select {
+    font-size: 11px;
+  }
+  .data-row > span {
+    max-width: 38%;
+    flex-shrink: 0;
+  }
+  .field-value {
+    max-width: 65%;
+  }
+  .service-card,
+  .detail-card {
+    padding: 18px;
+  }
+  .plan-actions > * {
+    max-width: 100%;
+  }
+}
+@media (max-width: 360px) {
+  main {
+    padding: 0 16px;
+  }
+  aside {
+    padding: 16px;
+  }
+  .planning-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .form-bottom {
+    gap: 10px;
+  }
+  .submit {
+    min-width: 117px;
+    padding: 0 12px;
+    gap: 15px;
+  }
+  .mode-field {
+    min-width: 100px;
+  }
+  .progress-stages > div {
+    min-width: 65px;
+  }
+}
