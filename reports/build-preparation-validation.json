@@ -1,0 +1,399 @@
+{
+  "schemaVersion": "iris.build-preparation-validation.v1",
+  "date": "2026-10-01",
+  "analyzerBase": "ae3004a",
+  "wasBase": "344426f94ddba606a3a40a8f52f0809beb809fe6",
+  "analyzerTests": {
+    "python311": 497,
+    "python313": 497,
+    "nativeOpenCodeChecksIncluded": true,
+    "branchAwareCoveragePercent": 86.61710037174721
+  },
+  "wasTests": {
+    "passed": 236,
+    "skipped": 8,
+    "skippedReason": "Local PostgreSQL integration tests require TEST_DATABASE_URL; GitHub CI runs them separately.",
+    "ruff": true,
+    "format": true,
+    "strictMypy": true
+  },
+  "projects": [
+    {
+      "project": "Temp_log",
+      "sourceSha": "54fa8072d9fbf817e3352f8eeee2344f37c8a813",
+      "sourceManifestSha256": "3286a730e927d90bae538450534848527f9de0b96c95a7d0a21805b2813f3863",
+      "analysisSnapshotId": "29153a2216555759d21cbb0a17ad26dd453b2696bad55bbbcb4615eb306a2705",
+      "analysisStatus": "complete",
+      "preparationStatus": "ready",
+      "analysisMode": "static",
+      "dockerfileOrigin": "source",
+      "dockerfileSha256": "5f956a5b86a6512eca400c86fd196deaf9b49c541e5635a7d5a9fa234a43110c",
+      "templateId": null,
+      "archiveSha256": "59d24f70bc207c330035881a41ad1c982937b5b4cab61503308294a2445e5481",
+      "buildTargets": [
+        {
+          "component": ".",
+          "serviceName": "app",
+          "composePath": "compose.yaml",
+          "contextPath": ".",
+          "contextBasis": "compose",
+          "dockerfilePath": "Dockerfile",
+          "target": null,
+          "status": "detected",
+          "condition": null,
+          "steps": [
+            {
+              "phase": "install",
+              "command": "npm ci --ignore-scripts",
+              "workingDirectory": "/app",
+              "stage": "build",
+              "evidenceIds": [
+                "e-d23c517c342645248ec3"
+              ]
+            },
+            {
+              "phase": "build",
+              "command": "npm run build",
+              "workingDirectory": "/app",
+              "stage": "build",
+              "evidenceIds": [
+                "e-369f69d5c59d03d36625"
+              ]
+            },
+            {
+              "phase": "install",
+              "command": "npm ci --omit=dev --ignore-scripts --workspace=server",
+              "workingDirectory": "/app",
+              "stage": "runtime-deps",
+              "evidenceIds": [
+                "e-b4ede929468b616dba18"
+              ]
+            },
+            {
+              "phase": "other",
+              "command": "mkdir -p /data/uploads && chown -R node:node /data && rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack /opt/yarn-* /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack /usr/local/bin/yarn /usr/local/bin/yarnpkg",
+              "workingDirectory": "/app/server",
+              "stage": "stage-3",
+              "evidenceIds": [
+                "e-ab329497efbbe43fb7a2"
+              ]
+            }
+          ],
+          "runtimeWorkingDirectory": "/app/server",
+          "packageManager": "npm",
+          "packageManagerVersion": null,
+          "lockfiles": [
+            "package-lock.json"
+          ],
+          "installCommand": "npm ci --ignore-scripts",
+          "installCommandBasis": "policy",
+          "buildCommand": "npm run build",
+          "buildCommandBasis": "declared",
+          "buildWorkingDirectory": "/app",
+          "outputPaths": [],
+          "unresolved": [],
+          "id": "build-00e1e22cc1be9ec4",
+          "evidenceIds": [
+            "e-0708fca10213eadb0f8f",
+            "e-19cffee9802875067c22",
+            "e-2608a2d95360bfb8a4df",
+            "e-286c983c24631e513cc6",
+            "e-2899b4ccac958e219ce4",
+            "e-2db62a1a020bd9997ec4",
+            "e-35c9ffe7f7dd7ff32023",
+            "e-36377e32db13b06aca2d",
+            "e-369f69d5c59d03d36625",
+            "e-385ab66e8963eb58170d",
+            "e-3e8b0828ac9d13950b9e",
+            "e-4323b73b319f2af0b46c",
+            "e-467073c9dd6e48c83052",
+            "e-47480647352cb73c10a2",
+            "e-50f318dddaadde7d66c8",
+            "e-5903ea656fe006817628",
+            "e-688216814a3f379ad82a",
+            "e-8585ff14487427fcd457",
+            "e-8be7650fac6ca08b0d39",
+            "e-8e2f6b3b83d060ef80e4",
+            "e-8f74d53bec574fa756d0",
+            "e-9fad13744633be502bf5",
+            "e-a4f5fa66046a1c2dad65",
+            "e-ab329497efbbe43fb7a2",
+            "e-ace5fe9626c89ea7d52a",
+            "e-aedc6b650669dae1c097",
+            "e-b4ede929468b616dba18",
+            "e-d23c517c342645248ec3",
+            "e-d4c4d75914e1236b03a9",
+            "e-db1fc69600f67c3ad336",
+            "e-f6626176b192cbfcd6c1",
+            "e-f97cb8314bc7ea7155c1",
+            "e-fc600bb32bede79d2c57"
+          ]
+        },
+        {
+          "component": "compose:mongo",
+          "serviceName": "mongo",
+          "composePath": "compose.yaml",
+          "contextPath": ".",
+          "contextBasis": "compose",
+          "dockerfilePath": "Dockerfile.mongo",
+          "target": null,
+          "status": "detected",
+          "condition": null,
+          "steps": [
+            {
+              "phase": "other",
+              "command": "apt-get purge -y mongodb-database-tools && rm -rf /opt/js-yaml /js-yaml.js /usr/local/bin/gosu /var/lib/apt/lists/* && command -v mongod && command -v mongosh && command -v tar",
+              "workingDirectory": null,
+              "stage": "stage-1",
+              "evidenceIds": [
+                "e-f266a732a80466fac658"
+              ]
+            }
+          ],
+          "runtimeWorkingDirectory": null,
+          "packageManager": null,
+          "packageManagerVersion": null,
+          "lockfiles": [],
+          "installCommand": null,
+          "installCommandBasis": "unknown",
+          "buildCommand": null,
+          "buildCommandBasis": "unknown",
+          "buildWorkingDirectory": null,
+          "outputPaths": [],
+          "unresolved": [],
+          "id": "build-85d302bf49d6baab",
+          "evidenceIds": [
+            "e-355063358088f260b748",
+            "e-68bcd2979904876faf70",
+            "e-8be7650fac6ca08b0d39",
+            "e-b9bd0dec0f5afa731eb7",
+            "e-f266a732a80466fac658"
+          ]
+        },
+        {
+          "component": ".",
+          "serviceName": null,
+          "composePath": null,
+          "contextPath": ".",
+          "contextBasis": "package_directory",
+          "dockerfilePath": null,
+          "target": null,
+          "status": "detected",
+          "condition": null,
+          "steps": [],
+          "runtimeWorkingDirectory": null,
+          "packageManager": "npm",
+          "packageManagerVersion": null,
+          "lockfiles": [
+            "package-lock.json"
+          ],
+          "installCommand": "npm ci --ignore-scripts",
+          "installCommandBasis": "policy",
+          "buildCommand": "npm run build",
+          "buildCommandBasis": "policy",
+          "buildWorkingDirectory": ".",
+          "outputPaths": [],
+          "unresolved": [],
+          "id": "build-19381980f8d1a003",
+          "evidenceIds": [
+            "e-688216814a3f379ad82a",
+            "e-9fad13744633be502bf5"
+          ]
+        },
+        {
+          "component": "client",
+          "serviceName": null,
+          "composePath": null,
+          "contextPath": "client",
+          "contextBasis": "package_directory",
+          "dockerfilePath": null,
+          "target": null,
+          "status": "detected",
+          "condition": null,
+          "steps": [],
+          "runtimeWorkingDirectory": null,
+          "packageManager": null,
+          "packageManagerVersion": null,
+          "lockfiles": [],
+          "installCommand": null,
+          "installCommandBasis": "unknown",
+          "buildCommand": "npm run build",
+          "buildCommandBasis": "policy",
+          "buildWorkingDirectory": "client",
+          "outputPaths": [
+            "dist"
+          ],
+          "unresolved": [],
+          "id": "build-65b6c7639e11d5b7",
+          "evidenceIds": [
+            "e-d31f75a5d62858cea267"
+          ]
+        },
+        {
+          "component": "server",
+          "serviceName": null,
+          "composePath": null,
+          "contextPath": "server",
+          "contextBasis": "package_directory",
+          "dockerfilePath": null,
+          "target": null,
+          "status": "detected",
+          "condition": null,
+          "steps": [],
+          "runtimeWorkingDirectory": null,
+          "packageManager": null,
+          "packageManagerVersion": null,
+          "lockfiles": [],
+          "installCommand": null,
+          "installCommandBasis": "unknown",
+          "buildCommand": "npm run build",
+          "buildCommandBasis": "policy",
+          "buildWorkingDirectory": "server",
+          "outputPaths": [
+            "dist"
+          ],
+          "unresolved": [],
+          "id": "build-15567b9ee2500310",
+          "evidenceIds": [
+            "e-59ddeba434d34a504f0d"
+          ]
+        }
+      ],
+      "serviceConnections": [
+        {
+          "fromComponent": ".",
+          "fromService": "app",
+          "toService": "mongo",
+          "protocol": "mongodb",
+          "port": 27017,
+          "environmentKey": "MONGO_URI",
+          "condition": null,
+          "evidenceIds": [
+            "e-8be7650fac6ca08b0d39"
+          ]
+        }
+      ],
+      "sourceQuality": {
+        "passed": true,
+        "checks": 22,
+        "criticalFactsAccuracy": 1.0,
+        "routes": {
+          "expected": 21,
+          "detected": 21,
+          "truePositive": 21,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        }
+      },
+      "requiredEnvironmentQuestions": [
+        {
+          "id": "secret-svc-9bc425e830b1b855-MONGO_URI",
+          "field": "bindings.secretRefs",
+          "reason": "Observed runtime consumer svc-9bc425e830b1b855 reads MONGO_URI. Supply an external Secret reference.",
+          "requiredForExecution": true
+        },
+        {
+          "id": "secret-svc-9bc425e830b1b855-SESSION_SECRET",
+          "field": "bindings.secretRefs",
+          "reason": "Observed runtime consumer svc-9bc425e830b1b855 reads SESSION_SECRET. Supply an external Secret reference.",
+          "requiredForExecution": true
+        }
+      ]
+    },
+    {
+      "project": "portpolio-production",
+      "sourceSha": "f54230346fbfca4e34ae2cdd1a370217611d2191",
+      "sourceManifestSha256": "57ade0e91973d20f4f6dc3479b04cb17c91a61b2af59687a96a40689120d9239",
+      "analysisSnapshotId": "dcab384d9e1a6cfe70ee38b024a06b0bce34cee63a645572e01f89b70c1fddca",
+      "analysisStatus": "complete",
+      "preparationStatus": "ready",
+      "analysisMode": "static",
+      "dockerfileOrigin": "controlled_template",
+      "dockerfileSha256": "84c12eb8bb015ca9559b1bd47c1615a4d71920559fe45b43555e0043e053cbcc",
+      "templateId": "vite-static-npm.v1",
+      "archiveSha256": "3fccdf0b05e6263f650498e22780e820da150671d0010b9fdfeb1989d4dd443e",
+      "buildTargets": [
+        {
+          "component": ".",
+          "serviceName": null,
+          "composePath": null,
+          "contextPath": ".",
+          "contextBasis": "package_directory",
+          "dockerfilePath": null,
+          "target": null,
+          "status": "detected",
+          "condition": null,
+          "steps": [],
+          "runtimeWorkingDirectory": null,
+          "packageManager": "npm",
+          "packageManagerVersion": null,
+          "lockfiles": [
+            "package-lock.json"
+          ],
+          "installCommand": "npm ci --ignore-scripts",
+          "installCommandBasis": "policy",
+          "buildCommand": "npm run build",
+          "buildCommandBasis": "policy",
+          "buildWorkingDirectory": ".",
+          "outputPaths": [
+            "dist"
+          ],
+          "unresolved": [],
+          "id": "build-19381980f8d1a003",
+          "evidenceIds": [
+            "e-79e79892a7f877fa331c",
+            "e-c1be2b4dd2600725dca2"
+          ]
+        }
+      ],
+      "serviceConnections": [],
+      "sourceQuality": {
+        "passed": true,
+        "checks": 15,
+        "criticalFactsAccuracy": 1.0,
+        "routes": {
+          "expected": 0,
+          "detected": 0,
+          "truePositive": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        }
+      },
+      "requiredEnvironmentQuestions": []
+    }
+  ],
+  "runtimeSmoke": {
+    "temp": {
+      "imageId": "sha256:4a0d32fa0ffedcf2bba1dd5a4cad43f55a37cb8d66ddad3cdd68dffda046958f",
+      "architecture": "arm64",
+      "os": "linux",
+      "nodeVersion": "v24.21.0"
+    },
+    "portfolio": {
+      "imageId": "sha256:fb59d37a64111fdfef4a0156ff73ee78f02fe6daf5dc3d5d9bc3557ccb90357d",
+      "architecture": "arm64",
+      "os": "linux",
+      "healthStatus": 200,
+      "indexStatus": 200,
+      "javascriptStatus": 200,
+      "javascriptBytes": 95413,
+      "containerRestrictions": {
+        "readOnlyRoot": true,
+        "nonRootUid": 101,
+        "memoryMiB": 64,
+        "cpu": 0.5
+      }
+    }
+  },
+  "limitations": [
+    "Generation uses reviewed Node/npm or default Vite templates after validated source analysis, not arbitrary model-written Dockerfile instructions.",
+    "No new paid model request was needed for this verification.",
+    "WAS queue claim, S3 source upload, CodeBuild submission and ECR push remain with the existing build worker integration; not executed in this verification.",
+    "Existing Dockerfile path was built and Node version checked; original Temp_log DB application E2E was not repeated.",
+    "Source Git SHA is caller-attested; independent content hashes bind included files but are not Git authentication.",
+    "Custom Vite configuration, unsupported languages/workspace fallback or unconfigured build variables return needs_input; explicit Railpack choice is preserved.",
+    "Docker image IDs are local config IDs, not ECR registry manifest digests. ARM64 test images do not prove amd64 runtime compatibility."
+  ]
+}

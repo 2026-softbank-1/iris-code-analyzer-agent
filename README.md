@@ -66,6 +66,10 @@ uv run iris-deployment --repo ../tested_code/Temp_log --env-file ../.env --out a
 
 테스트 프론트에서는 배포 조건을 바꾸고 같은 소스의 계획만 다시 생성할 수 있습니다. [배포 계획 계약과 아키텍처](docs/deployment-planning.md)에 모듈 경계, 입력, 가정·측정 처리, 비용과 템플릿 지원 범위를 설명했습니다.
 
+### 소스 분석 뒤 Dockerfile 준비
+
+팀 WAS Worker가 호출하는 빌드 준비 계약을 추가했습니다. 기존 Dockerfile과 binary 자산을 보존하고, Dockerfile이 없으면 지원하는 Node/npm·기본 Vite 프로파일의 고정 템플릿으로 생성합니다. [빌드 준비 구조와 실행법](docs/build-preparation.md), [검증 결과](reports/build-preparation-validation.md)를 참조합니다.
+
 ### 기존 분석 CLI
 
 ```sh
