@@ -673,7 +673,7 @@
             "compose.yaml"
           ]
         },
-        "baselineCoverage": "partially_static",
+        "baselineCoverage": "already_static",
         "baselineAssertions": [
           {
             "match": {
@@ -681,7 +681,7 @@
               "value": "nginx",
               "scope": "container"
             },
-            "present": false
+            "present": true
           },
           {
             "match": {
@@ -771,22 +771,12 @@
         }
       ],
       "expectedResult": {
-        "disposition": "flag_issue",
+        "disposition": "no_change",
         "expectedNewClaims": [],
-        "expectedNewIssues": [
-          {
-            "id": "final_runtime_not_represented",
-            "evidenceIds": [
-              "build-stage",
-              "final-stage"
-            ],
-            "blocking": true,
-            "reason": "Current baseline has Node/source but omits nginx/container; review the runtime field against the selected final stage before handing it to deployment."
-          }
-        ],
+        "expectedNewIssues": [],
         "expectedAbstentions": [],
         "expectedFileRequests": [],
-        "baselinePolicy": "Preserve the Node/source observation as build-source evidence; flag the missing final-runtime representation without relabeling it as an observed nginx fact. Current v1 cannot reliably express correcting a nonempty scalar runtime field through a supplemental suggestion.",
+        "baselinePolicy": "The final nginx declaration is now extracted into container scope; preserve Node build/source facts separately and do not claim a new AI discovery for this corrected baseline.",
         "scoredAsActualModelResult": false
       }
     },
@@ -1037,7 +1027,10 @@
           "index.js"
         ],
         "unselectedAvailablePaths": [],
-        "baselineStatus": "needs_input"
+        "baselineStatus": "needs_input",
+        "expandableSelectedPaths": [
+          "index.js"
+        ]
       },
       "evidenceToCheck": [
         {
@@ -1056,7 +1049,7 @@
           "endLine": 3,
           "exactText": "const healthPath = '/health/' + 'ready';",
           "relationship": "immutable local literal concatenation defines /health/ready",
-          "availability": "initial"
+          "availability": "after_expansion"
         },
         {
           "id": "registered-route",
@@ -1119,7 +1112,9 @@
         ],
         "expectedNewIssues": [],
         "expectedAbstentions": [],
-        "expectedFileRequests": [],
+        "expectedFileRequests": [
+          "index.js"
+        ],
         "baselinePolicy": "Preserve existing observations and their scopes. Count only the specified additions as AI contributions.",
         "scoredAsActualModelResult": false
       }

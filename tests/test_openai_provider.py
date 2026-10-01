@@ -140,9 +140,13 @@ def test_source_schema_binds_identity_and_rejects_other_snapshot():
     from iris_analyzer.opencode.runner import MODEL_PROPOSAL_SCHEMA, OpenCodeRunner
 
     bundle = {"source": {"snapshotId": "a" * 64}, "contextHash": "b" * 64}
-    schema = OpenCodeRunner(
+    runner = OpenCodeRunner(
         ModelConfig(provider="openai", model="gpt-6-luna", server_url="http://unused.test")
-    )._response_schema(bundle)
+    )
+    # The archived v1 evaluation path retains exact identity constraints. v2
+    # binds metadata through the validated transport parent instead of echoing it.
+    runner.response_schema = MODEL_PROPOSAL_SCHEMA
+    schema = runner._response_schema(bundle)
     identities = schema["$defs"]["analysis"]["properties"]
     for key, value in {
         "sourceSnapshotId": bundle["source"]["snapshotId"],

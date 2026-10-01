@@ -36,6 +36,43 @@
         },
         "result": {
           "$ref": "#/$defs/analysis"
+        },
+        "reviewFindings": {
+          "type": "array",
+          "maxItems": 12,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "category": {
+                "enum": [
+                  "documentation_mismatch",
+                  "runtime_stage_mismatch",
+                  "source_conflict",
+                  "missing_evidence"
+                ]
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 800
+              },
+              "evidenceIds": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "uniqueItems": true,
+                "minItems": 1
+              }
+            },
+            "required": [
+              "category",
+              "reason",
+              "evidenceIds"
+            ]
+          }
         }
       },
       "required": [

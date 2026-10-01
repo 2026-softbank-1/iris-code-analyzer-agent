@@ -88,7 +88,9 @@ def test_gold_evidence_locations_and_expectations_are_internally_consistent(case
     for forbidden in case["forbiddenClaims"]:
         assert forbidden["statement"] and forbidden["reason"]
     assert len({item["id"] for item in case["forbiddenClaims"]}) == len(case["forbiddenClaims"])
-    assert set(expected["expectedFileRequests"]) <= set(case["input"]["unselectedAvailablePaths"])
+    assert set(expected["expectedFileRequests"]) <= set(case["input"]["unselectedAvailablePaths"]) | set(
+        case["input"].get("expandableSelectedPaths", [])
+    )
     if expected["disposition"] == "needs_files":
         assert expected["expectedFileRequests"] and not expected["expectedNewClaims"]
 

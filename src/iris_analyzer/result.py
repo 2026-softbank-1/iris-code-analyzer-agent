@@ -611,8 +611,8 @@ def _check_model(result: dict, bundle: dict) -> None:
                 )
 
 
-def validate_analysis(reply: dict, bundle: dict) -> dict:
-    """Validate provenance and merge required static facts into a model analysis."""
+def _merge_analysis(reply: dict, bundle: dict) -> dict:
+    """Merge an already-admitted proposal while preserving deterministic observations."""
     validate_reply(reply)
     if reply["kind"] != "analysis":
         _error("RESULT_SCHEMA_INVALID", "An additional-file request is not an analysis result")
@@ -696,3 +696,70 @@ def validate_analysis(reply: dict, bundle: dict) -> dict:
             fields=True,
         )
     return _complete(result, bundle)
+
+
+def validate_analysis_with_report(reply: dict, bundle: dict) -> tuple[dict, dict]:
+    """Validate identity and semantic support before every public merge path.
+
+    The verification report is produced here from the immutable source; callers
+    cannot submit a report to grant their own suggestions admission authority.
+    """
+    validate_reply(reply)
+    if reply["kind"] != "analysis":
+        _error("RESULT_SCHEMA_INVALID", "An additional-file request is not an analysis result")
+    # Preserve hard rejection of forged context/evidence and invalid detected
+    # observations, even when a caller bypasses the OpenCode transport adapter.
+    static_analysis(bundle)
+    _check_model(reply["result"], bundle)
+    _references(
+        reply.get("reviewFindings", []),
+        {item["evidenceId"]: item for item in bundle["evidence"]},
+        {item["path"]: item for item in bundle["manifest"]},
+    )
+    from .verification import verify_proposals
+
+    admitted, verification = verify_proposals(reply, bundle)
+    result = _merge_analysis(admitted, bundle)
+    for finding in verification.get("reviewFindings", []):
+        if finding.get("decision") == "supported" and finding.get("blocking"):
+            covered = set(finding.get("obligationKeys", []))
+            if covered and covered <= {q["key"] for q in result["questions"]}:
+                continue
+            result["questions"].append(_question("verified_review." + finding["category"], finding["reason"]))
+    if any(
+        f.get("decision") == "supported" and f.get("blocking") for f in verification.get("reviewFindings", [])
+    ):
+        result = _complete(result, bundle)
+    # A proven new route may discharge only its exact old extractor gap. A
+    # shared generic question remains until every corresponding call resolves.
+    resolved = {item["obligationDigest"] for item in verification.get("resolvedObligations", [])}
+    groups = {}
+    for obligation in bundle["unresolved"]:
+        groups.setdefault((obligation["key"], obligation["reason"]), []).append(obligation)
+    discharged = {
+        pair for pair, items in groups.items() if items and all(digest(item) in resolved for item in items)
+    }
+    if discharged:
+        result["questions"] = [q for q in result["questions"] if (q["key"], q["reason"]) not in discharged]
+        reasons = {reason for _, reason in discharged}
+        retained_reasons = {q["reason"] for q in result["questions"]}
+        result["coverage"]["limitations"] = [
+            reason
+            for reason in result["coverage"]["limitations"]
+            if reason not in reasons or reason in retained_reasons
+        ]
+        if (
+            result["status"] != "unsupported"
+            and not result["questions"]
+            and not result["coverage"]["limitations"]
+        ):
+            result["status"] = "complete"
+            result["coverage"]["completeForProfile"] = True
+    verification["resultDigest"] = digest(result)
+    verification["deploymentAuthorized"] = False
+    return result, verification
+
+
+def validate_analysis(reply: dict, bundle: dict) -> dict:
+    """Public admission path: valid evidence references alone do not admit suggestions."""
+    return validate_analysis_with_report(reply, bundle)[0]

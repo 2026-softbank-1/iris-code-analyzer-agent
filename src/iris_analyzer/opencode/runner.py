@@ -26,14 +26,77 @@ from iris_analyzer.preprocess import compact_model_input
 from .client import OpenCodeClient, new_message_id
 from .config import ModelConfig
 from .pricing import pricing_for, usage_cost
+from .review_protocol import canonicalize_review, make_review_schema, review_template
 
-PROMPT_VERSION = "deployment_v1.3"
+PROMPT_VERSION = "deployment_v2.1"
 MODEL_PROPOSAL_SCHEMA = copy.deepcopy(MODEL_REPLY_SCHEMA)
 MODEL_PROPOSAL_SCHEMA["$defs"]["field"]["properties"]["status"]["enum"] = ["suggested", "unknown"]
 MODEL_PROPOSAL_SCHEMA["$comment"] = (
     "Supplemental proposals only. Detected observations are produced and merged by static code."
 )
+
+
+def _typed_proposal_field(name: str, value_schema: dict) -> str:
+    field = copy.deepcopy(MODEL_PROPOSAL_SCHEMA["$defs"]["field"])
+    field["properties"]["value"] = {"anyOf": [value_schema, {"type": "null"}]}
+    field["allOf"].append(
+        {
+            "if": {"properties": {"status": {"const": "suggested"}}},
+            "then": {"properties": {"value": value_schema}},
+        }
+    )
+    MODEL_PROPOSAL_SCHEMA["$defs"][name] = field
+    return "#/$defs/" + name
+
+
+_text_field = _typed_proposal_field("textProposal", {"type": "string", "minLength": 1})
+_port_field = _typed_proposal_field("portProposal", {"type": "integer", "minimum": 1, "maximum": 65535})
+_route_field = _typed_proposal_field(
+    "routeProposal",
+    {
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "method": {"enum": ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS", "ALL"]},
+            "path": {"type": "string", "pattern": "^/"},
+            "component": {"type": "string", "minLength": 1},
+        },
+        "required": ["method", "path", "component"],
+    },
+)
+_connection_field = _typed_proposal_field(
+    "connectionProposal",
+    {
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "baseUrl": {"type": "string", "minLength": 1},
+            "component": {"type": "string", "minLength": 1},
+        },
+        "required": ["baseUrl", "component"],
+    },
+)
+for _name in (
+    "root",
+    "role",
+    "runtime",
+    "buildCommand",
+    "startCommand",
+    "workingDirectory",
+    "outputDirectory",
+):
+    MODEL_PROPOSAL_SCHEMA["$defs"]["service"]["properties"][_name] = {"$ref": _text_field}
+for _name, _ref in (("ports", _port_field), ("healthchecks", _text_field)):
+    MODEL_PROPOSAL_SCHEMA["$defs"]["service"]["properties"][_name]["items"] = {"$ref": _ref}
+for _name, _ref in (
+    ("apiRoutes", _route_field),
+    ("connections", _connection_field),
+    ("environmentKeys", _text_field),
+):
+    MODEL_PROPOSAL_SCHEMA["$defs"]["analysis"]["properties"][_name]["items"] = {"$ref": _ref}
 _PROPOSAL_VALIDATOR = Draft202012Validator(MODEL_PROPOSAL_SCHEMA)
+MODEL_REVIEW_SCHEMA = make_review_schema(MODEL_PROPOSAL_SCHEMA)
+_REVIEW_VALIDATOR = Draft202012Validator(MODEL_REVIEW_SCHEMA)
 HIVE_GLM_PRICING = {
     "inputPerMillionUsd": 0.05,
     "outputPerMillionUsd": 0.17,
@@ -78,6 +141,7 @@ def response_template(bundle: dict) -> dict:
     """A compact supplemental reply; the result merger computes final coverage."""
     return {
         "kind": "analysis",
+        "reviewFindings": [],
         "result": {
             "schemaVersion": "1",
             "status": "needs_input",
@@ -176,7 +240,7 @@ def validate_model_proposal(reply: dict) -> dict:
 
 
 class OpenCodeRunner:
-    response_schema = MODEL_PROPOSAL_SCHEMA
+    response_schema = MODEL_REVIEW_SCHEMA
     prompt_version = PROMPT_VERSION
 
     def _validate_input(self, bundle: dict) -> None:
@@ -195,16 +259,49 @@ class OpenCodeRunner:
         return schema
 
     def _request_document(self, bundle: dict) -> dict:
+        from iris_analyzer.readiness.metadata import execution_metadata
+        from iris_analyzer.result import static_analysis
+
         return {
             "responseSchema": self._response_schema(bundle),
             "contextBundle": self._model_context(bundle),
-            "responseTemplate": response_template(bundle),
+            "staticAnalysis": static_analysis(bundle),
+            "executionMetadata": execution_metadata(bundle),
+            "responseTemplate": review_template()
+            if self.response_schema is MODEL_REVIEW_SCHEMA
+            else response_template(bundle),
         }
 
     def _system_prompt(self) -> str:
         return files("iris_analyzer.opencode").joinpath("prompts/deployment.txt").read_text(encoding="utf-8")
 
+    def input_token_upper_bound(self, bundle: dict) -> int:
+        """Reserve the actual envelope, including baseline and execution metadata."""
+        payload = {
+            "messageID": "m" * 128,
+            "model": {"providerID": self.config.provider, "modelID": self.config.model},
+            "agent": "iris-analyzer",
+            "system": self._system_prompt(),
+            "parts": [{"type": "text", "text": canonical_bytes(self._request_document(bundle)).decode()}],
+        }
+        if self.config.output_mode == "structured":
+            payload["format"] = {
+                "type": "json_schema",
+                "schema": self._response_schema(bundle),
+                "retryCount": 0,
+            }
+        return len(canonical_bytes(payload)) + 4096
+
     def _validate_output(self, reply: dict) -> dict:
+        if self.response_schema is MODEL_REVIEW_SCHEMA:
+            error = next(_REVIEW_VALIDATOR.iter_errors(reply), None)
+            if error is not None:
+                raise AnalyzerError(
+                    "RESULT_SCHEMA_INVALID",
+                    "Model reply does not match the delta review contract",
+                    {"path": list(error.absolute_path)},
+                )
+            return reply
         return validate_model_proposal(reply)
 
     def __init__(
@@ -222,6 +319,7 @@ class OpenCodeRunner:
         self.calls: list[dict] = []
         self.last_request: dict | None = None
         self.last_response: dict | None = None
+        self.last_wire_reply: dict | None = None
         self.model_calls = 0
         self.total_tokens = 0
         self.estimated_cost_usd = 0.0
@@ -246,6 +344,7 @@ class OpenCodeRunner:
     def invoke_model(self, bundle: dict) -> dict:
         self.last_request = None
         self.last_response = None
+        self.last_wire_reply = None
         self._validate_input(bundle)
         started = time.monotonic()
         deadline = started + self.config.timeout_seconds
@@ -424,7 +523,17 @@ class OpenCodeRunner:
                 if recovery:
                     record["formatRecovery"] = True
                     record["formatRecoveryDetails"] = recovery
-            return self._validate_output(reply)
+            validated = self._validate_output(reply)
+            self.last_wire_reply = copy.deepcopy(validated)
+            if self.response_schema is MODEL_REVIEW_SCHEMA:
+                if info.get("parentID") != message_id or info.get("role") != "assistant":
+                    raise AnalyzerError(
+                        "MODEL_CONTEXT_MISMATCH", "Review response does not belong to the requested context"
+                    )
+                record["responseProtocol"] = "iris.model-review.v2"
+                record["contextBinding"] = "verified_response_parent_and_fresh_session"
+                return canonicalize_review(validated, bundle)
+            return validated
         except (AnalyzerError, KeyboardInterrupt) as exc:
             record["error"] = exc.code if isinstance(exc, AnalyzerError) else "MODEL_CANCELLED"
             if self._session_id:

@@ -18,7 +18,7 @@ from .contracts import (
     validate_result,
 )
 from .preprocess import expand_context, prepare_context, release_snapshot, save_bundle
-from .result import static_analysis, validate_analysis
+from .result import static_analysis, validate_analysis_with_report
 
 
 class ModelRunner(Protocol):
@@ -97,7 +97,9 @@ def analyze_with_report(
         pending: list[dict[str, Any]] = []
         if runner is None:
             event("validating")
-            result = static_analysis(bundle)
+            from .opencode.runner import response_template
+
+            result, report["verification"] = validate_analysis_with_report(response_template(bundle), bundle)
         else:
             for call_index in range(limits.max_expansions + 1):
                 event("analyzing")
@@ -119,9 +121,14 @@ def analyze_with_report(
                     write_json(
                         destination / f"revision-{bundle['revision']:02d}" / "model-response.json", reply
                     )
+                    if getattr(runner, "last_wire_reply", None) is not None:
+                        write_json(
+                            destination / f"revision-{bundle['revision']:02d}" / "model-wire-response.json",
+                            runner.last_wire_reply,
+                        )
                 if reply["kind"] == "analysis":
                     event("validating")
-                    result = validate_analysis(reply, bundle)
+                    result, report["verification"] = validate_analysis_with_report(reply, bundle)
                     break
                 paths = reply["requestedPaths"]
                 if call_index == limits.max_expansions:
@@ -150,12 +157,19 @@ def analyze_with_report(
                 persist_revision()
             else:  # Defensive: a positive bounded call loop always breaks above.
                 raise AnalyzerError("PIPELINE_STATE_INVALID", "No analysis response")
+        if "verification" not in report:
+            from .opencode.runner import response_template
+
+            result, report["verification"] = validate_analysis_with_report(response_template(bundle), bundle)
         if pending:
             result["questions"].extend(pending)
             result["status"] = "needs_input"
             result["coverage"]["completeForProfile"] = False
             result["coverage"]["limitations"].extend(item["reason"] for item in pending)
         validate_result(result)
+        from .contracts import digest
+
+        report["verification"]["resultDigest"] = digest(result)
         event("succeeded" if result["status"] == "complete" else result["status"])
         report.update(
             status=result["status"],
@@ -175,6 +189,7 @@ def analyze_with_report(
                 write_json(destination / "model-input.json", actual_input)
                 write_json(destination / "model-response.json", reply)
             write_json(destination / "analysis-result.json", result)
+            write_json(destination / "verification-report.json", report["verification"])
             write_json(destination / "run-report.json", report)
         return PipelineRun(result, bundle, report)
     except (AnalyzerError, KeyboardInterrupt) as error:

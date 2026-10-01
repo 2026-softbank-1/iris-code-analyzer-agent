@@ -308,6 +308,20 @@ def compact_model_input(bundle: dict) -> dict:
         for item in bundle["manifest"]
         if item["eligible"] and item["path"] not in selected_paths
     ]
+    # Selected means some snippets are present, not that the whole file was
+    # supplied. Keep bounded expansion possible for an omitted declaration.
+    from iris_analyzer.readiness.source import _verified_text
+
+    already_requested = set(bundle.get("policy", {}).get("requestedPaths", []))
+    model["expandableSelectedPaths"] = [
+        {"path": item["path"], "kind": item["kind"], "reason": "incomplete_supplied_ranges"}
+        for item in bundle["manifest"]
+        if item["eligible"]
+        and item["path"] in selected_paths
+        and item["path"] not in already_requested
+        and _verified_text([e for e in bundle["evidence"] if e["path"] == item["path"]], item["digest"])
+        is None
+    ]
     return model
 
 

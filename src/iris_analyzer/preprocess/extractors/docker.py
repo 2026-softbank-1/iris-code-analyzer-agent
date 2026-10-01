@@ -468,6 +468,8 @@ def _dockerfile(path: str, selection: Selection, observations: Observations, com
             )
             if re.search(r"(?:^|/)nginx(?:[:@]|$)", image):
                 record["imageRuntime"] = "nginx"
+                observations.fact("runtime.name", "nginx", runtime_component, "container", [evidence])
+                observations.fact("runtime.image", image, runtime_component, "container", [evidence])
             if image.startswith("node:"):
                 observations.fact("runtime.name", "node", runtime_component, "container", [evidence])
                 observations.fact("runtime.image", image, runtime_component, "container", [evidence])

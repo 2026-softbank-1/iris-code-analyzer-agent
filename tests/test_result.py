@@ -309,18 +309,19 @@ def test_explicit_unknown_model_collection_blocks_complete(bundle):
         }
     )
     result = validate_analysis(model, bundle)
-    assert result["status"] == "needs_input"
-    assert any(question["key"] == "dependencies" for question in result["questions"])
+    assert result["status"] == "complete"
+    assert not any(question["key"] == "dependencies" for question in result["questions"])
+    assert not any(field["status"] == "unknown" for field in result["dependencies"])
 
 
-def test_suggested_conflict_preserves_static_value_and_question(bundle):
+def test_unsupported_suggested_conflict_preserves_static_value_without_false_blocker(bundle):
     model = reply(bundle)
     model["result"]["services"][0]["startCommand"].update(status="suggested", value="npm run different")
     result = validate_analysis(model, bundle)
     assert result["services"][0]["startCommand"]["value"] == "node main.js"
     assert result["services"][0]["startCommand"]["status"] == "detected"
-    assert any("npm run different" in question["reason"] for question in result["questions"])
-    assert result["status"] == "needs_input"
+    assert not any("npm run different" in question["reason"] for question in result["questions"])
+    assert result["status"] == "complete"
 
 
 def test_valid_detected_alternatives_in_different_scopes_are_not_conflicts(bundle):
@@ -350,7 +351,9 @@ def test_valid_detected_alternatives_in_different_scopes_are_not_conflicts(bundl
         ("apiRoutes", {"authenticated": True}),
     ],
 )
-def test_suggested_collection_conflict_preserves_observation_and_question(bundle, collection, change):
+def test_unsupported_collection_proposal_is_quarantined_without_poisoning_baseline(
+    bundle, collection, change
+):
     model = reply(bundle)
     proposal = next(
         field
@@ -361,9 +364,9 @@ def test_suggested_collection_conflict_preserves_observation_and_question(bundle
     proposal["value"].update(change)
     result = validate_analysis(model, bundle)
     assert any(field["status"] == "detected" for field in result[collection])
-    assert any(field["status"] == "suggested" for field in result[collection])
-    assert any(question["key"] == collection for question in result["questions"])
-    assert result["status"] == "needs_input"
+    assert not any(field["status"] == "suggested" for field in result[collection])
+    assert not any(question["key"] == collection for question in result["questions"])
+    assert result["status"] == "complete"
 
 
 def test_suggestions_never_elevate_unknown_build_to_complete(bundle):
@@ -379,7 +382,7 @@ def test_suggestions_never_elevate_unknown_build_to_complete(bundle):
     model["result"]["status"] = "complete"
     model["result"]["coverage"] = {"completeForProfile": True, "limitations": []}
     result = validate_analysis(model, bundle)
-    assert result["services"][0]["buildCommand"]["status"] == "suggested"
+    assert result["services"][0]["buildCommand"]["status"] == "unknown"
     assert result["status"] == "needs_input"
 
 

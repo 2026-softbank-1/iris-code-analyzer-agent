@@ -12,7 +12,7 @@ import httpx
 import pytest
 
 from iris_analyzer.contracts import AnalyzerError, digest
-from iris_analyzer.opencode import MODEL_PROPOSAL_SCHEMA, ModelConfig, OpenCodeRunner, model_input
+from iris_analyzer.opencode import ModelConfig, OpenCodeRunner, model_input
 
 
 def bundle(revision: int = 1) -> dict:
@@ -236,11 +236,9 @@ def test_structured_prompt_matches_real_doc_and_revision_gets_fresh_session() ->
         assert runner.calls[0]["usage"] == {"input": 12, "output": 7}
         assert runner.calls[0]["serverVersion"] == "1.18.33"
         assert "secret-key-must-not-be-reported" not in json.dumps(runner.calls)
-        expected = copy.deepcopy(MODEL_PROPOSAL_SCHEMA)
-        expected["$defs"]["analysis"]["properties"]["sourceSnapshotId"]["const"] = bundle(2)["source"][
-            "snapshotId"
-        ]
-        expected["$defs"]["analysis"]["properties"]["contextHash"]["const"] = bundle(2)["contextHash"]
+        from iris_analyzer.opencode.runner import MODEL_REVIEW_SCHEMA
+
+        expected = copy.deepcopy(MODEL_REVIEW_SCHEMA)
         assert runner.last_request["format"]["schema"] == expected
         assert runner.last_request["format"]["retryCount"] == 0
         assert runner.last_request["agent"] == "iris-analyzer"
