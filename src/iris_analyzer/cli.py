@@ -40,7 +40,7 @@ def _parser() -> argparse.ArgumentParser:
             p.add_argument("--opencode-url")
             p.add_argument("--opencode-executable", default="opencode")
             p.add_argument("--output-mode", choices=["structured", "json_text"])
-            p.add_argument("--reasoning-effort", choices=["low", "high", "max"])
+            p.add_argument("--reasoning-effort", choices=["none", "low", "medium", "high", "xhigh", "max"])
             p.add_argument("--timeout", type=float)
             p.add_argument("--max-output-tokens", type=int)
             p.add_argument("--max-model-calls", type=int)

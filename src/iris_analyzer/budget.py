@@ -11,28 +11,11 @@ from typing import Any
 from uuid import uuid4
 
 from .contracts import MODEL_REPLY_SCHEMA, AnalyzerError, canonical_bytes
-
-HIVE_GLM_PRICING = {
-    "input": 0.05,
-    "output": 0.17,
-    "cacheRead": 0.01,
-    "source": "https://thehive.ai/models/zai-org/glm-5.3-flash",
-    "verifiedDate": "2026-10-01",
-}
+from .opencode.pricing import HIVE_GLM_PRICING, pricing_for, usage_cost
 
 
 def estimate_usage_cost(usage: dict | None, pricing: dict = HIVE_GLM_PRICING) -> float | None:
-    if not isinstance(usage, dict) or not all(
-        isinstance(usage.get(k), (int, float)) for k in ("input", "output")
-    ):
-        return None
-    cache = usage.get("cache") or {}
-    # Unknown cache-write pricing is conservatively priced as fresh input.
-    return (
-        (usage["input"] + cache.get("write", 0)) * pricing["input"]
-        + (usage["output"] + usage.get("reasoning", 0)) * pricing["output"]
-        + cache.get("read", 0) * pricing["cacheRead"]
-    ) / 1_000_000
+    return usage_cost(usage, pricing)
 
 
 class BudgetedRunner:
@@ -51,19 +34,28 @@ class BudgetedRunner:
         self.max_cost_usd = max_cost_usd
         if isinstance(max_cost_usd, bool) or not math.isfinite(max_cost_usd) or max_cost_usd <= 0:
             raise ValueError("max_cost_usd must be positive")
-        identity = (runner.config.provider, runner.config.model)
-        self.pricing = pricing or (
-            HIVE_GLM_PRICING if identity == ("hive-ai", "zai-org/glm-5.3-flash") else None
-        )
+        self.pricing = pricing or pricing_for(runner.config.provider, runner.config.model)
         if self.pricing is not None:
             if not isinstance(self.pricing, dict) or any(
                 not isinstance(self.pricing.get(key), (int, float))
                 or isinstance(self.pricing[key], bool)
                 or not math.isfinite(self.pricing[key])
                 or self.pricing[key] < 0
-                for key in ("input", "output", "cacheRead")
+                for key in (
+                    "input",
+                    "output",
+                    "cacheRead",
+                    *[
+                        k
+                        for k in ("cacheWrite", "reservationInput", "reservationOutput")
+                        if k in self.pricing
+                    ],
+                )
             ):
                 raise ValueError("Pricing requires finite nonnegative numeric input/output/cacheRead rates")
+            threshold = self.pricing.get("longContextThreshold")
+            if threshold is not None and (type(threshold) is not int or threshold <= 0):
+                raise ValueError("Long-context threshold must be a positive integer")
 
     def __getattr__(self, name: str) -> Any:
         return getattr(self.runner, name)
@@ -105,10 +97,16 @@ class BudgetedRunner:
         input_ceiling = len(canonical_bytes(bundle)) + len(canonical_bytes(MODEL_REPLY_SCHEMA)) + 16_384
         output_ceiling = self.runner.config.max_output_tokens
         one_attempt_reserve = (
-            input_ceiling * self.pricing["input"] + output_ceiling * self.pricing["output"]
+            input_ceiling * self.pricing.get("reservationInput", self.pricing["input"])
+            + output_ceiling * self.pricing.get("reservationOutput", self.pricing["output"])
         ) / 1_000_000
         steps = getattr(self.runner.config, "max_inference_steps", 2)
-        growth_reserve = output_ceiling * self.pricing["input"] / 1_000_000 * (steps * (steps - 1) // 2)
+        growth_reserve = (
+            output_ceiling
+            * self.pricing.get("reservationInput", self.pricing["input"])
+            / 1_000_000
+            * (steps * (steps - 1) // 2)
+        )
         per_execution_reserve = one_attempt_reserve * steps + growth_reserve
         reserve = per_execution_reserve * (1 + self.runner.config.max_remote_retries)
         identifier = uuid4().hex

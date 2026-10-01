@@ -127,11 +127,17 @@ class PlanningOpenCodeRunner(OpenCodeRunner):
 
     def _request_document(self, bundle):
         return {
-            "responseSchema": self.response_schema,
+            "responseSchema": self._response_schema(bundle),
             "context": self._model_context(bundle),
             "analysisDigest": digest(bundle["analysisResult"]),
             "requestDigest": digest(bundle["planningRequest"]),
         }
+
+    def _response_schema(self, bundle):
+        schema = copy.deepcopy(self.response_schema)
+        schema["properties"]["analysisDigest"]["const"] = digest(bundle["analysisResult"])
+        schema["properties"]["requestDigest"]["const"] = digest(bundle["planningRequest"])
+        return schema
 
     def _system_prompt(self):
         return """Return exactly one JSON object matching responseSchema. You recommend initial operating policies,

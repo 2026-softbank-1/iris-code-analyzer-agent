@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 import json
 import threading
 from dataclasses import replace
@@ -235,7 +236,12 @@ def test_structured_prompt_matches_real_doc_and_revision_gets_fresh_session() ->
         assert runner.calls[0]["usage"] == {"input": 12, "output": 7}
         assert runner.calls[0]["serverVersion"] == "1.18.33"
         assert "secret-key-must-not-be-reported" not in json.dumps(runner.calls)
-        assert runner.last_request["format"]["schema"] == MODEL_PROPOSAL_SCHEMA
+        expected = copy.deepcopy(MODEL_PROPOSAL_SCHEMA)
+        expected["$defs"]["analysis"]["properties"]["sourceSnapshotId"]["const"] = bundle(2)["source"][
+            "snapshotId"
+        ]
+        expected["$defs"]["analysis"]["properties"]["contextHash"]["const"] = bundle(2)["contextHash"]
+        assert runner.last_request["format"]["schema"] == expected
         assert runner.last_request["format"]["retryCount"] == 0
         assert runner.last_request["agent"] == "iris-analyzer"
         assert runner.calls[-1]["requestPayloadDigest"] == digest(runner.last_request)

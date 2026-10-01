@@ -15,6 +15,7 @@ from iris_analyzer.contracts import AnalyzerError
 OPENCODE_VERSION = "1.18.33"
 HIVE_BASE_URL = "https://api-cdn.thehive.ai/api/v3"
 HIVE_MODEL = "zai-org/glm-5.3-flash"
+OPENAI_MODEL = "gpt-6-luna"
 
 
 @dataclass(frozen=True)
@@ -46,10 +47,13 @@ class ModelConfig:
     expected_version: str = OPENCODE_VERSION
 
     def __post_init__(self) -> None:
-        if self.reasoning_effort is None and self.provider == "hive-ai" and self.model == HIVE_MODEL:
+        if self.reasoning_effort is None and (
+            (self.provider == "hive-ai" and self.model == HIVE_MODEL)
+            or (self.provider == "openai" and self.model == "gpt-6-luna")
+        ):
             object.__setattr__(self, "reasoning_effort", "low")
-        if self.reasoning_effort not in {None, "low", "high", "max"}:
-            raise AnalyzerError("MODEL_CONFIG_INVALID", "Reasoning effort must be low, high or max")
+        if self.reasoning_effort not in {None, "none", "low", "medium", "high", "xhigh", "max"}:
+            raise AnalyzerError("MODEL_CONFIG_INVALID", "Unsupported reasoning effort")
         if self.native_json_mode is None:
             object.__setattr__(
                 self,
@@ -103,24 +107,55 @@ class ModelConfig:
                     )
         if self.api_key in {"", "xxx", "<YOUR_SECRET_KEY>"}:
             raise AnalyzerError(
-                "MODEL_AUTH_MISSING", "HIVE_AI contains a placeholder instead of a credential"
+                "MODEL_AUTH_MISSING", "Selected provider contains a placeholder instead of a credential"
             )
+        if (
+            self.provider == "openai"
+            and self.model.startswith("gpt-4.1")
+            and self.reasoning_effort is not None
+        ):
+            raise AnalyzerError("MODEL_CONFIG_INVALID", "GPT-4.1 does not use reasoning-effort controls")
+
+    @property
+    def inference_temperature(self):
+        return (
+            None
+            if self.provider == "openai"
+            and self.model.startswith("gpt-6")
+            and self.reasoning_effort != "none"
+            else 0
+        )
 
     @classmethod
     def from_env(cls, dotenv_path: str | Path | None = None, **overrides: object) -> ModelConfig:
         """Read one explicit dotenv file plus environment without modifying os.environ."""
         values = dict(dotenv_values(dotenv_path)) if dotenv_path is not None else {}
         values.update(os.environ)
+        configured_provider = values.get("OPENCODE_PROVIDER") or (
+            "hive-ai"
+            if values.get("HIVE_AI") or not (values.get("OPENAI_API") or values.get("OPENAI_API_KEY"))
+            else "openai"
+        )
+        provider = overrides.get("provider") or configured_provider
+        same_provider = provider == configured_provider
         fields: dict[str, object] = {
-            "provider": values.get("OPENCODE_PROVIDER") or "hive-ai",
-            "model": values.get("OPENCODE_MODEL") or values.get("HIVE_MODEL") or HIVE_MODEL,
+            "provider": provider,
+            "model": (values.get("OPENCODE_MODEL") if same_provider else None)
+            or (
+                values.get("OPENAI_MODEL") or OPENAI_MODEL
+                if provider == "openai"
+                else values.get("HIVE_MODEL") or HIVE_MODEL
+            ),
             "server_url": values.get("OPENCODE_URL") or None,
             "hive_base_url": values.get("HIVE_BASE_URL") or HIVE_BASE_URL,
-            "api_key": values.get("HIVE_AI") or None,
+            "api_key": (values.get("OPENAI_API_KEY") or values.get("OPENAI_API") or None)
+            if provider == "openai"
+            else values.get("HIVE_AI") or None,
             "server_password": values.get("OPENCODE_SERVER_PASSWORD") or None,
             "server_username": values.get("OPENCODE_SERVER_USERNAME") or "opencode",
-            "output_mode": values.get("OPENCODE_OUTPUT_MODE") or "json_text",
-            "reasoning_effort": values.get("OPENCODE_REASONING_EFFORT") or None,
+            "output_mode": (values.get("OPENCODE_OUTPUT_MODE") if same_provider else None)
+            or ("structured" if provider == "openai" else "json_text"),
+            "reasoning_effort": (values.get("OPENCODE_REASONING_EFFORT") if same_provider else None) or None,
         }
         for variable, field_name in (
             ("OPENCODE_MAX_OUTPUT_TOKENS", "max_output_tokens"),
@@ -134,7 +169,11 @@ class ModelConfig:
                 except (ValueError, TypeError) as exc:
                     raise AnalyzerError("MODEL_CONFIG_INVALID", f"{variable} must be an integer") from exc
         fields.update({key: value for key, value in overrides.items() if value is not None})
-        if values.get("OPENCODE_NATIVE_JSON_MODE") and overrides.get("native_json_mode") is None:
+        if (
+            same_provider
+            and values.get("OPENCODE_NATIVE_JSON_MODE")
+            and overrides.get("native_json_mode") is None
+        ):
             native_mode = values["OPENCODE_NATIVE_JSON_MODE"].lower()
             if native_mode not in {"true", "false", "1", "0"}:
                 raise AnalyzerError("MODEL_CONFIG_INVALID", "OPENCODE_NATIVE_JSON_MODE must be true or false")

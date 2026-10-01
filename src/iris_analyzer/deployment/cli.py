@@ -24,6 +24,8 @@ def main(argv=None):
         "--offline", action="store_true", help="Use explicit policy profiles without a model call"
     )
     parser.add_argument("--env-file", type=Path, default=Path(".env"))
+    parser.add_argument("--provider", choices=["hive-ai", "openai"])
+    parser.add_argument("--model")
     parser.add_argument("--opencode-executable", default="opencode")
     parser.add_argument("--budget-ledger", type=Path, default=Path("artifacts/model-budget-ledger.json"))
     parser.add_argument("--max-cost-usd", type=float, default=1.0)
@@ -39,7 +41,11 @@ def main(argv=None):
         readiness = prepare_readiness(repo, out=out, analysis=run.result)
         write_json(out / "source-readiness.json", readiness)
         config = (
-            None if args.offline else ModelConfig.from_env(args.env_file if args.env_file.is_file() else None)
+            None
+            if args.offline
+            else ModelConfig.from_env(
+                args.env_file if args.env_file.is_file() else None, provider=args.provider, model=args.model
+            )
         )
         dossier, report = plan_with_report(
             run.result,

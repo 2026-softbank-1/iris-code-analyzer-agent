@@ -230,16 +230,26 @@ class OpenCodeClient:
         options = selected_model.get("options")
         temperature = agent.get("temperature")
         expected_format = {"type": "json_object"} if self.config.native_json_mode else None
+        expected_temperature = self.config.inference_temperature
         if (
             type(limit) is not int
             or not 0 < limit <= self.config.max_output_tokens
             or not isinstance(options, dict)
-            or set(options) - {"reasoningEffort", "response_format"}
+            or set(options)
+            - (
+                {"reasoningEffort", "response_format", "store"}
+                if self.config.provider == "openai"
+                else {"reasoningEffort", "response_format"}
+            )
             or options.get("reasoningEffort") != self.config.reasoning_effort
             or options.get("response_format") != expected_format
-            or capabilities.get("temperature") is not True
-            or type(temperature) not in {int, float}
-            or temperature != 0
+            or (self.config.provider == "openai" and options.get("store") is not False)
+            or capabilities.get("temperature") is not (expected_temperature is not None)
+            or (expected_temperature is None and temperature is not None)
+            or (
+                expected_temperature is not None
+                and (type(temperature) not in {int, float} or temperature != expected_temperature)
+            )
         ):
             raise AnalyzerError(
                 "OPENCODE_POLICY_INVALID",

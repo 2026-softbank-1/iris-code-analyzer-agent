@@ -399,7 +399,15 @@ def test_advisor_hooks_validate_output_reuse_injected_client_and_fresh_sessions(
     assert second_document["requestDigest"] == digest(changed_bundle["planningRequest"])
     assert second_document["requestDigest"] != document["requestDigest"]
     if output_mode == "structured":
-        assert client.prompts[0]["format"]["schema"] == ADVICE_SCHEMA
+        expected_schema = copy.deepcopy(ADVICE_SCHEMA)
+        expected_schema["properties"]["analysisDigest"]["const"] = digest(analysis)
+        expected_schema["properties"]["requestDigest"]["const"] = digest(bundle["planningRequest"])
+        assert client.prompts[0]["format"]["schema"] == expected_schema
+        assert "const" not in ADVICE_SCHEMA["properties"]["analysisDigest"]
+        assert (
+            client.prompts[1]["format"]["schema"]["properties"]["requestDigest"]["const"]
+            == second_document["requestDigest"]
+        )
     else:
         assert "format" not in client.prompts[0]
 

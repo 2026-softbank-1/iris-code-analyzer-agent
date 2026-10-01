@@ -92,6 +92,44 @@ class IsolatedOpenCodeServer:
                     },
                 },
             }
+        if config.provider == "openai":
+            if config.native_json_mode:
+                raise AnalyzerError(
+                    "MODEL_CONFIG_INVALID", "OpenAI Responses does not use the Hive native JSON option"
+                )
+            result["provider"] = {
+                "openai": {
+                    "npm": "@ai-sdk/openai",
+                    "name": "OpenAI",
+                    "options": {
+                        "apiKey": "{env:OPENAI_API_KEY}",
+                        "baseURL": "https://api.openai.com/v1",
+                        "maxRetries": 0,
+                        "timeout": int(config.timeout_seconds * 1000),
+                    },
+                    "models": {
+                        config.model: {
+                            "name": config.model,
+                            "temperature": config.inference_temperature is not None,
+                            "options": {
+                                "store": False,
+                                **(
+                                    {"reasoningEffort": config.reasoning_effort}
+                                    if config.reasoning_effort
+                                    else {}
+                                ),
+                            },
+                            "limit": {
+                                "context": 922_000 if config.model == "gpt-6-luna" else 1_047_576,
+                                "output": config.max_output_tokens,
+                            },
+                            "modalities": {"input": ["text"], "output": ["text"]},
+                        }
+                    },
+                }
+            }
+        if config.inference_temperature is None:
+            result["agent"]["iris-analyzer"].pop("temperature", None)
         return result
 
     def start(self) -> IsolatedOpenCodeServer:
@@ -102,8 +140,8 @@ class IsolatedOpenCodeServer:
         )
         if not executable or not Path(executable).is_file():
             raise AnalyzerError("OPENCODE_EXECUTABLE_MISSING", "Install the pinned OpenCode executable")
-        if self.original_config.provider == "hive-ai" and not self.original_config.api_key:
-            raise AnalyzerError("MODEL_AUTH_MISSING", "HIVE_AI is required to start the Hive provider")
+        if self.original_config.provider in {"hive-ai", "openai"} and not self.original_config.api_key:
+            raise AnalyzerError("MODEL_AUTH_MISSING", "The selected provider credential is required")
         self.directory = Path(tempfile.mkdtemp(prefix="iris-opencode-"))
         for name in ("workspace", "home", "config", "data", "cache", "state", "platform"):
             (self.directory / name).mkdir(mode=0o700)
@@ -130,7 +168,8 @@ class IsolatedOpenCodeServer:
             "OPENCODE_SERVER_USERNAME": "opencode",
         }
         if self.original_config.api_key:
-            self.environment["HIVE_AI"] = self.original_config.api_key
+            variable = "OPENAI_API_KEY" if self.original_config.provider == "openai" else "HIVE_AI"
+            self.environment[variable] = self.original_config.api_key
         try:
             version = subprocess.run(
                 [executable, "--version"],

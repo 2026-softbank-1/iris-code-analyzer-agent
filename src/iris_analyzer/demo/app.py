@@ -10,7 +10,7 @@ import secrets
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, JSONResponse
@@ -35,12 +35,14 @@ class ReviewRequest(BaseModel):
     ref: str | None = Field(default=None, max_length=300)
     use_ai: bool = True
     planning_request: dict[str, Any] | None = None
+    provider: Literal["hive-ai", "openai"] | None = None
 
 
 class ReplanRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     planning_request: dict[str, Any] | None = None
     use_ai: bool | None = None
+    provider: Literal["hive-ai", "openai"] | None = None
 
 
 @dataclass
@@ -59,6 +61,7 @@ class ReviewJob:
     evidence: dict[str, dict] = field(default_factory=dict)
     planning_request: dict[str, Any] | None = None
     deployment_dossier: dict[str, Any] | None = None
+    provider: str | None = None
 
     def public(self) -> dict:
         return {
@@ -74,6 +77,7 @@ class ReviewJob:
             "sourceInfo": self.source_info,
             "error": self.error,
             "deploymentDossier": self.deployment_dossier,
+            "provider": self.provider,
         }
 
 
@@ -90,6 +94,24 @@ def create_app(
     slot = asyncio.Semaphore(1)
     artifact_root = artifact_root.resolve()
     model_available = bool(config.api_key or config.server_url)
+    configs = {config.provider: config}
+    if model_config is None and env_file and env_file.is_file():
+        for provider in ("hive-ai", "openai"):
+            try:
+                configs[provider] = ModelConfig.from_env(env_file, provider=provider)
+            except AnalyzerError:
+                continue
+
+    def selected_config(provider=None):
+        return configs.get(provider or config.provider)
+
+    def require_provider(provider, use_ai):
+        chosen = selected_config(provider)
+        if use_ai and (chosen is None or not (chosen.api_key or chosen.server_url)):
+            raise HTTPException(
+                422, detail="선택한 AI 공급자의 서버 키를 설정하거나 정적 분석을 선택해 주세요."
+            )
+        return chosen
 
     def load_evidence(job: ReviewJob) -> None:
         for path in (
@@ -130,6 +152,7 @@ def create_app(
                     "error": "error",
                     "deployment_dossier": "deploymentDossier",
                     "planning_request": "planningRequest",
+                    "provider": "provider",
                     "state": "state",
                     "stage": "stage",
                 }.items():
@@ -178,6 +201,10 @@ def create_app(
             "provider": config.provider,
             "supported": ["Node.js", "Vite", "Express", "Docker", "Compose"],
             "planningAdapters": ["aws_eks", "existing_kubernetes"],
+            "providers": [
+                {"id": c.provider, "model": c.model, "available": bool(c.api_key or c.server_url)}
+                for c in configs.values()
+            ],
         }
 
     async def plan_job(job):
@@ -194,7 +221,7 @@ def create_app(
             job.result["analysisResult"],
             readiness,
             job.planning_request,
-            config=config if job.use_ai else None,
+            config=selected_config(job.provider) if job.use_ai else None,
             ledger=artifact_root.parent / "model-budget-ledger.json",
             executable=executable,
             out=directory / "plans",
@@ -221,7 +248,7 @@ def create_app(
                 factory = None
                 if job.use_ai:
                     factory = create_live_runner_factory(
-                        config,
+                        selected_config(job.provider),
                         executable=executable,
                         budget_ledger=artifact_root.parent / "model-budget-ledger.json",
                         max_cost_usd=1.0,
@@ -272,8 +299,7 @@ def create_app(
             parse_github_url(payload.repository_url)
         except (AnalyzerError, ValueError) as error:
             raise HTTPException(422, detail="올바른 GitHub 저장소 링크를 입력해 주세요.") from error
-        if payload.use_ai and not model_available:
-            raise HTTPException(422, detail="서버의 HIVE_AI 키를 설정하거나 정적 분석을 선택해 주세요.")
+        require_provider(payload.provider, payload.use_ai)
         if payload.planning_request is not None:
             try:
                 validate_planning_request(payload.planning_request)
@@ -287,6 +313,7 @@ def create_app(
             )
         job = ReviewJob(secrets.token_hex(12), payload.repository_url.strip(), payload.ref, payload.use_ai)
         job.planning_request = payload.planning_request
+        job.provider = payload.provider or config.provider
         jobs[job.id] = job
         task = asyncio.create_task(run_job(job))
         tasks.add(task)
@@ -308,9 +335,9 @@ def create_app(
             except (AnalyzerError, ValueError):
                 raise HTTPException(422, detail="배포 조건이 버전별 입력 계약과 일치하지 않습니다.") from None
         use_ai = job.use_ai if payload.use_ai is None else payload.use_ai
-        if use_ai and not model_available:
-            raise HTTPException(422, detail="AI 키가 필요합니다.")
+        require_provider(payload.provider or job.provider, use_ai)
         job.planning_request, job.use_ai = payload.planning_request, use_ai
+        job.provider = payload.provider or job.provider or config.provider
         job.state, job.stage, job.error = "queued", "planning", None
 
         async def run():

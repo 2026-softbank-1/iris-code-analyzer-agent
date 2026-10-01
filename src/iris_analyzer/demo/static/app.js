@@ -35,6 +35,16 @@ let useAi = true,
   pollTimer = null,
   formJobId = null;
 const history = new Map();
+let providerModels = {};
+function updateProviderLabel() {
+  const selected = providerModels[$("ai-provider").value];
+  $("model-label").textContent = selected?.available
+    ? `${selected.id === "openai" ? "OpenAI" : "Hive"} · ${selected.model.split("/").pop()}`
+    : "정적 분석 · 선택한 AI 키 설정 필요";
+  document.querySelector('[data-mode="ai"]').disabled = !selected?.available;
+  if (!selected?.available) setMode("static");
+}
+$("ai-provider").addEventListener("change", updateProviderLabel);
 async function api(path, options) {
   const response = await fetch(path, options);
   const data = await response.json();
@@ -162,6 +172,10 @@ function restoreConditions(job) {
   const constraints = request?.constraints || {};
   $("repo-url").value = job.repositoryUrl || "";
   $("repo-ref").value = job.ref || "";
+  if (job.provider && providerModels[job.provider]) {
+    $("ai-provider").value = job.provider;
+    updateProviderLabel();
+  }
   for (const [id, value] of [
     ["plan-stack", target.stack],
     ["plan-cloud", target.cloud],
@@ -351,7 +365,11 @@ async function replan() {
     const job = await api(`/api/reviews/${id}/plan`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ planning_request: planning, use_ai: useAi }),
+      body: JSON.stringify({
+        planning_request: planning,
+        use_ai: useAi,
+        provider: $("ai-provider").value,
+      }),
     });
     if (id !== activeJob) return;
     formJobId = id;
@@ -423,6 +441,7 @@ $("review-form").addEventListener("submit", async (event) => {
         repository_url: $("repo-url").value.trim(),
         ref: $("repo-ref").value.trim() || null,
         use_ai: useAi,
+        provider: $("ai-provider").value,
         planning_request: planningRequest(),
       }),
     });
@@ -440,13 +459,20 @@ $("review-form").addEventListener("submit", async (event) => {
 });
 api("/api/config")
   .then((config) => {
-    $("model-label").textContent = config.modelAvailable
-      ? "Hive · " + config.model.split("/").pop()
-      : "정적 분석 · AI 키 설정 필요";
-    if (!config.modelAvailable) {
-      document.querySelector('[data-mode="ai"]').disabled = true;
-      setMode("static");
-    }
+    providerModels = Object.fromEntries(
+      (
+        config.providers || [
+          {
+            id: config.provider,
+            model: config.model,
+            available: config.modelAvailable,
+          },
+        ]
+      ).map((p) => [p.id, p]),
+    );
+    $("ai-provider").value =
+      history.get(activeJob)?.provider || config.provider;
+    updateProviderLabel();
   })
   .catch((error) => alertMessage(error.message));
 

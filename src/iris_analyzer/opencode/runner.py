@@ -25,6 +25,7 @@ from iris_analyzer.preprocess import compact_model_input
 
 from .client import OpenCodeClient, new_message_id
 from .config import ModelConfig
+from .pricing import pricing_for, usage_cost
 
 PROMPT_VERSION = "deployment_v1.3"
 MODEL_PROPOSAL_SCHEMA = copy.deepcopy(MODEL_REPLY_SCHEMA)
@@ -61,19 +62,11 @@ def _usage_count(usage: dict | None) -> int | None:
 def _estimate_cost(usage: dict | None, config: ModelConfig) -> float | None:
     # Pinned OpenCode subtracts reasoning from tokens.output, so add it back
     # before applying the provider's billed output price. This is an estimate.
-    if not isinstance(usage, dict) or config.provider != "hive-ai" or config.model != "zai-org/glm-5.3-flash":
+    prices = pricing_for(config.provider, config.model)
+    if not isinstance(usage, dict) or prices is None:
         return None
-    cache = usage.get("cache", {})
-    return round(
-        (
-            usage.get("input", 0) * HIVE_GLM_PRICING["inputPerMillionUsd"]
-            + (usage.get("output", 0) + usage.get("reasoning", 0)) * HIVE_GLM_PRICING["outputPerMillionUsd"]
-            + cache.get("read", 0) * HIVE_GLM_PRICING["cachedInputPerMillionUsd"]
-            + cache.get("write", 0) * HIVE_GLM_PRICING["inputPerMillionUsd"]
-        )
-        / 1_000_000,
-        9,
-    )
+    amount = usage_cost(usage, prices)
+    return round(amount, 9) if amount is not None else None
 
 
 def model_input(bundle: dict) -> dict:
@@ -192,9 +185,18 @@ class OpenCodeRunner:
     def _model_context(self, bundle: dict) -> dict:
         return model_input(bundle)
 
+    def _response_schema(self, bundle: dict) -> dict:
+        schema = copy.deepcopy(self.response_schema)
+        if self.response_schema is MODEL_PROPOSAL_SCHEMA:
+            schema["$defs"]["analysis"]["properties"]["sourceSnapshotId"]["const"] = bundle["source"][
+                "snapshotId"
+            ]
+            schema["$defs"]["analysis"]["properties"]["contextHash"]["const"] = bundle["contextHash"]
+        return schema
+
     def _request_document(self, bundle: dict) -> dict:
         return {
-            "responseSchema": self.response_schema,
+            "responseSchema": self._response_schema(bundle),
             "contextBundle": self._model_context(bundle),
             "responseTemplate": response_template(bundle),
         }
@@ -272,7 +274,7 @@ class OpenCodeRunner:
             "maxRemoteRetries": self.config.max_remote_retries,
             "maxInferenceSteps": self.config.max_inference_steps,
             "inferenceOptions": {
-                "temperature": 0,
+                "temperature": self.config.inference_temperature,
                 "reasoningEffort": self.config.reasoning_effort,
                 "maxOutputTokens": self.config.max_output_tokens,
                 "responseFormat": {"type": "json_object"} if self.config.native_json_mode else None,
@@ -286,6 +288,8 @@ class OpenCodeRunner:
             "reservedTokensUpperBound": None,
         }
         self.calls.append(record)
+        if self.config.provider == "openai":
+            record["pricing"] = pricing_for(self.config.provider, self.config.model)
         initial_attempts = self.client.attempts
         reservation = 0
         execution_reservation = 0
@@ -317,7 +321,11 @@ class OpenCodeRunner:
                 ],
             }
             if self.config.output_mode == "structured":
-                payload["format"] = {"type": "json_schema", "schema": self.response_schema, "retryCount": 0}
+                payload["format"] = {
+                    "type": "json_schema",
+                    "schema": self._response_schema(bundle),
+                    "retryCount": 0,
+                }
             # UTF-8 bytes conservatively bound ordinary text tokens. Add a
             # platform framing allowance and reserve output for every permitted
             # remote retry. Unknown interrupted usage keeps its full reservation.
@@ -394,7 +402,8 @@ class OpenCodeRunner:
                     self.estimated_cost_usd += record["estimatedCostUsd"]
             # The custom Hive model has no registered pricing. OpenCode fills 0
             # for unknown prices, which must not be reported as a free request.
-            record["cost"] = info.get("cost") if self.config.provider != "hive-ai" else None
+            record["cost"] = info.get("cost") if self.config.provider not in {"hive-ai", "openai"} else None
+            record["serverEstimatedCostUsd"] = info.get("cost")
             actual_provider = info.get("providerID")
             actual_model = info.get("modelID")
             if actual_provider != self.config.provider or actual_model != self.config.model:
