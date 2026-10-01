@@ -42,11 +42,11 @@ def node_source(root):
 
 def request(source, out, **kwargs):
     return {
-        "schemaVersion": "iris.build-preparation-request.v1",
+        "schemaVersion": "iris.build-preparation-request.v2",
         "sourceRoot": str(source),
         "outputDirectory": str(out),
         "sourceSha": "a" * 40,
-        "builder": "dockerfile",
+        "builder": "auto",
         **kwargs,
     }
 
@@ -73,18 +73,28 @@ def test_existing_dockerfile_and_binary_bytes_preserved_and_credentials_excluded
     assert result["executionAuthorized"] is False
 
 
-def test_generation_uses_analysis_and_never_changes_original_source(tmp_path):
+def test_missing_dockerfile_prepares_original_source_for_service_owned_railpack(tmp_path):
     source = node_source(tmp_path / "repo")
     result = prepare_source_build(request(source, tmp_path / "out"))
-    assert result["status"] == "ready" and result["dockerfileOrigin"] == "controlled_template"
+    assert result["schemaVersion"] == "iris.build-preparation.v2"
+    assert result["status"] == "ready" and result["builder"] == "railpack"
+    assert result["buildHandoff"] == {
+        "owner": "service",
+        "recommendedBuilder": "railpack",
+        "requestedBuilder": None,
+        "decisionRequired": True,
+        "reasonCode": "dockerfile_absent",
+    }
+    assert result["dockerfilePath"] is result["dockerfileOrigin"] is result["dockerfileSha256"] is None
+    assert result["templateId"] is None and result["executionAuthorized"] is False
     assert result["analysisSourceSnapshotId"] == result["analysisResult"]["sourceSnapshotId"]
     assert result["analysisMode"] == "static"
+    assert result["sourceReadiness"]
     assert not (source / "Dockerfile").exists()
     assert not (tmp_path / "out/source/Dockerfile").exists()
     with tarfile.open(result["sourceArchive"]["path"]) as archive:
-        generated = archive.extractfile("source/Dockerfile").read().decode()
-        assert "FROM node:24-alpine" in generated
-        assert 'CMD ["node", "server.js"]' in generated
+        assert "source/Dockerfile" not in archive.getnames()
+        assert archive.extractfile("source/server.js").read() == (source / "server.js").read_bytes()
     repeat = prepare_source_build(request(source, tmp_path / "repeat"))
     assert repeat["sourceManifestSha256"] == result["sourceManifestSha256"]
     assert repeat["sourceArchive"]["sha256"] == result["sourceArchive"]["sha256"]
@@ -97,19 +107,47 @@ def test_monorepo_selected_context_and_explicit_railpack_are_not_silently_change
     (child / "Dockerfile").write_text("FROM node:24-alpine\nCOPY . .\n")
     result = prepare_source_build(request(root, tmp_path / "out", rootDirectory="api"))
     assert result["rootDirectory"] == "api" and result["dockerfilePath"] == "Dockerfile"
-    with pytest.raises(AnalyzerError, match="Railpack"):
-        prepare_source_build(request(root, tmp_path / "other", builder="railpack"))
+    railpack = prepare_source_build(
+        request(root, tmp_path / "other", rootDirectory="api", builder="railpack")
+    )
+    assert railpack["builder"] == "railpack" and railpack["dockerfilePath"] is None
+    assert railpack["buildHandoff"]["reasonCode"] == "explicit_railpack"
+    assert railpack["buildHandoff"]["decisionRequired"] is False
+    with tarfile.open(railpack["sourceArchive"]["path"]) as archive:
+        assert archive.extractfile("source/api/Dockerfile").read() == (child / "Dockerfile").read_bytes()
 
 
-def test_disabled_generation_and_unsupported_profile_return_needs_input(tmp_path):
+@pytest.mark.parametrize("value", [True, False])
+def test_removed_generation_field_is_rejected_before_output(tmp_path, value):
     source = node_source(tmp_path / "repo")
-    result = prepare_source_build(request(source, tmp_path / "out", allowGeneration=False))
+    with pytest.raises(AnalyzerError, match="Unknown build preparation fields"):
+        prepare_source_build(request(source, tmp_path / "out", allowGeneration=value))
+    assert not (tmp_path / "out").exists()
+
+
+def test_explicit_dockerfile_builder_missing_does_not_switch_to_railpack(tmp_path):
+    source = node_source(tmp_path / "repo")
+    result = prepare_source_build(request(source, tmp_path / "out", builder="dockerfile"))
     assert result["status"] == "needs_input" and result["sourceArchive"] is None
-    package = json.loads((source / "package.json").read_text())
-    package["workspaces"] = ["packages/*"]
-    (source / "package.json").write_text(json.dumps(package))
-    result = prepare_source_build(request(source, tmp_path / "unsupported"))
-    assert result["status"] == "needs_input"
+    assert result["builder"] == "dockerfile"
+    assert result["buildHandoff"] == {
+        "owner": "service",
+        "recommendedBuilder": "dockerfile",
+        "requestedBuilder": "dockerfile",
+        "decisionRequired": True,
+        "reasonCode": "explicit_dockerfile_missing",
+    }
+    assert result["analysisResult"] and result["unresolvedInputs"]
+
+
+def test_railpack_handoff_does_not_claim_framework_support(tmp_path):
+    source = tmp_path / "repo"
+    source.mkdir()
+    (source / "Cargo.toml").write_text('[package]\nname = "test"\nversion = "0.1.0"\n')
+    result = prepare_source_build(request(source, tmp_path / "out"))
+    assert result["status"] == "ready" and result["builder"] == "railpack"
+    assert result["buildHandoff"]["decisionRequired"] is True
+    assert result["executionAuthorized"] is False
 
 
 def test_build_manifest_changes_and_parent_links_are_rejected(tmp_path):
@@ -213,12 +251,13 @@ def test_parent_link_in_prepare_build_rejected_even_with_unrelated_manifest(tmp_
         )
 
 
-def test_exact_node_declaration_is_not_replaced_by_floating_major(tmp_path):
+def test_version_declaration_is_preserved_for_service_builder(tmp_path):
     source = node_source(tmp_path / "repo")
     (source / ".nvmrc").write_text("24.21.0\n")
     result = prepare_source_build(request(source, tmp_path / "out"))
     with tarfile.open(result["sourceArchive"]["path"]) as archive:
-        assert "FROM node:24.21.0-alpine" in archive.extractfile("source/Dockerfile").read().decode()
+        assert archive.extractfile("source/.nvmrc").read() == b"24.21.0\n"
+        assert "source/Dockerfile" not in archive.getnames()
 
 
 def vite_source(root):
@@ -236,30 +275,31 @@ def vite_source(root):
     return source
 
 
-def test_custom_vite_output_cannot_package_stale_dist(tmp_path):
+def test_custom_vite_config_is_preserved_without_analyzer_generated_dockerfile(tmp_path):
     source = vite_source(tmp_path / "repo")
     (source / "vite.config.js").write_text("const outDir='site'; export default {build:{outDir}}")
     (source / "dist").mkdir()
     (source / "dist/index.html").write_text("stale-content")
     result = prepare_source_build(request(source, tmp_path / "out"))
-    assert result["status"] == "needs_input" and result["sourceArchive"] is None
+    assert result["status"] == "ready" and result["builder"] == "railpack"
+    with tarfile.open(result["sourceArchive"]["path"]) as archive:
+        assert archive.extractfile("source/vite.config.js").read() == (source / "vite.config.js").read_bytes()
+        assert "source/Dockerfile" not in archive.getnames()
 
 
-def test_vite_build_cleans_old_output_and_blocks_unconfigured_build_variables(tmp_path):
+def test_build_variables_remain_analysis_findings_for_service_owned_builder(tmp_path):
     source = vite_source(tmp_path / "repo")
     (source / "main.js").write_text("console.log(import.meta.env.VITE_API_URL);\n")
     result = prepare_source_build(request(source, tmp_path / "out"))
-    assert result["status"] == "needs_input" and result["sourceArchive"] is None
-    assert any("VITE_API_URL" in reason for reason in result["unresolvedInputs"])
-    (source / "main.js").write_text("console.log('ok');\n")
-    result = prepare_source_build(request(source, tmp_path / "ok"))
-    assert result["status"] == "ready"
+    assert result["status"] == "ready" and result["builder"] == "railpack"
+    assert any(row["key"] == "VITE_API_URL" for row in result["sourceReadiness"]["environmentVariables"])
+    assert result["executionAuthorized"] is False
     with tarfile.open(result["sourceArchive"]["path"]) as archive:
-        assert "rm -rf dist && npm run build" in archive.extractfile("source/Dockerfile").read().decode()
+        assert "source/Dockerfile" not in archive.getnames()
 
 
 @pytest.mark.parametrize("directory", ["secrets", ".secrets", "credentials"])
-def test_credential_directories_never_enter_generated_build_archive(tmp_path, directory):
+def test_credential_directories_never_enter_original_build_archive(tmp_path, directory):
     source = node_source(tmp_path / "repo")
     secret_dir = source / directory
     secret_dir.mkdir()
@@ -268,3 +308,69 @@ def test_credential_directories_never_enter_generated_build_archive(tmp_path, di
     with tarfile.open(result["sourceArchive"]["path"]) as archive:
         assert all(directory not in Path(name).parts for name in archive.getnames())
     assert "synthetic-sensitive-fixture" not in json.dumps(result)
+
+
+@pytest.mark.parametrize("filename", ["Dockerfile.production", "nested/Dockerfile"])
+def test_ambiguous_dockerfile_candidates_require_service_choice(tmp_path, filename):
+    source = node_source(tmp_path / "repo")
+    candidate = source / filename
+    candidate.parent.mkdir(exist_ok=True)
+    candidate.write_text("FROM scratch\n")
+    result = prepare_source_build(request(source, tmp_path / "out"))
+    assert result["status"] == "needs_input" and result["sourceArchive"] is None
+    assert result["buildHandoff"]["reasonCode"] == "dockerfile_selection_required"
+    assert result["buildHandoff"]["decisionRequired"] is True
+
+
+def test_dockerfile_in_sibling_service_does_not_block_railpack_recommendation(tmp_path):
+    source = tmp_path / "repo"
+    source.mkdir()
+    child = node_source(source / "api")
+    (source / "Dockerfile").write_text("FROM scratch\n")
+    result = prepare_source_build(request(source, tmp_path / "out", rootDirectory=child.name))
+    assert result["status"] == "ready" and result["builder"] == "railpack"
+
+
+def test_explicit_existing_dockerfile_is_preserved_without_decision_required(tmp_path):
+    source = node_source(tmp_path / "repo")
+    (source / "Dockerfile.custom").write_text("FROM scratch\n")
+    result = prepare_source_build(
+        request(source, tmp_path / "out", builder="dockerfile", dockerfilePath="Dockerfile.custom")
+    )
+    assert result["status"] == "ready" and result["dockerfilePath"] == "Dockerfile.custom"
+    assert result["buildHandoff"]["requestedBuilder"] == "dockerfile"
+    assert result["buildHandoff"]["decisionRequired"] is False
+
+
+@pytest.mark.parametrize("builder", ["auto", "dockerfile", "railpack"])
+def test_explicit_default_missing_path_is_not_replaced(tmp_path, builder):
+    source = node_source(tmp_path / "repo")
+    with pytest.raises(AnalyzerError, match="Selected Dockerfile"):
+        prepare_source_build(request(source, tmp_path / "out", builder=builder, dockerfilePath="Dockerfile"))
+
+
+def test_v1_request_is_rejected_instead_of_reinterpreted(tmp_path):
+    source = node_source(tmp_path / "repo")
+    with pytest.raises(AnalyzerError, match="Unsupported preparation contract"):
+        prepare_source_build(
+            request(source, tmp_path / "out", schemaVersion="iris.build-preparation-request.v1")
+        )
+    assert not (tmp_path / "out").exists()
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("builder", []),
+        ("builder", "other"),
+        ("platform", {}),
+        ("platform", "linux/s390x"),
+        ("rootDirectory", False),
+        ("dockerfilePath", ""),
+    ],
+)
+def test_invalid_v2_fields_are_rejected_before_output(tmp_path, field, value):
+    source = node_source(tmp_path / "repo")
+    with pytest.raises(AnalyzerError):
+        prepare_source_build(request(source, tmp_path / "out", **{field: value}))
+    assert not (tmp_path / "out").exists()

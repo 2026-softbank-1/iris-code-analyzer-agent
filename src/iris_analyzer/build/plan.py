@@ -42,7 +42,7 @@ class BuildRequest:
     dockerfile: str | None = None
     target: str | None = None
     platform: str = "linux/amd64"
-    template: str = "auto"
+    builder: str = "auto"
     timeout_seconds: int = 900
     image_repository: str = "iris-build"
     ecr_target: EcrTarget | None = None
@@ -60,10 +60,8 @@ class BuildRequest:
             raise AnalyzerError(
                 "BUILD_PLATFORM_UNSUPPORTED", "Only single-platform Linux amd64/arm64 builds are supported"
             )
-        if self.template not in {"auto", "none", "node_npm", "vite_static"}:
-            raise AnalyzerError(
-                "BUILD_TEMPLATE_UNSUPPORTED", "No controlled template exists for this profile"
-            )
+        if self.builder not in {"auto", "dockerfile", "railpack"}:
+            raise AnalyzerError("BUILD_BUILDER_UNSUPPORTED", "Use auto, dockerfile, or railpack")
         if type(self.timeout_seconds) is not int or not 1 <= self.timeout_seconds <= 3600:
             raise AnalyzerError("BUILD_TIMEOUT_INVALID", "Build timeout must be between 1 and 3600 seconds")
         if not re.fullmatch(r"[a-z0-9]+(?:[._/-][a-z0-9]+)*", self.image_repository):
@@ -81,96 +79,6 @@ class PreparedBuild:
     dockerfile: Path | None
 
 
-def _template(root: Path, profile: str) -> tuple[str | None, str | None, list[str]]:
-    package, lockfile = root / "package.json", root / "package-lock.json"
-    if not package.is_file() or not lockfile.is_file():
-        return (
-            None,
-            None,
-            [
-                "Fallback requires package.json and npm package-lock.json; other stacks need an explicit Dockerfile"
-            ],
-        )
-    try:
-        pkg = json.loads(package.read_text())
-        lock = json.loads(lockfile.read_text())
-    except (ValueError, UnicodeError):
-        return None, None, ["Package manifests are not valid JSON"]
-    if not isinstance(pkg, dict) or not isinstance(lock, dict):
-        return None, None, ["Package manifests must be JSON objects"]
-    if (
-        pkg.get("workspaces")
-        or not isinstance(pkg.get("packageManager", "npm"), str)
-        or pkg.get("packageManager", "npm").split("@")[0] != "npm"
-    ):
-        return None, None, ["Workspace/non-npm fallback is unsupported; provide the project's Dockerfile"]
-    if lock.get("lockfileVersion") not in {2, 3}:
-        return None, None, ["Fallback requires npm lockfile version 2 or 3"]
-    scripts = pkg.get("scripts", {})
-    if not isinstance(scripts, dict):
-        return None, None, ["Package scripts must be an object"]
-    if not all(isinstance(pkg.get(key, {}), dict) for key in ("dependencies", "devDependencies")):
-        return None, None, ["Package dependencies must be objects"]
-    dependencies = {**pkg.get("dependencies", {}), **pkg.get("devDependencies", {})}
-    build = scripts.get("build", "")
-    engines = pkg.get("engines", {})
-    if not isinstance(engines, dict):
-        return None, None, ["Package engines must be an object"]
-    declared = [engines.get("node")]
-    for path in (root / ".nvmrc", root / ".node-version"):
-        if path.is_file():
-            declared.append(path.read_text().strip())
-    major = None
-    exact_version = None
-    for version in filter(None, declared):
-        match = re.fullmatch(r"v?(22|24)(?:\.\d+){0,2}|(?:>=|\^)(22|24)(?:\.0){0,2}|(22|24)\.x", str(version))
-        if not match:
-            return None, None, ["Node version constraint needs an explicit compatible Dockerfile"]
-        selected = next(group for group in match.groups() if group)
-        if major and major != selected:
-            return None, None, ["Conflicting Node declarations require a version decision"]
-        major = selected
-        exact = re.fullmatch(r"v?((?:22|24)(?:\.\d+){1,2})", str(version))
-        if exact:
-            if exact_version and exact_version != exact[1]:
-                return None, None, ["Conflicting exact Node declarations require a version decision"]
-            exact_version = exact[1]
-    major = exact_version or major or "22"
-    common = f"FROM node:{major}-alpine AS build\nWORKDIR /app\nCOPY package.json package-lock.json ./\nRUN npm ci\nCOPY . .\n"
-    if profile in {"auto", "vite_static"} and "vite" in dependencies and (root / "index.html").is_file():
-        if build not in {"vite build", "tsc && vite build", "tsc -b && vite build"}:
-            return None, None, ["Vite fallback only supports the verified default static build scripts"]
-        if any(root.glob("vite.config.*")):
-            return (
-                None,
-                None,
-                ["Custom Vite configuration needs an explicit Dockerfile or reviewed build profile"],
-            )
-        content = common + (
-            "RUN rm -rf dist && npm run build && test -f dist/index.html\n"
-            "FROM nginx:alpine AS runtime\n"
-            "COPY --from=build /app/dist /usr/share/nginx/html\n"
-            "RUN printf '%s\\n' 'pid /tmp/nginx.pid;' 'events {}' 'http { include /etc/nginx/mime.types; access_log /dev/stdout; error_log /dev/stderr; client_body_temp_path /tmp/client_temp; proxy_temp_path /tmp/proxy_temp; fastcgi_temp_path /tmp/fastcgi_temp; uwsgi_temp_path /tmp/uwsgi_temp; scgi_temp_path /tmp/scgi_temp; server { listen 8080; server_name _; root /usr/share/nginx/html; index index.html; location = /healthz { return 200; } location / { try_files $uri $uri/ /index.html; } } }' > /etc/nginx/nginx.conf\n"
-            'USER 101:101\nENTRYPOINT ["nginx"]\n'
-            'EXPOSE 8080\nCMD ["-g", "daemon off;"]\n'
-        )
-        return "vite-static-npm.v1", content, []
-    if profile in {"auto", "node_npm"}:
-        start = scripts.get("start", "")
-        match = re.fullmatch(r"node ([A-Za-z0-9_./-]+\.(?:js|mjs|cjs))", start)
-        if match and not build:
-            entry = safe_relative(match[1])
-            if (root / entry).is_file():
-                content = (
-                    f"FROM node:{major}-alpine AS runtime\nWORKDIR /app\n"
-                    "COPY package.json package-lock.json ./\nRUN npm ci --omit=dev\n"
-                    "COPY --chown=node:node . .\nENV NODE_ENV=production\nUSER node\n"
-                    f"CMD {json.dumps(['node', entry])}\n"
-                )
-                return "node-npm-start.v1", content, []
-    return None, None, ["No verified controlled fallback profile; supply a Dockerfile and build context"]
-
-
 def prepare_build(
     source_root: Path, output_root: Path, manifest: dict, request: BuildRequest | None = None
 ) -> PreparedBuild:
@@ -185,35 +93,52 @@ def prepare_build(
     context = source_root / request.context
     if not context.is_dir() or context.is_symlink() or not context.resolve().is_relative_to(source_root):
         raise AnalyzerError("BUILD_CONTEXT_INVALID", "Build context does not exist inside staged source")
-    unresolved, dockerfile, template_id, content = [], None, None, None
-    selection = "source"
-    candidates = sorted(path.relative_to(source_root).as_posix() for path in source_root.rglob("Dockerfile*"))
+    unresolved, dockerfile = [], None
+    # Only candidates in the selected service root are relevant. A Dockerfile
+    # elsewhere in a monorepo must not prevent that service's Railpack handoff.
+    candidates = sorted(
+        path.relative_to(source_root).as_posix()
+        for path in context.rglob("Dockerfile*")
+        if path.is_file() and not path.name.endswith(".dockerignore")
+    )
     chosen = request.dockerfile
+    if chosen is not None:
+        selected_file = source_root / chosen
+        if (
+            not selected_file.is_file()
+            or selected_file.is_symlink()
+            or not selected_file.resolve().is_relative_to(context.resolve())
+        ):
+            raise AnalyzerError(
+                "BUILD_DOCKERFILE_INVALID", "Selected Dockerfile is not a staged context file"
+            )
     if chosen is None and (context / "Dockerfile").is_file():
         chosen = (context / "Dockerfile").relative_to(source_root).as_posix()
-    if chosen:
+    if request.builder == "railpack":
+        builder, reason = "railpack", "explicit_railpack"
+        chosen = None  # Detection never overrides an explicit service choice.
+    elif chosen:
+        builder, reason = "dockerfile", "source_dockerfile"
         dockerfile = source_root / chosen
-        if (
-            not dockerfile.is_file()
-            or dockerfile.is_symlink()
-            or not dockerfile.resolve().is_relative_to(source_root)
-        ):
-            raise AnalyzerError("BUILD_DOCKERFILE_INVALID", "Selected Dockerfile is not a staged source file")
-    elif candidates:
+    elif request.builder == "dockerfile":
+        builder, reason = "dockerfile", "explicit_dockerfile_missing"
         unresolved.append(
-            "Dockerfile candidates exist but the build context/selected Dockerfile is ambiguous"
+            "Explicit Dockerfile builder requires a source Dockerfile or a service configuration decision"
         )
-    elif request.template == "none":
-        unresolved.append("No Dockerfile found and template fallback is disabled")
+    elif candidates:
+        builder, reason = "dockerfile", "dockerfile_selection_required"
+        unresolved.append(
+            "Dockerfile candidates require an explicit path or a service decision to use Railpack"
+        )
     else:
-        template_id, content, reasons = _template(context, request.template)
-        unresolved.extend(reasons)
-        if content:
-            selection = "controlled_template"
-            directory = output_root / "generated"
-            directory.mkdir(exist_ok=True)
-            dockerfile = directory / "Dockerfile"
-            dockerfile.write_text(content)
+        builder, reason = "railpack", "dockerfile_absent"
+    handoff = {
+        "owner": "service",
+        "recommendedBuilder": builder,
+        "requestedBuilder": None if request.builder == "auto" else request.builder,
+        "decisionRequired": request.builder == "auto" or bool(unresolved),
+        "reasonCode": reason,
+    }
     origin = manifest["origin"]
     tag = origin.get("revision") or origin.get("uploadId") or manifest["sourceManifestSha256"][:40]
     if not re.fullmatch(r"[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}", tag):
@@ -226,7 +151,8 @@ def prepare_build(
     effective_ignore = specific_ignore if specific_ignore and specific_ignore.is_file() else ignored
     ignore_path = effective_ignore.relative_to(source_root).as_posix() if effective_ignore.is_file() else None
     plan = {
-        "schemaVersion": "iris.build-plan.v1",
+        "schemaVersion": "iris.build-plan.v2",
+        "buildHandoff": handoff,
         "status": "needs_input" if unresolved else "ready",
         "executionAuthorized": False,
         "source": {key: value for key, value in manifest.items() if key != "files"},
@@ -234,29 +160,24 @@ def prepare_build(
         "environment": {
             "kind": request.environment,
             "platform": request.platform,
-            "supportedByLocalRunner": request.environment == "local_docker",
+            "supportedByLocalRunner": False,
             "cloudFallback": False,
         },
         "build": {
             "contextPath": request.context,
             "dockerfilePath": chosen,
-            "dockerfileOrigin": selection,
+            "dockerfileOrigin": "source" if dockerfile else None,
             "dockerfileSha256": hashlib.sha256(dockerfile.read_bytes()).hexdigest() if dockerfile else None,
             "dockerfileCandidates": candidates,
             "dockerignorePath": ignore_path,
-            "dockerignoreSemantics": "Docker applies the unchanged effective ignore file after explicit credential/host exclusions",
+            "dockerignoreSemantics": (
+                "Docker applies the unchanged effective ignore file after explicit credential/host exclusions"
+                if builder == "dockerfile"
+                else "Detected source ignore file only; the service builder determines Railpack ignore behavior"
+            ),
             "target": request.target,
-            "templateId": template_id,
-            "templatePolicy": {
-                "nodeImage": next(
-                    (line.split()[1] for line in content.splitlines() if line.startswith("FROM node:")), None
-                ),
-                "staticImage": "nginx:alpine",
-                "basis": "controlled_template_policy",
-                "baseImagesPinned": False,
-            }
-            if template_id
-            else None,
+            "templateId": None,
+            "templatePolicy": None,
             "buildArguments": [],
             "secretMounts": [],
             "timeoutSeconds": request.timeout_seconds,
@@ -274,6 +195,8 @@ def prepare_build(
         "registry": asdict(request.ecr_target) if request.ecr_target else None,
         "unresolvedInputs": unresolved,
         "limitations": [
+            "Ready means original source archive preparation only, not Railpack detection, build success, or execution authorization.",
+            "The service owner selects and runs Dockerfile/Railpack builders; this analyzer does not create Dockerfiles or execute source.",
             "A successful image build does not validate application correctness or production capacity.",
             "Local Docker is for explicitly trusted source; a shared Docker daemon is not a hostile-code tenant isolation boundary.",
             "Credential/host files are excluded before Docker applies dockerignore. Exclusions may make builds that depend on them fail.",

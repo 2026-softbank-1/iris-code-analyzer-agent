@@ -162,10 +162,14 @@ Report는 snapshot/context/baseline/proposal/실행조건 digest와 verifier ver
 2. baseline에 없던 정상 문자열 결합 route는 검증해 수용한다. 재할당/shadowing/미확인 import 변형은 보류한다.
 3. dev/container/host 포트 차이를 오충돌로 막지 않고, 같은 실행 경로의 충돌은 탐지한다.
 4. pg 설치만으로 DB 연결을 확정하지 않는다. 최종 nginx runtime과 Node build를 분리한다.
-5. rejected optional 제안은 정상 실행을 막지 않고, 미검증 필수 입력은 Helm/Dockerfile 생성 등 실행용 변환에 들어가지 못한다.
+5. rejected optional 제안은 정상 실행을 막지 않고, 미검증 필수 입력은 빌드 설정·Helm 등 실행용 변환에 들어가지 못한다.
 6. 근거 ID를 무관한 ID로 교체하거나, 실제 선언을 바꾸거나, 참조를 제거한 변형 테스트에서 판정이 그에 맞게 바뀌어야 한다.
 7. raw AI 오답, 검증기에 차단된 오답, 빠져나간 오답, 유용한 신규 발견, 적절/불필요한 보류를 따로 집계한다.
 
 먼저 원문 제안을 별도 보존하고 미검증 제안의 실행 입력 사용을 차단한다. 다음으로 typed claims와 port/command/runtime/DB·양성 route 규칙을 구현하고, 반대 근거 탐색·admission·downstream 소비를 연결한다. 그 뒤 A~E를 동일 사례와 반복 조건에서 비교한다.
 
 현재 11개 사례는 smoke/regression 출발점이다. prompt 예제로 사용한 사례와 평가용 저장소·변형을 분리하고, unseen 사례를 추가한다. 각 군의 모델 식별자·prompt/rule 버전·입력 hash·effort·usage·latency·실패와 zero-denominator N/A를 기록한다. 제한된 테스트에서 escaped 오류 0건은 필수 회귀 조건이지 일반 정확성 증명이 아니다. 새 유료 실험은 기존 공유 예산에 먼저 예약하며, 한도를 자동 증가시키지 않는다.
+
+## 서비스 빌드·개선 에이전트 연결
+
+Dockerfile이 없으면 서비스 담당의 Railpack 빌드로 인계한다. 분석기 Dockerfile 자동 생성은 v2에서 제거했다. 검증된 실패/코드 하자를 로그 기반 개선 에이전트에 넘기는 조건·증빙·제한된 반복 정책은 [개선 인계 설계](remediation-handoff.md)를 따른다. 의미 검증 결과만으로 실제 빌드 실패나 patch 권한을 만들어내지 않는다.

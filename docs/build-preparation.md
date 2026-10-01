@@ -1,53 +1,88 @@
-# 소스 분석 뒤 Dockerfile 준비
+# 소스 분석 뒤 서비스 빌더로 인계
 
-빌드 담당자와의 연결 범위는 **고정 소스 분석 → 기존 Dockerfile 보존 또는 제한된 템플릿 생성 → 검증 가능한 빌드 아카이브 반환**이다. 실제 이미지 빌드·ECR push·CodeBuild Job은 팀 WAS/인프라 빌더가 수행한다. 이 모듈을 분석 API 호출만으로 실행·배포하는 경로는 없다.
+담당 경계는 **고정 소스 분석 → 기존 Dockerfile 확인 → 원본 빌드 아카이브·분석 결과 인계**다. Dockerfile이 없으면 백엔드/서비스 담당 김현겸의 Railpack 빌드 경로를 추천한다. Dockerfile 생성·Railpack 실행·이미지 빌드·ECR push·CodeBuild Job은 서비스 빌드 Worker의 책임이다. 분석기는 소스 코드나 설치 스크립트를 실행하지 않으며 Dockerfile을 생성하지 않는다.
 
-## 입력과 출력
+Dockerfile 부재는 정상적인 빌더 선택 조건이다. 그 자체를 코드 하자나 재귀 수정 에이전트의 수정 대상으로 보내지 않는다. 실제 빌드/실행 하자는 빌더가 돌려주는 고정 소스 식별자·종료 코드·정제된 로그·재현 정보를 진단 계약으로 검증한 뒤 별도로 인계한다.
 
-`python -m iris_analyzer.build.cli --request-stdin`은 stdin JSON 하나를 받고 stdout JSON 하나를 반환한다. Worker가 이미 고정 커밋으로 준비한 소스를 넘긴다.
+## v2 입력과 출력
+
+`python -m iris_analyzer.build.cli --request-stdin`은 stdin JSON 하나를 받아 stdout JSON 하나를 반환한다. Worker가 이미 고정 커밋으로 준비한 소스를 넘긴다.
 
 ```json
 {
-  "schemaVersion": "iris.build-preparation-request.v1",
+  "schemaVersion": "iris.build-preparation-request.v2",
   "sourceRoot": "/worker/fetched-source",
   "outputDirectory": "/worker/jobs/new-job",
   "sourceSha": "0123456789012345678901234567890123456789",
   "rootDirectory": ".",
   "dockerfilePath": null,
   "platform": "linux/amd64",
-  "builder": "dockerfile",
-  "allowGeneration": true
+  "builder": "auto"
 }
 ```
 
-`sourceSha`는 소스 수집 Worker가 검증해 전달하는 Git 커밋이다. 로컬 디렉터리에 SHA 문자열을 붙인다고 Git 원본 인증이 되는 것은 아니다. 준비 모듈은 실제 포함 파일의 별도 `sourceManifestSha256`을 계산하고, 분석 snapshot/context hash, Dockerfile SHA, 최종 압축 SHA를 기록한다.
+`builder`는 `auto`(생략 시 기본값), `dockerfile`, `railpack`이다. `rootDirectory`는 저장소 기준 서비스 루트이고 `dockerfilePath`는 그 루트 안의 상대 경로다. 잘못된 명시 경로는 다른 파일이나 Railpack으로 자동 대체하지 않는다. `sourceSha`는 소스 수집 Worker가 검증해 전달하는 커밋이며, 이 문자열만으로 로컬 디렉터리의 Git 원본이 인증되지는 않는다. 준비 모듈은 포함 파일의 별도 `sourceManifestSha256`과 분석 snapshot/context hash, 기존 Dockerfile SHA, 압축 SHA를 기록한다.
 
-출력 `iris.build-preparation.v1`에는 `status`, `sourceSha`, `rootDirectory`, `platform`, `dockerfilePath`, `dockerfileOrigin`, `dockerfileSha256`, `templateId`, `sourceManifestSha256`, `analysisSourceSnapshotId`, `analysisContextHash`, `analysisMode`, `analysisResult`, `sourceReadiness`, `evidence`, `sourceArchive`, `planDigest`, `preparationDigest`, `unresolvedInputs`, `executionAuthorized=false`가 있다. 준비 성공은 `ready`, 결정할 설정이 남으면 `needs_input`이다. 이는 이미지 빌드 성공이나 배포 승인이 아니다.
+출력 `iris.build-preparation.v2`는 기존 분석·무결성 필드와 다음의 서비스 인계를 포함한다.
 
-`sourceArchive`는 `path/sha256/format`이며 ready일 때만 생성한다. tar 항목은 `source/<원본 경로>`와 선택적 생성 Dockerfile 하나다. 인프라의 기존 `tar --strip-components=1` 입력에 맞췄다. Dockerfile 경로는 서비스 `rootDirectory` 안의 상대 경로다. 원본 파일·실행 비트와 binary 자산은 보존한다. `.git`, 호스트 의존성·가상환경, `.env*`, 명시적 인증 파일과 `secrets/.secrets/credentials` 디렉터리는 포함하지 않는다. 제외 항목은 manifest에 남고, 여기에 의존하는 프로젝트는 별도 빌드 설정이 필요하다.
+```json
+{
+  "schemaVersion": "iris.build-preparation.v2",
+  "status": "ready",
+  "builder": "railpack",
+  "buildHandoff": {
+    "owner": "service",
+    "recommendedBuilder": "railpack",
+    "requestedBuilder": null,
+    "decisionRequired": true,
+    "reasonCode": "dockerfile_absent"
+  },
+  "dockerfilePath": null,
+  "dockerfileOrigin": null,
+  "dockerfileSha256": null,
+  "templateId": null,
+  "executionAuthorized": false
+}
+```
 
-마스킹된 분석 context는 이미지 소스로 쓰지 않는다. 원본을 별도 staging한 뒤 분석하고, 생성 Dockerfile은 아카이브에만 추가한다. 사용자 저장소와 staging 원본을 덮어쓰지 않는다. 심볼릭 링크·경로 이탈·변경된 manifest·기존 출력 디렉터리는 거절한다.
+위는 인계 필드 발췌이며 전체 응답은 `sourceSha`, `rootDirectory`, `platform`, `sourceManifestSha256`, `analysisSourceSnapshotId`, `analysisContextHash`, `analysisMode`, `analysisResult`, `sourceReadiness`, `evidence`, `sourceArchive`, `planDigest`, `preparationDigest`, `unresolvedInputs`도 포함한다.
 
-## 생성 정책
+- `builder`와 `recommendedBuilder`는 준비 모듈의 추천이다. DB의 `service.builder`를 설정하거나 덮어쓰는 명령이 아니다.
+- `requestedBuilder`는 명시적 호출자 선택이며 `auto`/생략은 `null`이다.
+- `decisionRequired`는 자동 추천이거나 `needs_input`이면 `true`다. 검증된 명시적 빌더 선택일 때만 `false`다. Worker는 실제 실행 전 서비스에 저장된 빌더 선택을 확인한다.
+- `ready`는 분석 및 원본 소스 아카이브 준비 완료다. Railpack의 언어 감지·호환성·빌드 성공이나 환경변수의 완전함을 주장하지 않는다. 그런 검증은 빌더 담당이다.
+- `executionAuthorized`는 항상 `false`다. 명시적인 빌더를 전달했어도 분석 호출이 빌드를 실행하지 않는다.
 
-- 기존 Dockerfile이 있으면 바이트를 그대로 보존한다. 잘못된 명시 경로를 다른 파일로 자동 대체하지 않는다.
-- Dockerfile이 없을 때 npm lockfile v2/v3 기반의 단순 Node 시작 앱 또는 기본 Vite 정적 앱만 고정 템플릿으로 생성한다. 분석 결과와 생성 정책의 출처는 분리한다.
-- Node 22/24의 지원하는 선언을 확인한다. `.nvmrc` 등의 정확한 버전은 보존하고, 불명확하거나 충돌한 제약은 질문으로 남긴다. 선언이 없을 때의 Node 22는 템플릿 정책이다. base image tag는 digest 고정이 아니므로 바이너리 재현성을 주장하지 않는다.
-- Vite는 `npm run build` 전에 기존 dist를 제거한다. custom `vite.config.*`, SSR/라이브러리/모노레포, 미설정 빌드 환경변수는 검증된 전용 프로파일 또는 Dockerfile이 필요하다. 일반 Node 빌드/TypeScript, Python, Go는 이 생성기의 지원 범위가 아니다. 팀이 명시적으로 선택한 Railpack 경로는 WAS에서 유지한다.
-- 생성 정적 이미지는 nginx 비특권 사용자와 8080 포트를 사용하며 `/healthz`를 제공한다. read-only root 및 `/tmp` tmpfs 조건으로 실제 실행을 확인했다.
+## 선택 규칙
 
-현재 subprocess bridge는 정적 분석 모드를 명시한다. 라이브러리 `prepare_source_build(request, runner=...)`는 기존 검증된 모델 runner를 받을 수 있지만, Dockerfile 텍스트는 검토한 템플릿으로 생성한다. 이를 자유 형식 LLM 코드 생성이나 새로운 모델 정확도 평가로 표현하지 않는다.
+| 입력/관측 | 추천 · reasonCode | 결과 |
+|---|---|---|
+| auto + 서비스 루트의 Dockerfile 존재 | dockerfile · `source_dockerfile` | ready, 원본 바이트 보존, 서비스 결정 필요 |
+| auto + Dockerfile 후보 없음 | railpack · `dockerfile_absent` | ready, 원본만 인계, 서비스 결정 필요 |
+| auto + 기본 파일 없이 다른 Dockerfile 후보 존재 | dockerfile · `dockerfile_selection_required` | needs_input, 파일 또는 Railpack 명시 선택 필요 |
+| 명시적 dockerfile + 유효한 파일 | dockerfile · `source_dockerfile` | ready, 기존 파일 보존 |
+| 명시적 dockerfile + 기본 파일 없음 | dockerfile · `explicit_dockerfile_missing` | needs_input, Railpack으로 몰래 변경하지 않음 |
+| 명시적 railpack | railpack · `explicit_railpack` | ready, 기존 Dockerfile 유무와 무관하게 선택 보존 |
+| 명시한 dockerfilePath가 없음/잘못됨 | 오류 `BUILD_DOCKERFILE_INVALID` | 다른 파일/빌더로 대체하지 않음 |
 
-## 처리 구조 보완
+Dockerfile 후보는 선택한 서비스 루트 내부에서 찾는다. 다른 서비스의 Dockerfile은 이 서비스의 Railpack 추천을 막지 않는다. Railpack 선택 응답의 Dockerfile path/origin/hash는 모두 null이며, 발견된 기존 파일 자체는 아카이브에 그대로 남는다. 선택한 기존 Dockerfile의 origin은 `source`다. `templateId`는 v2에서 항상 null이다.
 
-`sourceReadiness.buildTargets`는 Docker 빌드 context·Dockerfile·stage·빌드 경로·명령과 패키지 매니저·lockfile·설치 정책을 제공한다. Temp_log의 빌드 `/app`와 실행 `/app/server`를 분리한다. `resolvedCommand`/`resolvedCommandBasis`는 `npm run build` 같은 실행 래퍼가 정책인지 원문 명령인지 구분한다.
+## 바이트와 분석의 분리
 
-`environmentVariables`는 key·component·serviceName·phase·required·origin·condition·evidenceIds를 제공한다. 앱용 Secret과 DB 초기화·Compose 보간·QA 변수를 구분한다. `serviceConnections`는 공급된 근거로 확인한 앱→DB 등의 연결 정보를 추가한다. 선언되지 않은 동적 연결 전체를 복원한다고 주장하지 않는다.
+`sourceArchive`는 `path/sha256/format`이며 ready일 때만 생성한다. tar 항목은 `source/<원본 경로>`뿐이다. 생성 파일 또는 덮어쓰기 overlay를 허용하지 않는다. 원본 파일·실행 비트·binary 자산을 보존한다. `.git`, 호스트 의존성·가상환경, `.env`·`.env.*`, 명시적 인증 파일과 `secrets/.secrets/credentials` 디렉터리는 제외한다. 제외 항목은 manifest에 남고, 이에 의존하는 프로젝트는 빌더에서 별도 설정이 필요하다.
 
-배포 요청의 `bindings.runtimeEnv`와 `bindings.configMapRefs`를 통해 서비스별 일반 설정을 전달한다. Secret과 키가 중복되거나 평문 자격증명·알 수 없는 서비스가 포함되면 거절한다. 자세한 형식은 [배포 계약](deployment-planning.md)에 있다.
+마스킹된 분석 context를 이미지 소스로 사용하지 않는다. 원본을 별도 staging하고 분석하며 원본 또는 staging 파일을 수정하지 않는다. 심볼릭 링크·경로 이탈·변경된 manifest·기존 출력 디렉터리를 거절한다. WAS는 응답 SHA·플랫폼·경로, 아카이브 전체 원본 파일·실행 비트, manifest와 evidence를 독립적으로 대조한다. 추가/누락/변경 파일 및 중복 tar 경로는 실패다.
 
-## 팀 WAS 연결
+현재 subprocess bridge는 정적 분석 모드를 명시한다. 라이브러리 `prepare_source_build(request, runner=...)`는 기존 검증·예산 파이프라인의 모델 runner를 받을 수 있다. 이 선택은 빌더 소유권이나 소스 실행 권한을 바꾸지 않는다.
 
-`iris-was` 최신 `develop`의 Worker-side `BuildPreparationService`가 위 subprocess 계약을 사용한다. WAS는 응답 SHA·플랫폼·경로, 아카이브의 모든 원본 파일 및 실행 비트, manifest와 evidence를 독립적으로 대조한다. 유일하게 허용되는 추가 파일은 선택한 생성 Dockerfile이다. 기존 Dockerfile 변경, 파일 누락·추가·변경, 중복 tar 경로, 타임아웃 뒤 남은 자식 프로세스에 대한 회귀를 포함한다.
+## 빌더에 전달하는 분석 정보
 
-WAS의 DB 큐/소스 수집→CodeBuild 실제 호출은 기존 빌드 담당 구현에서 이 준비 단계를 호출해야 한다. 이번 검증은 WAS 준비 CLI→실제 분석기→아카이브→로컬 Docker 빌드 경로까지 수행했다. [검증 결과](../reports/build-preparation-validation.md)를 참조한다.
+`sourceReadiness.buildTargets`는 빌드 context·Dockerfile·stage·빌드 경로·명령, 패키지 매니저·lockfile·설치 정책을 제공한다. 빌드 경로와 실행 경로를 분리하고 `resolvedCommandBasis`로 원문/정책을 구별한다. `environmentVariables`의 key·component·serviceName·phase·required·origin·condition·evidenceIds와 `serviceConnections`의 근거 기반 연결 관계도 보존한다.
+
+이 결과에 빌드 환경변수나 동적 설정의 미확정 항목이 있을 수 있다. 아카이브 준비 `ready`가 이 항목을 해결하지 않는다. Railpack 감지 결과·설정 override·버전·실제 빌드 로그·이미지 digest는 서비스 빌더가 별도 실행 결과에 기록한다.
+
+## v1에서 v2로 이전
+
+이번 계약은 기존 Draft PR의 생성 경로를 대체한다. v1 입력은 버전 오류로 거절한다. `allowGeneration` 필드는 제거했으며 v2에 넣어도 오류다. Worker는 입력/출력 버전을 함께 v2로 바꾸고 기본 빌더는 auto로 전달한다. 라이브러리 `BuildRequest.template`도 제거하고 `builder`를 사용한다. 원본 이외의 생성 Dockerfile 예외 허용 검사를 제거한다. 이전에 생성한 Dockerfile 아카이브를 v2 결과로 재사용하지 않는다.
+
+서비스 담당은 이 준비 단계를 기존 소스 수집→Railpack/Dockerfile→CodeBuild/ECR 흐름에 연결한다. 분석기에는 Railpack 설치/실행이나 자동 fallback 빌더 실행이 없다. 과거 템플릿 빌드 실험은 [기존 검증 기록](../reports/build-preparation-validation.md)에 남지만, v2의 Railpack 실제 빌드 검증을 대신하지 않는다.

@@ -1,0 +1,161 @@
+{
+  "schemaVersion": "iris.remediation-handoff-cases.v1",
+  "purpose": "draft_contract_examples_not_real_failures",
+  "runtimeDispatchImplemented": false,
+  "examples": [
+    {
+      "name": "verified-source-defect",
+      "packet": {
+        "schemaVersion": "iris.remediation-handoff.v1-draft",
+        "handoffId": "handoff-example-1",
+        "incidentId": "incident-example-1",
+        "idempotencyKey": "1111111111111111111111111111111111111111111111111111111111111111",
+        "serviceId": "svc-example",
+        "source": {
+          "repositoryId": "example/project",
+          "commitSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "sourceSnapshotId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "contextHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "sourceManifestSha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+        },
+        "analysis": {
+          "analysisDigest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "verificationReceiptRef": "receipt:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        },
+        "failure": {
+          "stage": "test",
+          "runId": "test-run-1",
+          "executionConfigDigest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "failureFingerprint": "2222222222222222222222222222222222222222222222222222222222222222",
+          "outcome": "failed",
+          "classification": "code_defect",
+          "causeStatus": "verified",
+          "exitCode": 1,
+          "failureReceiptRef": "receipt:3333333333333333333333333333333333333333333333333333333333333333",
+          "logArtifacts": [
+            {
+              "artifactRef": "artifact:4444444444444444444444444444444444444444444444444444444444444444",
+              "sha256": "4444444444444444444444444444444444444444444444444444444444444444",
+              "kind": "test_log",
+              "redacted": true,
+              "redactionPolicyVersion": "redaction.v1",
+              "byteLength": 240
+            }
+          ],
+          "findingReceiptRefs": [
+            "receipt:5555555555555555555555555555555555555555555555555555555555555555"
+          ]
+        },
+        "repairPolicy": {
+          "mode": "propose_patch",
+          "authorizationReceiptRef": "receipt:6666666666666666666666666666666666666666666666666666666666666666",
+          "attempt": 0,
+          "maxPatchAttempts": 3,
+          "maxDiagnosisRounds": 2,
+          "maxElapsedSeconds": 600,
+          "maxCostUsd": 0.05,
+          "allowedPaths": [
+            "src/**"
+          ],
+          "protectedPaths": [
+            ".env*",
+            ".github/**",
+            "infra/**"
+          ],
+          "validationPlanRef": "artifact:7777777777777777777777777777777777777777777777777777777777777777",
+          "repositoryPushAuthorized": false,
+          "deploymentAuthorized": false
+        }
+      }
+    },
+    {
+      "name": "observed-failure-cause-unknown",
+      "packet": {
+        "schemaVersion": "iris.remediation-handoff.v1-draft",
+        "handoffId": "handoff-example-2",
+        "incidentId": "incident-example-1",
+        "idempotencyKey": "1111111111111111111111111111111111111111111111111111111111111111",
+        "serviceId": "svc-example",
+        "source": {
+          "repositoryId": "example/project",
+          "commitSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "sourceSnapshotId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "contextHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "sourceManifestSha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+        },
+        "analysis": {
+          "analysisDigest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "verificationReceiptRef": "receipt:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        },
+        "failure": {
+          "stage": "test",
+          "runId": "test-run-1",
+          "executionConfigDigest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "failureFingerprint": "2222222222222222222222222222222222222222222222222222222222222222",
+          "outcome": "failed",
+          "classification": "unclassified_failure",
+          "causeStatus": "undetermined",
+          "exitCode": 1,
+          "failureReceiptRef": "receipt:3333333333333333333333333333333333333333333333333333333333333333",
+          "logArtifacts": [
+            {
+              "artifactRef": "artifact:4444444444444444444444444444444444444444444444444444444444444444",
+              "sha256": "4444444444444444444444444444444444444444444444444444444444444444",
+              "kind": "test_log",
+              "redacted": true,
+              "redactionPolicyVersion": "redaction.v1",
+              "byteLength": 240
+            }
+          ],
+          "findingReceiptRefs": []
+        },
+        "repairPolicy": {
+          "mode": "diagnose_only",
+          "authorizationReceiptRef": "receipt:6666666666666666666666666666666666666666666666666666666666666666",
+          "attempt": 0,
+          "maxPatchAttempts": 3,
+          "maxDiagnosisRounds": 2,
+          "maxElapsedSeconds": 600,
+          "maxCostUsd": 0.05,
+          "allowedPaths": [
+            "src/**"
+          ],
+          "protectedPaths": [
+            ".env*",
+            ".github/**",
+            "infra/**"
+          ],
+          "validationPlanRef": "artifact:7777777777777777777777777777777777777777777777777777777777777777",
+          "repositoryPushAuthorized": false,
+          "deploymentAuthorized": false
+        }
+      }
+    }
+  ],
+  "nonRepairRoutes": [
+    {
+      "case": "Dockerfile absent",
+      "owner": "service",
+      "action": "Railpack build selection",
+      "reason": "Normal build path, not code defect"
+    },
+    {
+      "case": "required runtime secret missing",
+      "owner": "service_configuration",
+      "action": "request secure binding",
+      "reason": "No invented credential or code patch"
+    },
+    {
+      "case": "registry authentication or transient network error",
+      "owner": "platform",
+      "action": "authorized recovery/retry",
+      "reason": "Infrastructure error does not prove a code defect"
+    },
+    {
+      "case": "syntax warning without verified complete source/check logs",
+      "owner": "analysis",
+      "action": "collect context or request trusted reproduction",
+      "reason": "Unverified suspicion cannot authorize a patch"
+    }
+  ]
+}

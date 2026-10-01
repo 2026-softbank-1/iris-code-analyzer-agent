@@ -1,5 +1,7 @@
 # 전처리·빌드 준비 연동 검증 · 2026-10-01
 
+> **이전 v1 검증 기록.** 이후 팀 합의로 분석기 Dockerfile 생성은 제거하고 서비스 담당의 Railpack 인계로 변경했다. 아래 실제 빌드 결과는 당시 v1 기능의 기록이며 현행 v2 동작은 [Railpack 인계 검증](railpack-handoff-validation.md)을 따른다.
+
 최신 `iris-was/develop` **344426f**를 별도 clone/worktree로 준비하고, 소스 분석 뒤 Dockerfile을 준비하는 Worker 단계를 연결했다. 분석기 개선은 `feat/preprocess-deployment-contracts`, WAS 연결은 `feat/ai-dockerfile-preparation` 브랜치다.
 
 ## 확인한 처리 경로

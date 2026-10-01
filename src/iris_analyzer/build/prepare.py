@@ -1,4 +1,4 @@
-"""Worker boundary: analyze fixed source, select/generate Dockerfile, package bytes.
+"""Worker boundary: analyze fixed source, recommend service-owned builders, package bytes.
 
 Analysis snapshots deliberately omit binary assets and redact evidence. Build
 archives use a separate byte-preserving manifest, never the redacted context.
@@ -20,8 +20,8 @@ from ..pipeline import ModelRunner, analyze_with_report
 from .plan import BuildRequest, prepare_build
 from .source import safe_relative, stage_local_source, verify_source
 
-REQUEST_VERSION = "iris.build-preparation-request.v1"
-RESULT_VERSION = "iris.build-preparation.v1"
+REQUEST_VERSION = "iris.build-preparation-request.v2"
+RESULT_VERSION = "iris.build-preparation.v2"
 
 
 def _request(document: dict) -> dict:
@@ -34,7 +34,6 @@ def _request(document: dict) -> dict:
         "sourceSha",
         "platform",
         "builder",
-        "allowGeneration",
     }
     if not isinstance(document, dict) or set(document) - allowed:
         raise AnalyzerError("BUILD_REQUEST_INVALID", "Unknown build preparation fields")
@@ -47,32 +46,32 @@ def _request(document: dict) -> dict:
     sha = document.get("sourceSha")
     if not isinstance(sha, str) or not re.fullmatch(r"[a-f0-9]{40}", sha):
         raise AnalyzerError("BUILD_REQUEST_INVALID", "Worker must supply its pinned 40-character commit SHA")
-    if document.get("builder", "dockerfile") != "dockerfile":
-        raise AnalyzerError(
-            "BUILD_CONFIG_REQUIRED", "Explicit Railpack requests belong to the Railpack worker"
-        )
-    if type(document.get("allowGeneration", True)) is not bool:
-        raise AnalyzerError("BUILD_REQUEST_INVALID", "allowGeneration must be boolean")
+    builder = document.get("builder", "auto")
+    if not isinstance(builder, str) or builder not in {"auto", "dockerfile", "railpack"}:
+        raise AnalyzerError("BUILD_REQUEST_INVALID", "Builder must be auto, dockerfile, or railpack")
+    platform = document.get("platform", "linux/amd64")
+    if not isinstance(platform, str) or platform not in {"linux/amd64", "linux/arm64"}:
+        raise AnalyzerError("BUILD_PLATFORM_UNSUPPORTED", "Only Linux amd64/arm64 platforms are supported")
     result = dict(document)
-    result["rootDirectory"] = safe_relative(document.get("rootDirectory") or ".", allow_dot=True)
+    result["rootDirectory"] = safe_relative(document.get("rootDirectory", "."), allow_dot=True)
     path = document.get("dockerfilePath")
-    result["dockerfilePath"] = safe_relative(path) if path else None
+    if path is not None and (not isinstance(path, str) or not path):
+        raise AnalyzerError(
+            "BUILD_REQUEST_INVALID", "Dockerfile path must be a nonempty relative path or null"
+        )
+    result["dockerfilePath"] = safe_relative(path) if path is not None else None
+    result["builder"] = document.get("builder", "auto")
     return result
 
 
-def _archive(source: Path, manifest: dict, output: Path, generated: tuple[str, bytes] | None) -> str:
+def _archive(source: Path, manifest: dict, output: Path) -> str:
     """Deterministic tar with a common root, compatible with CodeBuild strip-components=1."""
     verify_source(source, manifest)
     entries = {row["path"]: row for row in manifest["files"]}
-    if generated:
-        path, data = generated
-        if path in entries:
-            raise AnalyzerError("BUILD_DOCKERFILE_EXISTS", "Generated output would overwrite source")
-        entries[path] = {"path": path, "sha256": hashlib.sha256(data).hexdigest(), "executable": False}
     with output.open("xb") as raw, gzip.GzipFile(filename="", mode="wb", fileobj=raw, mtime=0) as gz:
         with tarfile.open(fileobj=gz, mode="w") as archive:
             for name, row in sorted(entries.items()):
-                data = generated[1] if generated and name == generated[0] else (source / name).read_bytes()
+                data = (source / name).read_bytes()
                 if hashlib.sha256(data).hexdigest() != row["sha256"]:
                     raise AnalyzerError("BUILD_SOURCE_CHANGED", "Source changed during archive assembly")
                 info = tarfile.TarInfo("source/" + name)
@@ -87,8 +86,8 @@ def prepare_source_build(document: dict, *, runner: ModelRunner | None = None) -
     """Prepare an isolated build artifact; caller attests the source's pinned Git SHA.
 
     A supplied model runner uses the existing schema/evidence/budget pipeline.
-    Without one the mode is explicitly static; template output is never labelled
-    free-form model-authored Dockerfile or proof of a successful image build.
+    Without one the mode is explicitly static. Ready attests source archive
+    preparation, never Railpack support, an image build, or execution approval.
     """
     request = _request(document)
     source = Path(request["sourceRoot"]).resolve(strict=True)
@@ -106,55 +105,23 @@ def prepare_source_build(document: dict, *, runner: ModelRunner | None = None) -
     }
     run = analyze_with_report(staged, runner=runner, out=output / "analysis")
     readiness = prepare_readiness(staged, analysis=run.result, out=output / "readiness")
-    # Analysis and readiness must not alter the build bytes before generation.
+    # Analysis and readiness must not alter the original build bytes.
     verify_source(staged, manifest)
     context = request["rootDirectory"]
     selected = request["dockerfilePath"]
     full_path = (PurePosixPath(context) / selected).as_posix() if selected else None
-    # An explicit missing filename is a configuration error. Only an absent
-    # default Dockerfile is eligible for controlled generation.
-    if full_path and not (staged / full_path).is_file():
-        if selected == "Dockerfile" and request.get("allowGeneration", True):
-            full_path = None
     config = BuildRequest(
         context=context,
         dockerfile=full_path,
         platform=request.get("platform", "linux/amd64"),
-        template="auto" if request.get("allowGeneration", True) else "none",
+        builder=request["builder"],
         source_snapshot_id=run.result["sourceSnapshotId"],
     )
     prepared = prepare_build(staged, output / "plan", manifest, config)
     plan = prepared.plan
-    if plan["build"]["dockerfileOrigin"] == "controlled_template":
-        builtin_vite = {"MODE", "BASE_URL", "DEV", "PROD", "SSR"}
-        for variable in readiness.get("environmentVariables", []):
-            component = variable.get("component", ".")
-            belongs = context == "." or component == context or component.startswith(context + "/")
-            if (
-                belongs
-                and variable.get("phase") == "build"
-                and variable.get("required") is not False
-                and variable.get("key") not in builtin_vite
-            ):
-                plan["unresolvedInputs"].append(
-                    "Build-time environment requires an explicit reviewed input: " + variable["key"]
-                )
-        if plan["unresolvedInputs"]:
-            plan["status"] = "needs_input"
-            plan["planDigest"] = digest({key: value for key, value in plan.items() if key != "planDigest"})
-            (output / "plan/build-plan.json").write_text(
-                json.dumps(plan, ensure_ascii=False, indent=2) + "\n"
-            )
-    generated = None
-    relative = None
-    if prepared.dockerfile:
-        if plan["build"]["dockerfileOrigin"] == "controlled_template":
-            relative = "Dockerfile"
-            generated = ((PurePosixPath(context) / relative).as_posix(), prepared.dockerfile.read_bytes())
-        else:
-            relative = prepared.dockerfile.relative_to(staged / context).as_posix()
+    relative = prepared.dockerfile.relative_to(staged / context).as_posix() if prepared.dockerfile else None
     archive = output / "source.tar.gz"
-    archive_digest = _archive(staged, manifest, archive, generated) if plan["status"] == "ready" else None
+    archive_digest = _archive(staged, manifest, archive) if plan["status"] == "ready" else None
     evidence = [
         {"path": row["path"], "sha256": row["sha256"]}
         for row in manifest["files"]
@@ -173,7 +140,8 @@ def prepare_source_build(document: dict, *, runner: ModelRunner | None = None) -
     result = {
         "schemaVersion": RESULT_VERSION,
         "status": plan["status"],
-        "builder": "dockerfile",
+        "builder": plan["buildHandoff"]["recommendedBuilder"],
+        "buildHandoff": plan["buildHandoff"],
         "rootDirectory": context,
         "platform": config.platform,
         "dockerfilePath": relative,

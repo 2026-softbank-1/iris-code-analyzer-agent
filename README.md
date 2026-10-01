@@ -66,9 +66,9 @@ uv run iris-deployment --repo ../tested_code/Temp_log --env-file ../.env --out a
 
 테스트 프론트에서는 배포 조건을 바꾸고 같은 소스의 계획만 다시 생성할 수 있습니다. [배포 계획 계약과 아키텍처](docs/deployment-planning.md)에 모듈 경계, 입력, 가정·측정 처리, 비용과 템플릿 지원 범위를 설명했습니다.
 
-### 소스 분석 뒤 Dockerfile 준비
+### 소스 분석 후 서비스 빌드 인계
 
-팀 WAS Worker가 호출하는 빌드 준비 계약을 추가했습니다. 기존 Dockerfile과 binary 자산을 보존하고, Dockerfile이 없으면 지원하는 Node/npm·기본 Vite 프로파일의 고정 템플릿으로 생성합니다. [빌드 준비 구조와 실행법](docs/build-preparation.md), [검증 결과](reports/build-preparation-validation.md)를 참조합니다.
+팀 WAS Worker가 호출하는 빌드 준비 v2는 기존 Dockerfile과 binary 자산을 보존합니다. Dockerfile이 없으면 서비스 담당의 Railpack 경로를 추천하며, 분석기가 Dockerfile을 생성하지 않습니다. 명시적 빌더 선택을 보존하고 실제 선택·빌드·ECR push는 서비스가 담당합니다. [빌드 인계 계약](docs/build-preparation.md), [v2 검증 결과](reports/railpack-handoff-validation.md)를 참조합니다.
 
 ### 기존 분석 CLI
 
@@ -156,3 +156,7 @@ worker는 `analyze_with_report`에 모델 runner와 Job 이벤트 저장 콜백�
 ### AI 판단·근거·기여 평가 기준
 
 [AI 판단 정책](docs/ai-judgment-policy.md)은 각 항목을 입력 → 확인할 근거 → 허용 결론 → 금지 단정 → 기대 결과로 정리합니다. 현재 구현의 보장과 검증 공백을 구분하며, [구조화 평가 사례](evaluations/ai-judgment-cases.json)와 [오프라인 검증기 감사](reports/ai-judgment-audit.json)를 함께 제공합니다. 사례 테스트 통과와 실제 AI 기여 점수는 별개입니다.
+
+### 검증된 문제의 로그 기반 개선 인계
+
+실패 로그·원본 식별자·검증 기록을 묶어 원인 미확정은 진단 전용, 검증된 코드 하자는 수정안 제안으로 넘기는 [개선 인계 설계](docs/remediation-handoff.md)를 추가했습니다. [draft 계약](contracts/remediation-handoff.v1.schema.json)은 형식 초안이며 실제 오류 에이전트·WAS 큐 연결은 아직 구현하지 않았습니다. Dockerfile 부재·설정 누락·인프라 장애는 코드 하자로 자동 분류하지 않습니다.
