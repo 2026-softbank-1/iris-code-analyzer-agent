@@ -1,6 +1,6 @@
 # Iris Code Analyzer
 
-Iris의 전처리와 코드 분석 worker용 Python 패키지입니다. 저장소를 고정한 스냅샷으로 읽고 배포에 필요한 파일·관측값·줄 단위 근거를 구성한 다음 OpenCode를 통해 Hive 모델에 전달합니다. 결과는 JSON Schema와 원본 근거 및 정적 관측값으로 다시 검증합니다.
+Iris의 전처리와 코드 분석 worker용 Python 패키지입니다. 저장소를 고정한 스냅샷으로 읽고 배포에 필요한 파일·관측값·줄 단위 근거를 구성한 다음 OpenCode를 통해 Hive 또는 OpenAI 모델에 전달합니다. 결과는 JSON Schema와 원본 근거 및 정적 관측값으로 다시 검증합니다.
 
 Node.js workspace, Vite, Express, Dockerfile, Compose를 지원합니다. 분석 대상의 소스·설정·스크립트를 실행하지 않습니다. FastAPI Job 접수, PostgreSQL 저장, 실제 빌드·배포는 플랫폼 담당 모듈에서 연결합니다.
 
@@ -19,6 +19,25 @@ uv 없이 설치하려면 가상환경에서 `pip install -e '.[dev]'`를 사용
 
 Hive 기본 설정은 `hive-ai / zai-org/glm-5.3-flash`입니다. 다른 모델은 `--model deepseek-ai/deepseek-v4.1-flash`로 지정합니다. `.env`의 `HIVE_MODEL`, `HIVE_BASE_URL`, `OPENCODE_PROVIDER`도 지원합니다. `.env`는 Git에서 제외되며 키는 모델 입력·보고서에 넣지 않습니다. 상위 폴더의 키는 `--env-file ../.env`로 사용합니다.
 
+OpenAI는 `OPENAI_API` 또는 표준 이름 `OPENAI_API_KEY`를 읽습니다. 다음처럼 설정하면 기본 공급자가 바뀝니다. 키는 서버에만 두며 프론트에는 전달하지 않습니다.
+
+```dotenv
+OPENAI_API=your-key
+OPENAI_MODEL=gpt-6-luna
+OPENCODE_PROVIDER=openai
+```
+
+`OPENCODE_OUTPUT_MODE`를 생략하면 OpenAI는 구조화 응답 도구, Hive는 JSON 텍스트를 사용합니다. GPT-6 Luna 기본 reasoning은 `low`이며 이때 temperature를 보내지 않습니다. 모델 응답의 snapshot/context 및 계획 digest는 요청별 스키마에 고정하고 기존 검증을 유지합니다. 초기 JSON 텍스트 호출의 잘못된 해시를 거절한 기록과 실제 두 프로젝트 검증은 [OpenAI 검증 보고서](reports/openai-validation.md)에 있습니다.
+
+```sh
+uv run iris-analyzer analyze --repo ../tested_code/Temp_log \
+  --env-file ../.env --provider openai --model gpt-6-luna --out artifacts/openai-analysis
+uv run iris-deployment --repo ../tested_code/Temp_log \
+  --env-file ../.env --provider openai --model gpt-6-luna --out artifacts/openai-deployment
+```
+
+공급자를 명시적으로 바꾸면 다른 공급자의 `OPENCODE_MODEL`, 응답 모드·reasoning·native JSON 설정을 가져오지 않습니다. 비용 상한은 양쪽 공급자가 같은 ledger를 공유합니다. OpenAI 비용은 cache write·reasoning·긴 context 할증까지 반영한 추정값이며 실제 청구는 별도로 확인해야 합니다.
+
 ## 실행
 
 ### GitHub 링크를 받는 테스트 프론트
@@ -30,7 +49,7 @@ uv run --extra demo iris-review-demo --env-file ../.env
 # 전역 opencode가 없으면 --opencode-executable /path/to/opencode 추가
 ```
 
-브라우저에서 <http://127.0.0.1:8765/>를 열고 GitHub 저장소 링크를 입력합니다. 브랜치·태그·커밋을 따로 지정하거나 `/tree/test/feature` 링크를 사용할 수 있습니다. 기본은 Hive AI 보완이며 키가 없으면 정적 분석을 제공합니다. 서비스 구성, 실행 명령, 포트, API 경로, 환경변수 키, 의존성, 확인할 항목을 표시합니다. 근거 버튼은 마스킹한 파일의 줄을 열고 JSON 다운로드는 고정 소스 커밋과 분석 결과를 저장합니다.
+브라우저에서 <http://127.0.0.1:8765/>를 열고 GitHub 저장소 링크를 입력합니다. 브랜치·태그·커밋을 따로 지정하거나 `/tree/test/feature` 링크를 사용할 수 있습니다. AI 공급자에서 Hive 또는 OpenAI를 선택할 수 있으며, 선택한 공급자의 키가 없으면 정적 분석을 제공합니다. 서비스 구성, 실행 명령, 포트, API 경로, 환경변수 키, 의존성, 확인할 항목을 표시합니다. 근거 버튼은 마스킹한 파일의 줄을 열고 JSON 다운로드는 고정 소스 커밋과 분석 결과를 저장합니다.
 
 테스트 서버는 `127.0.0.1`에 바인딩합니다. 인증된 GitHub CLI로 커밋 SHA를 먼저 고정하고 tarball을 자료로 읽습니다. 다운로드한 프로젝트를 설치·빌드·실행하지 않습니다. 압축 파일 32 MiB, 압축 해제 선언 크기 100 MiB, 파일당 1 MB, 분석 파일 2,000개, 아카이브 항목 10,000개를 제한합니다. 동시 분석 1개, 대기 포함 3개, 프로세스당 기록 24개입니다. 기록 한도에 도달하면 서버를 재시작합니다. 화면의 최근 기록은 탭을 새로고침하면 초기화됩니다.
 

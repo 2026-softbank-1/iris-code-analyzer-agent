@@ -1,0 +1,723 @@
+{
+  "schemaVersion": "iris.openai-validation.v1",
+  "date": "2026-10-01",
+  "model": "gpt-6-luna",
+  "provider": "openai",
+  "opencodeVersion": "1.18.33",
+  "tests": {
+    "python311": 436,
+    "python313": 436,
+    "branchAwareCoveragePercent": 86.25162127107653,
+    "ruff": true,
+    "prettier": true,
+    "nodeSyntax": true,
+    "wheelBuild": true
+  },
+  "projects": [
+    {
+      "name": "Temp_log",
+      "reviewedSourceDigestsMatch": true,
+      "sourceSnapshotId": "d0892b62daa0e20e6fd7e5459d761a8323430ed2b886af86880f7dd5f33460cd",
+      "sourceStatus": "complete",
+      "quality": {
+        "passed": true,
+        "checks": [
+          {
+            "key": "application_service_count",
+            "expected": 1,
+            "observed": 1,
+            "passed": true
+          },
+          {
+            "key": "service_roles",
+            "expected": [
+              "web_api"
+            ],
+            "observed": [
+              "web_api"
+            ],
+            "passed": true
+          },
+          {
+            "key": "component_roots",
+            "expected": [
+              ".",
+              "client",
+              "server"
+            ],
+            "observed": [
+              ".",
+              "client",
+              "server"
+            ],
+            "passed": true
+          },
+          {
+            "key": "service:web_api:runtime",
+            "expected": true,
+            "observed": true,
+            "passed": true
+          },
+          {
+            "key": "service:web_api:startCommand",
+            "expected": true,
+            "observed": true,
+            "passed": true
+          },
+          {
+            "key": "service:web_api:workingDirectory",
+            "expected": true,
+            "observed": true,
+            "passed": true
+          },
+          {
+            "key": "service:web_api:buildCommand",
+            "expected": true,
+            "observed": true,
+            "passed": true
+          },
+          {
+            "key": "runtime.port:container:*",
+            "expected": true,
+            "observed": true,
+            "passed": true
+          },
+          {
+            "key": "runtime.port:development:client",
+            "expected": true,
+            "observed": true,
+            "passed": true
+          },
+          {
+            "key": "runtime.port:host_mapping:*",
+            "expected": true,
+            "observed": true,
+            "passed": true
+          },
+          {
+            "key": "runtime.host:production:*",
+            "expected": true,
+            "observed": true,
+            "passed": true
+          },
+          {
+            "key": "docker.workdir:container:*",
+            "expected": true,
+            "observed": true,
+            "passed": true
+          },
+          {
+            "key": "start.command:container:*",
+            "expected": true,
+            "observed": true,
+            "passed": true
+          },
+          {
+            "key": "build.command:source:*",
+            "expected": true,
+            "observed": true,
+            "passed": true
+          },
+          {
+            "key": "route_set",
+            "expected": [
+              [
+                "DELETE",
+                "/api/comments/:id"
+              ],
+              [
+                "DELETE",
+                "/api/comments/:id/admin"
+              ],
+              [
+                "DELETE",
+                "/api/posts/:id"
+              ],
+              [
+                "DELETE",
+                "/api/upload/:filename"
+              ],
+              [
+                "GET",
+                "/api/auth/me"
+              ],
+              [
+                "GET",
+                "/api/comments"
+              ],
+              [
+                "GET",
+                "/api/health"
+              ],
+              [
+                "GET",
+                "/api/posts"
+              ],
+              [
+                "GET",
+                "/api/posts/:idOrSlug"
+              ],
+              [
+                "GET",
+                "/api/posts/featured"
+              ],
+              [
+                "GET",
+                "/api/upload/library"
+              ],
+              [
+                "GET",
+                "/health/live"
+              ],
+              [
+                "GET",
+                "/health/ready"
+              ],
+              [
+                "GET",
+                "/uploads/:filename"
+              ],
+              [
+                "GET",
+                "/{*path}"
+              ],
+              [
+                "PATCH",
+                "/api/posts/:id"
+              ],
+              [
+                "POST",
+                "/api/auth/login"
+              ],
+              [
+                "POST",
+                "/api/auth/logout"
+              ],
+              [
+                "POST",
+                "/api/comments"
+              ],
+              [
+                "POST",
+                "/api/posts"
+              ],
+              [
+                "POST",
+                "/api/upload"
+              ]
+            ],
+            "observed": [
+              [
+                "DELETE",
+                "/api/comments/:id"
+              ],
+              [
+                "DELETE",
+                "/api/comments/:id/admin"
+              ],
+              [
+                "DELETE",
+                "/api/posts/:id"
+              ],
+              [
+                "DELETE",
+                "/api/upload/:filename"
+              ],
+              [
+                "GET",
+                "/api/auth/me"
+              ],
+              [
+                "GET",
+                "/api/comments"
+              ],
+              [
+                "GET",
+                "/api/health"
+              ],
+              [
+                "GET",
+                "/api/posts"
+              ],
+              [
+                "GET",
+                "/api/posts/:idOrSlug"
+              ],
+              [
+                "GET",
+                "/api/posts/featured"
+              ],
+              [
+                "GET",
+                "/api/upload/library"
+              ],
+              [
+                "GET",
+                "/health/live"
+              ],
+              [
+                "GET",
+                "/health/ready"
+              ],
+              [
+                "GET",
+                "/uploads/:filename"
+              ],
+              [
+                "GET",
+                "/{*path}"
+              ],
+              [
+                "PATCH",
+                "/api/posts/:id"
+              ],
+              [
+                "POST",
+                "/api/auth/login"
+              ],
+              [
+                "POST",
+                "/api/auth/logout"
+              ],
+              [
+                "POST",
+                "/api/comments"
+              ],
+              [
+                "POST",
+                "/api/posts"
+              ],
+              [
+                "POST",
+                "/api/upload"
+              ]
+            ],
+            "passed": true
+          },
+          {
+            "key": "required_environment_keys",
+            "expected": true,
+            "observed": true,
+            "passed": true
+          },
+          {
+            "key": "dependency:mongo",
+            "expected": true,
+            "observed": true,
+            "passed": true
+          },
+          {
+            "key": "dependency:uploads",
+            "expected": true,
+            "observed": true,
+            "passed": true
+          },
+          {
+            "key": "dependency:mongo-data",
+            "expected": true,
+            "observed": true,
+            "passed": true
+          },
+          {
+            "key": "frontend_base:/api",
+            "expected": true,
+            "observed": true,
+            "passed": true
+          },
+          {
+            "key": "evidence_integrity",
+            "expected": true,
+            "observed": true,
+            "passed": true
+          },
+          {
+            "key": "secret_file_exclusion",
+            "expected": true,
+            "observed": true,
+            "passed": true
+          }
+        ],
+        "criticalFactsAccuracy": 1.0,
+        "routes": {
+          "expected": 21,
+          "detected": 21,
+          "truePositive": 21,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "resultStatus": "complete",
+        "limitations": []
+      },
+      "modelProposalCount": 0,
+      "sourceCalls": [
+        {
+          "provider": "openai",
+          "model": "gpt-6-luna",
+          "outputMode": "structured",
+          "latencySeconds": 5.110702,
+          "usage": {
+            "cache": {
+              "read": 0,
+              "write": 51245
+            },
+            "input": 126,
+            "output": 143,
+            "reasoning": 0,
+            "total": 51514
+          },
+          "estimatedCostUsd": 0.006492875,
+          "cost": null,
+          "effectiveInferenceOptions": {
+            "maxOutputTokens": 8192,
+            "reasoningEffort": "low",
+            "responseFormat": null,
+            "temperature": null
+          },
+          "formatRecovery": false,
+          "error": null,
+          "usageCompleteForCall": false,
+          "remoteRetryAttempts": 0
+        }
+      ],
+      "planningCalls": [
+        {
+          "provider": "openai",
+          "model": "gpt-6-luna",
+          "outputMode": "structured",
+          "latencySeconds": 5.972025,
+          "usage": {
+            "cache": {
+              "read": 0,
+              "write": 12576
+            },
+            "input": 126,
+            "output": 430,
+            "reasoning": 0,
+            "total": 13132
+          },
+          "estimatedCostUsd": 0.00180275,
+          "cost": null,
+          "effectiveInferenceOptions": {
+            "maxOutputTokens": 8192,
+            "reasoningEffort": "low",
+            "responseFormat": null,
+            "temperature": null
+          },
+          "formatRecovery": false,
+          "error": null,
+          "usageCompleteForCall": false,
+          "remoteRetryAttempts": 0
+        }
+      ],
+      "planningStatus": "needs_input",
+      "executionStatus": "blocked",
+      "deploymentAuthorized": false
+    },
+    {
+      "name": "portpolio-production",
+      "reviewedSourceDigestsMatch": true,
+      "sourceSnapshotId": "dcab384d9e1a6cfe70ee38b024a06b0bce34cee63a645572e01f89b70c1fddca",
+      "sourceStatus": "complete",
+      "quality": {
+        "passed": true,
+        "checks": [
+          {
+            "key": "application_service_count",
+            "expected": 1,
+            "observed": 1,
+            "passed": true
+          },
+          {
+            "key": "service_roles",
+            "expected": [
+              "static"
+            ],
+            "observed": [
+              "static"
+            ],
+            "passed": true
+          },
+          {
+            "key": "component_roots",
+            "expected": [
+              "."
+            ],
+            "observed": [
+              "."
+            ],
+            "passed": true
+          },
+          {
+            "key": "service:static:runtime",
+            "expected": true,
+            "observed": true,
+            "passed": true
+          },
+          {
+            "key": "service:static:buildCommand",
+            "expected": true,
+            "observed": true,
+            "passed": true
+          },
+          {
+            "key": "service:static:outputDirectory",
+            "expected": true,
+            "observed": true,
+            "passed": true
+          },
+          {
+            "key": "framework:source:*",
+            "expected": true,
+            "observed": true,
+            "passed": true
+          },
+          {
+            "key": "build.command:source:*",
+            "expected": true,
+            "observed": true,
+            "passed": true
+          },
+          {
+            "key": "output.directory:production:*",
+            "expected": true,
+            "observed": true,
+            "passed": true
+          },
+          {
+            "key": "runtime.port:container:*",
+            "expected": true,
+            "observed": true,
+            "passed": true
+          },
+          {
+            "key": "runtime.port:host_mapping:*",
+            "expected": true,
+            "observed": true,
+            "passed": true
+          },
+          {
+            "key": "route_set",
+            "expected": [],
+            "observed": [],
+            "passed": true
+          },
+          {
+            "key": "required_environment_keys",
+            "expected": true,
+            "observed": true,
+            "passed": true
+          },
+          {
+            "key": "evidence_integrity",
+            "expected": true,
+            "observed": true,
+            "passed": true
+          },
+          {
+            "key": "secret_file_exclusion",
+            "expected": true,
+            "observed": true,
+            "passed": true
+          }
+        ],
+        "criticalFactsAccuracy": 1.0,
+        "routes": {
+          "expected": 0,
+          "detected": 0,
+          "truePositive": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "resultStatus": "complete",
+        "limitations": []
+      },
+      "modelProposalCount": 0,
+      "sourceCalls": [
+        {
+          "provider": "openai",
+          "model": "gpt-6-luna",
+          "outputMode": "structured",
+          "latencySeconds": 5.216958,
+          "usage": {
+            "cache": {
+              "read": 0,
+              "write": 12747
+            },
+            "input": 126,
+            "output": 149,
+            "reasoning": 0,
+            "total": 13022
+          },
+          "estimatedCostUsd": 0.001683625,
+          "cost": null,
+          "effectiveInferenceOptions": {
+            "maxOutputTokens": 8192,
+            "reasoningEffort": "low",
+            "responseFormat": null,
+            "temperature": null
+          },
+          "formatRecovery": false,
+          "error": null,
+          "usageCompleteForCall": false,
+          "remoteRetryAttempts": 0
+        }
+      ],
+      "planningCalls": [
+        {
+          "provider": "openai",
+          "model": "gpt-6-luna",
+          "outputMode": "structured",
+          "latencySeconds": 7.525203,
+          "usage": {
+            "cache": {
+              "read": 0,
+              "write": 4501
+            },
+            "input": 126,
+            "output": 452,
+            "reasoning": 145,
+            "total": 5224
+          },
+          "estimatedCostUsd": 0.000876875,
+          "cost": null,
+          "effectiveInferenceOptions": {
+            "maxOutputTokens": 8192,
+            "reasoningEffort": "low",
+            "responseFormat": null,
+            "temperature": null
+          },
+          "formatRecovery": false,
+          "error": null,
+          "usageCompleteForCall": false,
+          "remoteRetryAttempts": 0
+        }
+      ],
+      "planningStatus": "needs_input",
+      "executionStatus": "blocked",
+      "deploymentAuthorized": false
+    }
+  ],
+  "initialAttempts": [
+    {
+      "project": "temp",
+      "outputMode": "json_text",
+      "status": "failed",
+      "calls": [
+        {
+          "provider": "openai",
+          "model": "gpt-6-luna",
+          "outputMode": "json_text",
+          "latencySeconds": 4.273845,
+          "usage": {
+            "cache": {
+              "read": 0,
+              "write": 48726
+            },
+            "input": 3,
+            "output": 133,
+            "reasoning": 0,
+            "total": 48862
+          },
+          "estimatedCostUsd": 0.006157625,
+          "cost": null,
+          "effectiveInferenceOptions": {
+            "maxOutputTokens": 8192,
+            "reasoningEffort": "low",
+            "responseFormat": null,
+            "temperature": null
+          },
+          "formatRecovery": false,
+          "error": "RESULT_SCHEMA_INVALID",
+          "usageCompleteForCall": true,
+          "remoteRetryAttempts": 0
+        }
+      ]
+    },
+    {
+      "project": "portfolio",
+      "outputMode": "json_text",
+      "status": "complete",
+      "calls": [
+        {
+          "provider": "openai",
+          "model": "gpt-6-luna",
+          "outputMode": "json_text",
+          "latencySeconds": 4.48208,
+          "usage": {
+            "cache": {
+              "read": 0,
+              "write": 10216
+            },
+            "input": 3,
+            "output": 139,
+            "reasoning": 0,
+            "total": 10358
+          },
+          "estimatedCostUsd": 0.001346875,
+          "cost": null,
+          "effectiveInferenceOptions": {
+            "maxOutputTokens": 8192,
+            "reasoningEffort": "low",
+            "responseFormat": null,
+            "temperature": null
+          },
+          "formatRecovery": false,
+          "error": null,
+          "usageCompleteForCall": true,
+          "remoteRetryAttempts": 0
+        }
+      ]
+    }
+  ],
+  "browserValidation": {
+    "url": "http://127.0.0.1:8765/#review=020f2c177e3ad26531fb1f78",
+    "state": "succeeded",
+    "sourceMode": "reused static review at commit 54fa8072d9fb",
+    "planMode": "ai",
+    "calls": [
+      {
+        "provider": "openai",
+        "model": "gpt-6-luna",
+        "outputMode": "structured",
+        "latencySeconds": 7.988242,
+        "usage": {
+          "cache": {
+            "read": 0,
+            "write": 12570
+          },
+          "input": 126,
+          "output": 472,
+          "reasoning": 100,
+          "total": 13268
+        },
+        "estimatedCostUsd": 0.001873,
+        "cost": null,
+        "effectiveInferenceOptions": {
+          "maxOutputTokens": 8192,
+          "reasoningEffort": "low",
+          "responseFormat": null,
+          "temperature": null
+        },
+        "formatRecovery": false,
+        "error": null,
+        "usageCompleteForCall": false,
+        "remoteRetryAttempts": 0
+      }
+    ]
+  },
+  "budget": {
+    "sharedCapUsd": 1,
+    "accountedIncludingUnsettledReservationsUsd": 0.878278215,
+    "actualInvoiceCostUsd": null,
+    "note": "Shared historical Hive and OpenAI ledger; incomplete usage retains reservation. Call estimates are not invoice costs."
+  },
+  "limitations": [
+    "One final structured run per project; no statistical reliability or cross-run reproducibility claim.",
+    "Both source responses returned no supplemental proposals; scores verify the merged static observations and identity/evidence checks, not added semantic discovery.",
+    "Planning suggestions remain unmeasured assumptions; requests lack verified image, network, secrets and storage bindings.",
+    "No Terraform apply, cloud provisioning or cluster deployment performed.",
+    "Initial Temp_log JSON text attempt was rejected for a 63-character context hash; no repair of identity. Final structured schemas bind expected identities with const."
+  ]
+}
