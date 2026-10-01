@@ -1,0 +1,534 @@
+{
+  "schemaVersion": "1",
+  "purpose": "reviewed_holdout_policy_spec",
+  "modelEvaluationPerformed": false,
+  "evidenceIdConvention": "Case-local aliases bind to snapshot evidence by exact file and line text, never model-visible literal evidence IDs.",
+  "evaluationLimits": [
+    "These source cases were not included as examples in the production prompt; they are a small independent holdout, not a broad model benchmark.",
+    "Offline tests verify source/gold consistency and deterministic baseline only; real model runs are recorded separately.",
+    "Abstention rationale and no-op behavior require human review; the automatic gate is not a complete policy score.",
+    "Some selected source files initially provide only snippets; expectedFileRequests includes same-file expansion only when the missing lines are necessary."
+  ],
+  "cases": [
+    {
+      "input": {
+        "caseId": "holdout-composed-route",
+        "category": "positive_static_gap",
+        "sourceFiles": {
+          "package.json": "{\n  \"name\": \"acceptance-holdout\",\n  \"scripts\": {\n    \"start\": \"node gateway.cjs\"\n  },\n  \"dependencies\": {\n    \"express\": \"5.1.0\"\n  }\n}\n",
+          "gateway.cjs": "const createWeb = require('express');\nconst gateway = createWeb();\nconst diagnostic = '/ops/' + 'alive';\ngateway.get(diagnostic, (_req, res) => res.send('alive'));\ngateway.listen(4637);\n"
+        },
+        "selectedContext": {
+          "component": ".",
+          "environment": "source_only"
+        },
+        "baselineCoverage": "intended_ai_policy",
+        "baselineAssertions": [
+          {
+            "match": {
+              "key": "runtime.port",
+              "value": 4637,
+              "scope": "container"
+            },
+            "present": true
+          },
+          {
+            "match": {
+              "key": "api.route",
+              "value": {
+                "method": "GET",
+                "path": "/ops/alive"
+              }
+            },
+            "present": false
+          }
+        ],
+        "selectedPaths": [
+          "gateway.cjs"
+        ],
+        "unselectedAvailablePaths": [],
+        "expandableSelectedPaths": [
+          "gateway.cjs"
+        ],
+        "baselineStatus": "needs_input"
+      },
+      "evidenceToCheck": [
+        {
+          "id": "factory",
+          "path": "gateway.cjs",
+          "startLine": 1,
+          "endLine": 1,
+          "exactText": "const createWeb = require('express');",
+          "relationship": "createWeb is imported from Express",
+          "availability": "after_expansion"
+        },
+        {
+          "id": "receiver",
+          "path": "gateway.cjs",
+          "startLine": 2,
+          "endLine": 2,
+          "exactText": "const gateway = createWeb();",
+          "relationship": "gateway is the top-level Express receiver",
+          "availability": "initial"
+        },
+        {
+          "id": "literal",
+          "path": "gateway.cjs",
+          "startLine": 3,
+          "endLine": 3,
+          "exactText": "const diagnostic = '/ops/' + 'alive';",
+          "relationship": "The immutable string expression produces /ops/alive",
+          "availability": "after_expansion"
+        },
+        {
+          "id": "registration",
+          "path": "gateway.cjs",
+          "startLine": 4,
+          "endLine": 4,
+          "exactText": "gateway.get(diagnostic, (_req, res) => res.send('alive'));",
+          "relationship": "The GET registration uses that exact identifier",
+          "availability": "initial"
+        }
+      ],
+      "allowedConclusions": [
+        {
+          "id": "new-diagnostic-route",
+          "statement": "After source expansion, suggest GET /ops/alive declared by this immutable local expression and Express registration.",
+          "supportingEvidenceIds": [
+            "factory",
+            "receiver",
+            "literal",
+            "registration"
+          ],
+          "scope": "source"
+        }
+      ],
+      "forbiddenClaims": [
+        {
+          "id": "unseen-expression",
+          "statement": "Assert the concatenated route before receiving its omitted declaration.",
+          "reason": "Initial snippets do not include the literal expression."
+        },
+        {
+          "id": "production-health",
+          "statement": "The route establishes readiness or successful HTTP response in a deployed service.",
+          "reason": "The source returns a fixed string and no runtime test is performed."
+        }
+      ],
+      "expectedResult": {
+        "disposition": "suggest",
+        "expectedNewClaims": [
+          {
+            "claimId": "new-diagnostic-route",
+            "target": "apiRoutes",
+            "status": "suggested",
+            "scope": "source",
+            "value": {
+              "method": "GET",
+              "path": "/ops/alive",
+              "component": "."
+            },
+            "evidenceIds": [
+              "factory",
+              "receiver",
+              "literal",
+              "registration"
+            ]
+          }
+        ],
+        "expectedNewIssues": [],
+        "expectedAbstentions": [],
+        "expectedFileRequests": [
+          "gateway.cjs"
+        ],
+        "baselinePolicy": "Preserve original observations; source execution and deployment health are unmeasured. Only reviewed novel claims earn model credit.",
+        "scoredAsActualModelResult": false
+      }
+    },
+    {
+      "input": {
+        "caseId": "holdout-reassigned-route",
+        "category": "insufficient_relationship",
+        "sourceFiles": {
+          "package.json": "{\n  \"name\": \"acceptance-holdout\",\n  \"scripts\": {\n    \"start\": \"node gateway.cjs\"\n  },\n  \"dependencies\": {\n    \"express\": \"5.1.0\"\n  }\n}\n",
+          "gateway.cjs": "const createWeb = require('express');\nconst gateway = createWeb();\nlet diagnostic = '/ops/' + 'alive';\ndiagnostic = process.env.PROBE_ROUTE;\ngateway.get(diagnostic, (_req, res) => res.send('alive'));\ngateway.listen(4637);\n"
+        },
+        "selectedContext": {
+          "component": ".",
+          "environment": "source_only"
+        },
+        "baselineCoverage": "partially_static",
+        "baselineAssertions": [
+          {
+            "match": {
+              "key": "runtime.port",
+              "value": 4637,
+              "scope": "container"
+            },
+            "present": true
+          },
+          {
+            "match": {
+              "key": "api.route",
+              "value": {
+                "method": "GET",
+                "path": "/ops/alive"
+              }
+            },
+            "present": false
+          }
+        ],
+        "selectedPaths": [
+          "gateway.cjs"
+        ],
+        "unselectedAvailablePaths": [],
+        "expandableSelectedPaths": [],
+        "baselineStatus": "needs_input"
+      },
+      "evidenceToCheck": [
+        {
+          "id": "assignment",
+          "path": "gateway.cjs",
+          "startLine": 4,
+          "endLine": 4,
+          "exactText": "diagnostic = process.env.PROBE_ROUTE;",
+          "relationship": "The identifier is overwritten by an unknown external environment value before registration",
+          "availability": "initial"
+        },
+        {
+          "id": "registration",
+          "path": "gateway.cjs",
+          "startLine": 5,
+          "endLine": 5,
+          "exactText": "gateway.get(diagnostic, (_req, res) => res.send('alive'));",
+          "relationship": "GET uses the overwritten identifier",
+          "availability": "initial"
+        }
+      ],
+      "allowedConclusions": [
+        {
+          "id": "defer-unproven-route",
+          "statement": "PROBE_ROUTE overwrites the local literal; no deployment binding establishes the final route. Keep the route unresolved without inventing a path.",
+          "supportingEvidenceIds": [
+            "assignment",
+            "registration"
+          ],
+          "scope": "source"
+        }
+      ],
+      "forbiddenClaims": [
+        {
+          "id": "claimed-local-literal-route",
+          "statement": "Conclude that GET /ops/alive is the registered route by reading the earlier outer literal only.",
+          "reason": "PROBE_ROUTE overwrites the local literal; no deployment binding establishes the final route."
+        },
+        {
+          "id": "request-secret-values",
+          "statement": "Ask for the raw environment file or secret values.",
+          "reason": "The analysis should identify the unresolved binding, not read excluded runtime credentials."
+        }
+      ],
+      "expectedResult": {
+        "disposition": "abstain",
+        "expectedNewClaims": [],
+        "expectedNewIssues": [],
+        "expectedAbstentions": [
+          {
+            "key": "runtime.httpRoutes",
+            "reason": "PROBE_ROUTE overwrites the local literal; no deployment binding establishes the final route.",
+            "kind": "code_review",
+            "blocking": true
+          }
+        ],
+        "expectedFileRequests": [],
+        "baselinePolicy": "Preserve original observations; source execution and deployment health are unmeasured. Only reviewed novel claims earn model credit.",
+        "scoredAsActualModelResult": false
+      }
+    },
+    {
+      "input": {
+        "caseId": "holdout-shadowed-route",
+        "category": "insufficient_relationship",
+        "sourceFiles": {
+          "package.json": "{\n  \"name\": \"acceptance-holdout\",\n  \"scripts\": {\n    \"start\": \"node gateway.cjs\"\n  },\n  \"dependencies\": {\n    \"express\": \"5.1.0\"\n  }\n}\n",
+          "gateway.cjs": "const createWeb = require('express');\nconst gateway = createWeb();\nconst diagnostic = '/ops/' + 'alive';\nfunction register(diagnostic) {\n  gateway.get(diagnostic, (_req, res) => res.send('alive'));\n}\nregister(process.env.PROBE_ROUTE);\ngateway.listen(4637);\n"
+        },
+        "selectedContext": {
+          "component": ".",
+          "environment": "source_only"
+        },
+        "baselineCoverage": "partially_static",
+        "baselineAssertions": [
+          {
+            "match": {
+              "key": "runtime.port",
+              "value": 4637,
+              "scope": "container"
+            },
+            "present": true
+          },
+          {
+            "match": {
+              "key": "api.route",
+              "value": {
+                "method": "GET",
+                "path": "/ops/alive"
+              }
+            },
+            "present": false
+          }
+        ],
+        "selectedPaths": [
+          "gateway.cjs"
+        ],
+        "unselectedAvailablePaths": [],
+        "expandableSelectedPaths": [
+          "gateway.cjs"
+        ],
+        "baselineStatus": "needs_input"
+      },
+      "evidenceToCheck": [
+        {
+          "id": "outer-literal",
+          "path": "gateway.cjs",
+          "startLine": 3,
+          "endLine": 3,
+          "exactText": "const diagnostic = '/ops/' + 'alive';",
+          "relationship": "An outer const exists but is hidden by the function parameter",
+          "availability": "after_expansion"
+        },
+        {
+          "id": "shadow",
+          "path": "gateway.cjs",
+          "startLine": 4,
+          "endLine": 6,
+          "exactText": "function register(diagnostic) {\n  gateway.get(diagnostic, (_req, res) => res.send('alive'));\n}",
+          "relationship": "The registration uses the function parameter rather than the outer const",
+          "availability": "after_expansion"
+        },
+        {
+          "id": "caller",
+          "path": "gateway.cjs",
+          "startLine": 7,
+          "endLine": 7,
+          "exactText": "register(process.env.PROBE_ROUTE);",
+          "relationship": "The caller supplies an unknown environment value",
+          "availability": "initial"
+        }
+      ],
+      "allowedConclusions": [
+        {
+          "id": "defer-unproven-route",
+          "statement": "Function parameter shadows the outer literal; PROBE_ROUTE supplies the unresolved route. Keep the route unresolved without inventing a path.",
+          "supportingEvidenceIds": [
+            "outer-literal",
+            "shadow",
+            "caller"
+          ],
+          "scope": "source"
+        }
+      ],
+      "forbiddenClaims": [
+        {
+          "id": "claimed-local-literal-route",
+          "statement": "Conclude that GET /ops/alive is the registered route by reading the earlier outer literal only.",
+          "reason": "Function parameter shadows the outer literal; PROBE_ROUTE supplies the unresolved route."
+        },
+        {
+          "id": "request-secret-values",
+          "statement": "Ask for the raw environment file or secret values.",
+          "reason": "The analysis should identify the unresolved binding, not read excluded runtime credentials."
+        }
+      ],
+      "expectedResult": {
+        "disposition": "abstain",
+        "expectedNewClaims": [],
+        "expectedNewIssues": [],
+        "expectedAbstentions": [
+          {
+            "key": "runtime.httpRoutes",
+            "reason": "Function parameter shadows the outer literal; PROBE_ROUTE supplies the unresolved route.",
+            "kind": "code_review",
+            "blocking": true
+          }
+        ],
+        "expectedFileRequests": [
+          "gateway.cjs"
+        ],
+        "baselinePolicy": "Preserve original observations; source execution and deployment health are unmeasured. Only reviewed novel claims earn model credit.",
+        "scoredAsActualModelResult": false
+      }
+    },
+    {
+      "input": {
+        "caseId": "holdout-normal-noop",
+        "category": "normal",
+        "sourceFiles": {
+          "package.json": "{\n  \"name\": \"acceptance-holdout\",\n  \"scripts\": {\n    \"start\": \"node gateway.cjs\"\n  },\n  \"dependencies\": {\n    \"express\": \"5.1.0\"\n  }\n}\n",
+          "gateway.cjs": "const createWeb = require('express');\nconst gateway = createWeb();\ngateway.listen(4637);\n"
+        },
+        "selectedContext": {
+          "component": ".",
+          "environment": "source_only"
+        },
+        "baselineCoverage": "already_static",
+        "baselineAssertions": [
+          {
+            "match": {
+              "key": "runtime.port",
+              "value": 4637,
+              "scope": "container"
+            },
+            "present": true
+          }
+        ],
+        "selectedPaths": [
+          "gateway.cjs"
+        ],
+        "unselectedAvailablePaths": [],
+        "expandableSelectedPaths": [],
+        "baselineStatus": "complete"
+      },
+      "evidenceToCheck": [
+        {
+          "id": "listener",
+          "path": "gateway.cjs",
+          "startLine": 3,
+          "endLine": 3,
+          "exactText": "gateway.listen(4637);",
+          "relationship": "The application source declares the container listener 4637",
+          "availability": "initial"
+        }
+      ],
+      "allowedConclusions": [
+        {
+          "id": "preserve-port",
+          "statement": "Keep the observed listener 4637 without counting it as a new AI discovery.",
+          "supportingEvidenceIds": [
+            "listener"
+          ],
+          "scope": "container"
+        }
+      ],
+      "forbiddenClaims": [
+        {
+          "id": "duplicate-static-credit",
+          "statement": "Count the same port as a novel AI discovery.",
+          "reason": "It is already present in the deterministic baseline."
+        }
+      ],
+      "expectedResult": {
+        "disposition": "no_change",
+        "expectedNewClaims": [],
+        "expectedNewIssues": [],
+        "expectedAbstentions": [],
+        "expectedFileRequests": [],
+        "baselinePolicy": "Preserve original observations; source execution and deployment health are unmeasured. Only reviewed novel claims earn model credit.",
+        "scoredAsActualModelResult": false
+      }
+    },
+    {
+      "input": {
+        "caseId": "holdout-development-docs",
+        "category": "scope_nonconflict",
+        "sourceFiles": {
+          "package.json": "{\n  \"name\": \"acceptance-holdout\",\n  \"scripts\": {\n    \"start\": \"node gateway.cjs\"\n  },\n  \"dependencies\": {\n    \"express\": \"5.1.0\"\n  }\n}\n",
+          "gateway.cjs": "const createWeb = require('express');\nconst gateway = createWeb();\ngateway.listen(4637);\n",
+          "Dockerfile": "FROM node:22\nWORKDIR /srv\nCOPY . .\nEXPOSE 4637\nCMD [\"node\", \"gateway.cjs\"]\n",
+          "README.md": "# Developer guide\nDevelopment uses `node dev.cjs` and listens on port 5842.\n"
+        },
+        "selectedContext": {
+          "component": ".",
+          "environment": "container"
+        },
+        "baselineCoverage": "already_static",
+        "baselineAssertions": [
+          {
+            "match": {
+              "key": "runtime.port",
+              "value": 4637,
+              "scope": "container"
+            },
+            "present": true
+          }
+        ],
+        "selectedPaths": [
+          "gateway.cjs"
+        ],
+        "unselectedAvailablePaths": [],
+        "expandableSelectedPaths": [],
+        "baselineStatus": "complete"
+      },
+      "evidenceToCheck": [
+        {
+          "id": "listener",
+          "path": "gateway.cjs",
+          "startLine": 3,
+          "endLine": 3,
+          "exactText": "gateway.listen(4637);",
+          "relationship": "The application source declares the container listener 4637",
+          "availability": "initial"
+        },
+        {
+          "id": "development-doc",
+          "path": "README.md",
+          "startLine": 2,
+          "endLine": 2,
+          "exactText": "Development uses `node dev.cjs` and listens on port 5842.",
+          "relationship": "Documentation explicitly describes a development command and port",
+          "availability": "initial"
+        },
+        {
+          "id": "container-declarations",
+          "path": "Dockerfile",
+          "startLine": 4,
+          "endLine": 5,
+          "exactText": "EXPOSE 4637\nCMD [\"node\", \"gateway.cjs\"]",
+          "relationship": "EXPOSE and CMD apply to the container path",
+          "availability": "initial"
+        }
+      ],
+      "allowedConclusions": [
+        {
+          "id": "preserve-port",
+          "statement": "Keep the observed listener 4637 without counting it as a new AI discovery.",
+          "supportingEvidenceIds": [
+            "listener"
+          ],
+          "scope": "container"
+        },
+        {
+          "id": "preserve-scope",
+          "statement": "Development documentation at 5842 and the container listener at 4637 describe distinct scopes; do not claim a documentation mismatch.",
+          "supportingEvidenceIds": [
+            "development-doc",
+            "container-declarations",
+            "listener"
+          ],
+          "scope": "source"
+        }
+      ],
+      "forbiddenClaims": [
+        {
+          "id": "duplicate-static-credit",
+          "statement": "Count the same port as a novel AI discovery.",
+          "reason": "It is already present in the deterministic baseline."
+        },
+        {
+          "id": "invented-doc-conflict",
+          "statement": "Assert stale production documentation from the different development port.",
+          "reason": "No same-environment conflict is established."
+        }
+      ],
+      "expectedResult": {
+        "disposition": "no_change",
+        "expectedNewClaims": [],
+        "expectedNewIssues": [],
+        "expectedAbstentions": [],
+        "expectedFileRequests": [],
+        "baselinePolicy": "Preserve original observations; source execution and deployment health are unmeasured. Only reviewed novel claims earn model credit.",
+        "scoredAsActualModelResult": false
+      }
+    }
+  ]
+}

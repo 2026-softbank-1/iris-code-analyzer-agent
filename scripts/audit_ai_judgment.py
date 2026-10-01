@@ -1,6 +1,6 @@
 """Print a constructed evidence-support audit; no model/source execution.
 
-The JSON is diagnostic, not a model quality score or a passing policy gate.
+The JSON checks one admission invariant, not model quality or universal correctness.
 Run: python scripts/audit_ai_judgment.py
 """
 
@@ -11,7 +11,7 @@ from tempfile import TemporaryDirectory
 from iris_analyzer.contracts import AnalyzerError
 from iris_analyzer.opencode.runner import response_template
 from iris_analyzer.preprocess import prepare_context, release_snapshot
-from iris_analyzer.result import static_analysis, validate_analysis
+from iris_analyzer.result import static_analysis, validate_analysis, validate_analysis_with_report
 
 with TemporaryDirectory(prefix="iris-judgment-audit-") as directory:
     root = Path(directory)
@@ -47,7 +47,7 @@ with TemporaryDirectory(prefix="iris-judgment-audit-") as directory:
                 "reason": "PostgreSQL is required",
             }
         ]
-        accepted = validate_analysis(reply, bundle)
+        accepted, verification = validate_analysis_with_report(reply, bundle)
         reply["result"]["dependencies"][0]["status"] = "detected"
         try:
             validate_analysis(reply, bundle)
@@ -71,6 +71,7 @@ with TemporaryDirectory(prefix="iris-judgment-audit-") as directory:
                 "status": accepted["status"],
                 "dependencies": accepted["dependencies"],
                 "questions": accepted["questions"],
+                "verification": verification,
             },
             "sameClaimAsDetected": detected,
             "questionCase": {
