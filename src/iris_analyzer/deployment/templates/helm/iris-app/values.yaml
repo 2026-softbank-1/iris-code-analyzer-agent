@@ -1,0 +1,4 @@
+# The compiler supplies this file. Draft plans intentionally produce no values.
+namespace: iris-placeholder
+planDigest: "0000000000000000000000000000000000000000000000000000000000000000"
+resources: []

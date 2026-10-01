@@ -183,6 +183,28 @@ def validate_model_proposal(reply: dict) -> dict:
 
 
 class OpenCodeRunner:
+    response_schema = MODEL_PROPOSAL_SCHEMA
+    prompt_version = PROMPT_VERSION
+
+    def _validate_input(self, bundle: dict) -> None:
+        validate_bundle(bundle)
+
+    def _model_context(self, bundle: dict) -> dict:
+        return model_input(bundle)
+
+    def _request_document(self, bundle: dict) -> dict:
+        return {
+            "responseSchema": self.response_schema,
+            "contextBundle": self._model_context(bundle),
+            "responseTemplate": response_template(bundle),
+        }
+
+    def _system_prompt(self) -> str:
+        return files("iris_analyzer.opencode").joinpath("prompts/deployment.txt").read_text(encoding="utf-8")
+
+    def _validate_output(self, reply: dict) -> dict:
+        return validate_model_proposal(reply)
+
     def __init__(
         self,
         config: ModelConfig,
@@ -222,7 +244,7 @@ class OpenCodeRunner:
     def invoke_model(self, bundle: dict) -> dict:
         self.last_request = None
         self.last_response = None
-        validate_bundle(bundle)
+        self._validate_input(bundle)
         started = time.monotonic()
         deadline = started + self.config.timeout_seconds
         record: dict = {
@@ -234,7 +256,7 @@ class OpenCodeRunner:
             "responseMessageId": None,
             "provider": self.config.provider,
             "model": self.config.model,
-            "promptVersion": PROMPT_VERSION,
+            "promptVersion": self.prompt_version,
             "outputMode": self.config.output_mode,
             "serverVersion": None,
             "apiSchemaHash": None,
@@ -281,9 +303,7 @@ class OpenCodeRunner:
             record["sessionId"] = self._session_id
             message_id = new_message_id()
             record["messageId"] = message_id
-            prompt = (
-                files("iris_analyzer.opencode").joinpath("prompts/deployment.txt").read_text(encoding="utf-8")
-            )
+            prompt = self._system_prompt()
             payload = {
                 "messageID": message_id,
                 "model": {"providerID": self.config.provider, "modelID": self.config.model},
@@ -292,18 +312,12 @@ class OpenCodeRunner:
                 "parts": [
                     {
                         "type": "text",
-                        "text": canonical_bytes(
-                            {
-                                "responseSchema": MODEL_PROPOSAL_SCHEMA,
-                                "contextBundle": model_input(bundle),
-                                "responseTemplate": response_template(bundle),
-                            }
-                        ).decode("utf-8"),
+                        "text": canonical_bytes(self._request_document(bundle)).decode("utf-8"),
                     }
                 ],
             }
             if self.config.output_mode == "structured":
-                payload["format"] = {"type": "json_schema", "schema": MODEL_PROPOSAL_SCHEMA, "retryCount": 0}
+                payload["format"] = {"type": "json_schema", "schema": self.response_schema, "retryCount": 0}
             # UTF-8 bytes conservatively bound ordinary text tokens. Add a
             # platform framing allowance and reserve output for every permitted
             # remote retry. Unknown interrupted usage keeps its full reservation.
@@ -326,7 +340,7 @@ class OpenCodeRunner:
             self.model_calls += 1
             record["reservedTokensUpperBound"] = reservation
             self.last_request = payload
-            record["modelInputDigest"] = digest(model_input(bundle))
+            record["modelInputDigest"] = digest(self._model_context(bundle))
             record["modelPromptDigest"] = digest(json.loads(payload["parts"][0]["text"]))
             record["requestPayloadDigest"] = digest(payload)
             response = self.client.prompt(
@@ -401,7 +415,7 @@ class OpenCodeRunner:
                 if recovery:
                     record["formatRecovery"] = True
                     record["formatRecoveryDetails"] = recovery
-            return validate_model_proposal(reply)
+            return self._validate_output(reply)
         except (AnalyzerError, KeyboardInterrupt) as exc:
             record["error"] = exc.code if isinstance(exc, AnalyzerError) else "MODEL_CANCELLED"
             if self._session_id:

@@ -1,0 +1,3435 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://iris.example/contracts/deployment-plan.v1.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "enum": [
+        "iris.deployment-plan.v1"
+      ]
+    },
+    "planDigest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "requestDigest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "analysisDigest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "sourceSnapshotId": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "contextHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "analysisStatus": {
+          "enum": [
+            "complete",
+            "needs_input",
+            "unsupported"
+          ]
+        }
+      },
+      "required": [
+        "sourceSnapshotId",
+        "contextHash",
+        "analysisStatus"
+      ]
+    },
+    "request": {
+      "$ref": "#/$defs/planningRequest"
+    },
+    "adapter": {
+      "anyOf": [
+        {
+          "enum": [
+            "aws_eks",
+            "existing_kubernetes"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "needs_input",
+        "ready",
+        "unsupported"
+      ]
+    },
+    "plannerMode": {
+      "enum": [
+        "policy",
+        "ai"
+      ]
+    },
+    "executionEligible": {
+      "type": "boolean"
+    },
+    "deploymentAuthorized": {
+      "enum": [
+        false
+      ]
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1
+          },
+          "impact": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "id",
+          "description",
+          "impact"
+        ]
+      },
+      "minItems": 0
+    },
+    "questions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "field": {
+            "type": "string",
+            "minLength": 1
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          },
+          "requiredForExecution": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "field",
+          "reason",
+          "requiredForExecution"
+        ]
+      },
+      "minItems": 0
+    },
+    "recommendations": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "target": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "stack": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "cloud": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "region": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "architecture": {
+                  "anyOf": [
+                    {
+                      "enum": [
+                        "x86_64",
+                        "arm64"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "environment": {
+                  "enum": [
+                    "test",
+                    "production"
+                  ]
+                }
+              },
+              "required": [
+                "stack",
+                "cloud",
+                "region",
+                "architecture",
+                "environment"
+              ]
+            },
+            "provenance": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "basis": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "source",
+                      "user",
+                      "measurement",
+                      "policy"
+                    ]
+                  },
+                  "minItems": 1,
+                  "uniqueItems": true
+                },
+                "evidenceIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "uniqueItems": true
+                },
+                "measurementIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "uniqueItems": true
+                },
+                "assumptionIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "uniqueItems": true
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "basis",
+                "evidenceIds",
+                "measurementIds",
+                "assumptionIds",
+                "reason"
+              ]
+            }
+          },
+          "required": [
+            "value",
+            "provenance"
+          ]
+        },
+        "instance": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "instanceType": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "cpuMillicores": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "memoryMiB": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "minNodes": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "maxNodes": {
+                      "type": "integer",
+                      "minimum": 1
+                    }
+                  },
+                  "required": [
+                    "instanceType",
+                    "cpuMillicores",
+                    "memoryMiB",
+                    "minNodes",
+                    "maxNodes"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "provenance": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "basis": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "source",
+                      "user",
+                      "measurement",
+                      "policy"
+                    ]
+                  },
+                  "minItems": 1,
+                  "uniqueItems": true
+                },
+                "evidenceIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "uniqueItems": true
+                },
+                "measurementIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "uniqueItems": true
+                },
+                "assumptionIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "uniqueItems": true
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "basis",
+                "evidenceIds",
+                "measurementIds",
+                "assumptionIds",
+                "reason"
+              ]
+            }
+          },
+          "required": [
+            "value",
+            "provenance"
+          ]
+        },
+        "cost": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "currency": {
+                  "enum": [
+                    "USD"
+                  ]
+                },
+                "monthlyTotalUsd": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "coverage": {
+                  "enum": [
+                    "complete",
+                    "partial",
+                    "unknown"
+                  ]
+                },
+                "lineItems": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "key": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "monthlyUsd": {
+                        "anyOf": [
+                          {
+                            "type": "number",
+                            "minimum": 0
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "reason": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "catalogItemKey": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "quantity": {
+                        "anyOf": [
+                          {
+                            "type": "number",
+                            "minimum": 0
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "key",
+                      "monthlyUsd",
+                      "reason"
+                    ]
+                  },
+                  "minItems": 0
+                }
+              },
+              "required": [
+                "currency",
+                "monthlyTotalUsd",
+                "coverage",
+                "lineItems"
+              ]
+            },
+            "provenance": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "basis": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "source",
+                      "user",
+                      "measurement",
+                      "policy"
+                    ]
+                  },
+                  "minItems": 1,
+                  "uniqueItems": true
+                },
+                "evidenceIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "uniqueItems": true
+                },
+                "measurementIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "uniqueItems": true
+                },
+                "assumptionIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "uniqueItems": true
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "basis",
+                "evidenceIds",
+                "measurementIds",
+                "assumptionIds",
+                "reason"
+              ]
+            }
+          },
+          "required": [
+            "value",
+            "provenance"
+          ]
+        },
+        "network": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "vpcMode": {
+                  "enum": [
+                    "create",
+                    "existing"
+                  ]
+                },
+                "vpcId": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^vpc-[a-f0-9]+$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "subnetIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^subnet-[a-f0-9]+$"
+                  },
+                  "minItems": 0
+                },
+                "availabilityZones": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "minItems": 0
+                },
+                "natGatewayCount": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "publicIngress": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "vpcMode",
+                "vpcId",
+                "subnetIds",
+                "availabilityZones",
+                "natGatewayCount",
+                "publicIngress"
+              ]
+            },
+            "provenance": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "basis": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "source",
+                      "user",
+                      "measurement",
+                      "policy"
+                    ]
+                  },
+                  "minItems": 1,
+                  "uniqueItems": true
+                },
+                "evidenceIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "uniqueItems": true
+                },
+                "measurementIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "uniqueItems": true
+                },
+                "assumptionIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "uniqueItems": true
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "basis",
+                "evidenceIds",
+                "measurementIds",
+                "assumptionIds",
+                "reason"
+              ]
+            }
+          },
+          "required": [
+            "value",
+            "provenance"
+          ]
+        },
+        "databases": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "serviceIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "minItems": 1
+                  },
+                  "engine": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "version": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "mode": {
+                    "enum": [
+                      "existing",
+                      "managed"
+                    ]
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "storageGiB": {
+                    "anyOf": [
+                      {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "connectionSecretName": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[a-z0-9]([-a-z0-9]{0,61}[a-z0-9])?$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "serviceIds",
+                  "engine",
+                  "version",
+                  "mode",
+                  "name",
+                  "storageGiB",
+                  "connectionSecretName"
+                ]
+              },
+              "minItems": 0
+            },
+            "provenance": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "basis": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "source",
+                      "user",
+                      "measurement",
+                      "policy"
+                    ]
+                  },
+                  "minItems": 1,
+                  "uniqueItems": true
+                },
+                "evidenceIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "uniqueItems": true
+                },
+                "measurementIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "uniqueItems": true
+                },
+                "assumptionIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "uniqueItems": true
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "basis",
+                "evidenceIds",
+                "measurementIds",
+                "assumptionIds",
+                "reason"
+              ]
+            }
+          },
+          "required": [
+            "value",
+            "provenance"
+          ]
+        },
+        "storage": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9]([-a-z0-9]{0,61}[a-z0-9])?$"
+                  },
+                  "serviceIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "minItems": 1
+                  },
+                  "sizeGiB": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "storageClass": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "accessMode": {
+                    "enum": [
+                      "ReadWriteOnce",
+                      "ReadWriteMany"
+                    ]
+                  }
+                },
+                "required": [
+                  "name",
+                  "serviceIds",
+                  "sizeGiB",
+                  "storageClass",
+                  "accessMode"
+                ]
+              },
+              "minItems": 0
+            },
+            "provenance": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "basis": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "source",
+                      "user",
+                      "measurement",
+                      "policy"
+                    ]
+                  },
+                  "minItems": 1,
+                  "uniqueItems": true
+                },
+                "evidenceIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "uniqueItems": true
+                },
+                "measurementIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "uniqueItems": true
+                },
+                "assumptionIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "uniqueItems": true
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "basis",
+                "evidenceIds",
+                "measurementIds",
+                "assumptionIds",
+                "reason"
+              ]
+            }
+          },
+          "required": [
+            "value",
+            "provenance"
+          ]
+        },
+        "observability": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "prometheusEnabled": {
+                  "type": "boolean"
+                },
+                "scrapeIntervalSeconds": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              },
+              "required": [
+                "prometheusEnabled",
+                "scrapeIntervalSeconds"
+              ]
+            },
+            "provenance": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "basis": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "source",
+                      "user",
+                      "measurement",
+                      "policy"
+                    ]
+                  },
+                  "minItems": 1,
+                  "uniqueItems": true
+                },
+                "evidenceIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "uniqueItems": true
+                },
+                "measurementIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "uniqueItems": true
+                },
+                "assumptionIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "uniqueItems": true
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "basis",
+                "evidenceIds",
+                "measurementIds",
+                "assumptionIds",
+                "reason"
+              ]
+            }
+          },
+          "required": [
+            "value",
+            "provenance"
+          ]
+        },
+        "operatingPolicy": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "expectedRps": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "availability": {
+                  "enum": [
+                    "single_az",
+                    "multi_az"
+                  ]
+                },
+                "userMonthlyBudgetUsd": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "suggestedMonthlyBudgetUsd": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "budgetConfidence": {
+                  "enum": [
+                    "provisional",
+                    "measured"
+                  ]
+                },
+                "knownMonthlyCostFloorUsd": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "kubernetesVersion": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^1\\.[0-9]{2}$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "expectedRps",
+                "availability",
+                "userMonthlyBudgetUsd",
+                "suggestedMonthlyBudgetUsd",
+                "budgetConfidence",
+                "knownMonthlyCostFloorUsd"
+              ]
+            },
+            "provenance": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "basis": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "source",
+                      "user",
+                      "measurement",
+                      "policy"
+                    ]
+                  },
+                  "minItems": 1,
+                  "uniqueItems": true
+                },
+                "evidenceIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "uniqueItems": true
+                },
+                "measurementIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "uniqueItems": true
+                },
+                "assumptionIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "uniqueItems": true
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "basis",
+                "evidenceIds",
+                "measurementIds",
+                "assumptionIds",
+                "reason"
+              ]
+            }
+          },
+          "required": [
+            "value",
+            "provenance"
+          ]
+        }
+      },
+      "required": [
+        "target",
+        "instance",
+        "cost",
+        "network",
+        "databases",
+        "storage",
+        "observability"
+      ]
+    },
+    "configuration": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "runtimeVerified": {
+          "type": "boolean"
+        },
+        "namespace": {
+          "type": "string",
+          "pattern": "^[a-z0-9]([-a-z0-9]{0,61}[a-z0-9])?$"
+        },
+        "clusterName": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-z0-9]([-a-z0-9]{0,61}[a-z0-9])?$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "existingClusterContext": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "imagePlatforms": {
+          "type": "object",
+          "additionalProperties": {
+            "enum": [
+              "amd64",
+              "arm64"
+            ]
+          }
+        },
+        "terraformInputs": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "kubernetesVersion": {
+                  "type": "string",
+                  "pattern": "^1\\.[0-9]{2}$"
+                },
+                "administratorRoleArn": {
+                  "type": "string",
+                  "pattern": "^arn:aws:iam::[0-9]{12}:role/[A-Za-z0-9+=,.@_/-]+$"
+                },
+                "nodeDiskGiB": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "desiredNodes": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "privateNetworkEgressVerified": {
+                  "type": "boolean"
+                },
+                "executorPrivateApiReachable": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "kubernetesVersion",
+                "administratorRoleArn",
+                "nodeDiskGiB",
+                "desiredNodes",
+                "privateNetworkEgressVerified",
+                "executorPrivateApiReachable"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ingressVerified": {
+          "type": "boolean"
+        },
+        "storageDriverVerified": {
+          "type": "boolean"
+        },
+        "databasesVerified": {
+          "type": "boolean"
+        },
+        "availableCapacity": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "cpuMillicores": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "memoryMiB": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "nodeCount": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              },
+              "required": [
+                "cpuMillicores",
+                "memoryMiB",
+                "nodeCount"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "workloads": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "serviceId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "name": {
+                "type": "string",
+                "pattern": "^[a-z0-9]([-a-z0-9]{0,61}[a-z0-9])?$"
+              },
+              "image": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]*@sha256:[a-f0-9]{64}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "containerPorts": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "pattern": "^[a-z0-9]([-a-z0-9]{0,61}[a-z0-9])?$"
+                    },
+                    "port": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 65535
+                    },
+                    "protocol": {
+                      "enum": [
+                        "TCP",
+                        "UDP"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "port",
+                    "protocol"
+                  ]
+                },
+                "minItems": 0
+              },
+              "command": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "minItems": 1
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "args": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "minItems": 0
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "resources": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "value": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "requests": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "cpuMillicores": {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          "memoryMiB": {
+                            "type": "integer",
+                            "minimum": 1
+                          }
+                        },
+                        "required": [
+                          "cpuMillicores",
+                          "memoryMiB"
+                        ]
+                      },
+                      "limits": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "cpuMillicores": {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          "memoryMiB": {
+                            "type": "integer",
+                            "minimum": 1
+                          }
+                        },
+                        "required": [
+                          "cpuMillicores",
+                          "memoryMiB"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "requests",
+                      "limits"
+                    ]
+                  },
+                  "provenance": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "basis": {
+                        "type": "array",
+                        "items": {
+                          "enum": [
+                            "source",
+                            "user",
+                            "measurement",
+                            "policy"
+                          ]
+                        },
+                        "minItems": 1,
+                        "uniqueItems": true
+                      },
+                      "evidenceIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "uniqueItems": true
+                      },
+                      "measurementIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "uniqueItems": true
+                      },
+                      "assumptionIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "uniqueItems": true
+                      },
+                      "reason": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "required": [
+                      "basis",
+                      "evidenceIds",
+                      "measurementIds",
+                      "assumptionIds",
+                      "reason"
+                    ]
+                  }
+                },
+                "required": [
+                  "value",
+                  "provenance"
+                ]
+              },
+              "replicas": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "value": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "provenance": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "basis": {
+                        "type": "array",
+                        "items": {
+                          "enum": [
+                            "source",
+                            "user",
+                            "measurement",
+                            "policy"
+                          ]
+                        },
+                        "minItems": 1,
+                        "uniqueItems": true
+                      },
+                      "evidenceIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "uniqueItems": true
+                      },
+                      "measurementIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "uniqueItems": true
+                      },
+                      "assumptionIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "uniqueItems": true
+                      },
+                      "reason": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "required": [
+                      "basis",
+                      "evidenceIds",
+                      "measurementIds",
+                      "assumptionIds",
+                      "reason"
+                    ]
+                  }
+                },
+                "required": [
+                  "value",
+                  "provenance"
+                ]
+              },
+              "service": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "value": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "type": {
+                            "enum": [
+                              "ClusterIP"
+                            ]
+                          },
+                          "port": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 65535
+                          },
+                          "targetPort": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 65535
+                          },
+                          "protocol": {
+                            "enum": [
+                              "TCP",
+                              "UDP"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "port",
+                          "targetPort",
+                          "protocol"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "provenance": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "basis": {
+                        "type": "array",
+                        "items": {
+                          "enum": [
+                            "source",
+                            "user",
+                            "measurement",
+                            "policy"
+                          ]
+                        },
+                        "minItems": 1,
+                        "uniqueItems": true
+                      },
+                      "evidenceIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "uniqueItems": true
+                      },
+                      "measurementIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "uniqueItems": true
+                      },
+                      "assumptionIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "uniqueItems": true
+                      },
+                      "reason": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "required": [
+                      "basis",
+                      "evidenceIds",
+                      "measurementIds",
+                      "assumptionIds",
+                      "reason"
+                    ]
+                  }
+                },
+                "required": [
+                  "value",
+                  "provenance"
+                ]
+              },
+              "ingress": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "value": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "enabled": {
+                        "type": "boolean"
+                      },
+                      "host": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9.-]*[A-Za-z0-9]$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "className": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "tlsSecretName": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "pattern": "^[a-z0-9]([-a-z0-9]{0,61}[a-z0-9])?$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "path": {
+                        "type": "string",
+                        "pattern": "^/"
+                      }
+                    },
+                    "required": [
+                      "enabled",
+                      "host",
+                      "className",
+                      "tlsSecretName",
+                      "path"
+                    ]
+                  },
+                  "provenance": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "basis": {
+                        "type": "array",
+                        "items": {
+                          "enum": [
+                            "source",
+                            "user",
+                            "measurement",
+                            "policy"
+                          ]
+                        },
+                        "minItems": 1,
+                        "uniqueItems": true
+                      },
+                      "evidenceIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "uniqueItems": true
+                      },
+                      "measurementIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "uniqueItems": true
+                      },
+                      "assumptionIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "uniqueItems": true
+                      },
+                      "reason": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "required": [
+                      "basis",
+                      "evidenceIds",
+                      "measurementIds",
+                      "assumptionIds",
+                      "reason"
+                    ]
+                  }
+                },
+                "required": [
+                  "value",
+                  "provenance"
+                ]
+              },
+              "probes": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "value": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "readiness": {
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                              "kind": {
+                                "enum": [
+                                  "http",
+                                  "tcp"
+                                ]
+                              },
+                              "port": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 65535
+                              },
+                              "path": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "pattern": "^/"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "initialDelaySeconds": {
+                                "type": "integer",
+                                "minimum": 0
+                              },
+                              "periodSeconds": {
+                                "type": "integer",
+                                "minimum": 1
+                              },
+                              "timeoutSeconds": {
+                                "type": "integer",
+                                "minimum": 1
+                              },
+                              "failureThreshold": {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            },
+                            "required": [
+                              "kind",
+                              "port",
+                              "path",
+                              "initialDelaySeconds",
+                              "periodSeconds",
+                              "timeoutSeconds",
+                              "failureThreshold"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "liveness": {
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                              "kind": {
+                                "enum": [
+                                  "http",
+                                  "tcp"
+                                ]
+                              },
+                              "port": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 65535
+                              },
+                              "path": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "pattern": "^/"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "initialDelaySeconds": {
+                                "type": "integer",
+                                "minimum": 0
+                              },
+                              "periodSeconds": {
+                                "type": "integer",
+                                "minimum": 1
+                              },
+                              "timeoutSeconds": {
+                                "type": "integer",
+                                "minimum": 1
+                              },
+                              "failureThreshold": {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            },
+                            "required": [
+                              "kind",
+                              "port",
+                              "path",
+                              "initialDelaySeconds",
+                              "periodSeconds",
+                              "timeoutSeconds",
+                              "failureThreshold"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "startup": {
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                              "kind": {
+                                "enum": [
+                                  "http",
+                                  "tcp"
+                                ]
+                              },
+                              "port": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 65535
+                              },
+                              "path": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "pattern": "^/"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "initialDelaySeconds": {
+                                "type": "integer",
+                                "minimum": 0
+                              },
+                              "periodSeconds": {
+                                "type": "integer",
+                                "minimum": 1
+                              },
+                              "timeoutSeconds": {
+                                "type": "integer",
+                                "minimum": 1
+                              },
+                              "failureThreshold": {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            },
+                            "required": [
+                              "kind",
+                              "port",
+                              "path",
+                              "initialDelaySeconds",
+                              "periodSeconds",
+                              "timeoutSeconds",
+                              "failureThreshold"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "readiness",
+                      "liveness",
+                      "startup"
+                    ]
+                  },
+                  "provenance": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "basis": {
+                        "type": "array",
+                        "items": {
+                          "enum": [
+                            "source",
+                            "user",
+                            "measurement",
+                            "policy"
+                          ]
+                        },
+                        "minItems": 1,
+                        "uniqueItems": true
+                      },
+                      "evidenceIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "uniqueItems": true
+                      },
+                      "measurementIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "uniqueItems": true
+                      },
+                      "assumptionIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "uniqueItems": true
+                      },
+                      "reason": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "required": [
+                      "basis",
+                      "evidenceIds",
+                      "measurementIds",
+                      "assumptionIds",
+                      "reason"
+                    ]
+                  }
+                },
+                "required": [
+                  "value",
+                  "provenance"
+                ]
+              },
+              "volumes": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "value": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "pattern": "^[a-z0-9]([-a-z0-9]{0,61}[a-z0-9])?$"
+                        },
+                        "mountPath": {
+                          "type": "string",
+                          "pattern": "^/"
+                        },
+                        "claimName": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "pattern": "^[a-z0-9]([-a-z0-9]{0,61}[a-z0-9])?$"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "sizeGiB": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": 1
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "storageClass": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "accessMode": {
+                          "enum": [
+                            "ReadWriteOnce",
+                            "ReadWriteMany"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "name",
+                        "mountPath",
+                        "claimName",
+                        "sizeGiB",
+                        "storageClass",
+                        "accessMode"
+                      ]
+                    },
+                    "minItems": 0
+                  },
+                  "provenance": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "basis": {
+                        "type": "array",
+                        "items": {
+                          "enum": [
+                            "source",
+                            "user",
+                            "measurement",
+                            "policy"
+                          ]
+                        },
+                        "minItems": 1,
+                        "uniqueItems": true
+                      },
+                      "evidenceIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "uniqueItems": true
+                      },
+                      "measurementIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "uniqueItems": true
+                      },
+                      "assumptionIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "uniqueItems": true
+                      },
+                      "reason": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "required": [
+                      "basis",
+                      "evidenceIds",
+                      "measurementIds",
+                      "assumptionIds",
+                      "reason"
+                    ]
+                  }
+                },
+                "required": [
+                  "value",
+                  "provenance"
+                ]
+              },
+              "secretRefs": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "value": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "environmentKey": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                        },
+                        "name": {
+                          "type": "string",
+                          "pattern": "^[a-z0-9]([-a-z0-9]{0,61}[a-z0-9])?$"
+                        },
+                        "key": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9._-]+$"
+                        }
+                      },
+                      "required": [
+                        "environmentKey",
+                        "name",
+                        "key"
+                      ]
+                    },
+                    "minItems": 0
+                  },
+                  "provenance": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "basis": {
+                        "type": "array",
+                        "items": {
+                          "enum": [
+                            "source",
+                            "user",
+                            "measurement",
+                            "policy"
+                          ]
+                        },
+                        "minItems": 1,
+                        "uniqueItems": true
+                      },
+                      "evidenceIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "uniqueItems": true
+                      },
+                      "measurementIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "uniqueItems": true
+                      },
+                      "assumptionIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "uniqueItems": true
+                      },
+                      "reason": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "required": [
+                      "basis",
+                      "evidenceIds",
+                      "measurementIds",
+                      "assumptionIds",
+                      "reason"
+                    ]
+                  }
+                },
+                "required": [
+                  "value",
+                  "provenance"
+                ]
+              },
+              "rollout": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "value": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "strategy": {
+                        "enum": [
+                          "RollingUpdate"
+                        ]
+                      },
+                      "maxSurge": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "maxUnavailable": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "progressDeadlineSeconds": {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    },
+                    "required": [
+                      "strategy",
+                      "maxSurge",
+                      "maxUnavailable",
+                      "progressDeadlineSeconds"
+                    ]
+                  },
+                  "provenance": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "basis": {
+                        "type": "array",
+                        "items": {
+                          "enum": [
+                            "source",
+                            "user",
+                            "measurement",
+                            "policy"
+                          ]
+                        },
+                        "minItems": 1,
+                        "uniqueItems": true
+                      },
+                      "evidenceIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "uniqueItems": true
+                      },
+                      "measurementIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "uniqueItems": true
+                      },
+                      "assumptionIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "uniqueItems": true
+                      },
+                      "reason": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "required": [
+                      "basis",
+                      "evidenceIds",
+                      "measurementIds",
+                      "assumptionIds",
+                      "reason"
+                    ]
+                  }
+                },
+                "required": [
+                  "value",
+                  "provenance"
+                ]
+              },
+              "rollback": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "value": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "strategy": {
+                        "enum": [
+                          "helm_atomic"
+                        ]
+                      },
+                      "timeoutSeconds": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "revisionHistoryLimit": {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    },
+                    "required": [
+                      "strategy",
+                      "timeoutSeconds",
+                      "revisionHistoryLimit"
+                    ]
+                  },
+                  "provenance": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "basis": {
+                        "type": "array",
+                        "items": {
+                          "enum": [
+                            "source",
+                            "user",
+                            "measurement",
+                            "policy"
+                          ]
+                        },
+                        "minItems": 1,
+                        "uniqueItems": true
+                      },
+                      "evidenceIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "uniqueItems": true
+                      },
+                      "measurementIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "uniqueItems": true
+                      },
+                      "assumptionIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "uniqueItems": true
+                      },
+                      "reason": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "required": [
+                      "basis",
+                      "evidenceIds",
+                      "measurementIds",
+                      "assumptionIds",
+                      "reason"
+                    ]
+                  }
+                },
+                "required": [
+                  "value",
+                  "provenance"
+                ]
+              }
+            },
+            "required": [
+              "serviceId",
+              "name",
+              "image",
+              "containerPorts",
+              "command",
+              "args",
+              "resources",
+              "replicas",
+              "service",
+              "ingress",
+              "probes",
+              "volumes",
+              "secretRefs",
+              "rollout",
+              "rollback"
+            ]
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "runtimeVerified",
+        "namespace",
+        "clusterName",
+        "existingClusterContext",
+        "imagePlatforms",
+        "terraformInputs",
+        "ingressVerified",
+        "storageDriverVerified",
+        "databasesVerified",
+        "availableCapacity",
+        "workloads"
+      ]
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "planDigest",
+    "requestDigest",
+    "analysisDigest",
+    "source",
+    "request",
+    "adapter",
+    "status",
+    "plannerMode",
+    "executionEligible",
+    "deploymentAuthorized",
+    "assumptions",
+    "questions",
+    "recommendations",
+    "configuration"
+  ],
+  "$defs": {
+    "planningRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "enum": [
+            "iris.planning-request.v1"
+          ]
+        },
+        "target": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "stack": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "cloud": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "region": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "architecture": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "x86_64",
+                    "arm64"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "environment": {
+              "enum": [
+                "test",
+                "production"
+              ]
+            }
+          },
+          "required": [
+            "stack",
+            "environment"
+          ]
+        },
+        "constraints": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "monthlyBudgetUsd": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "expectedRps": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "availability": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "single_az",
+                    "multi_az"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": []
+        },
+        "measurements": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "serviceId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "sourceSnapshotId": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "kind": {
+                "enum": [
+                  "build",
+                  "test",
+                  "load",
+                  "runtime"
+                ]
+              },
+              "verified": {
+                "type": "boolean"
+              },
+              "measuredAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "metrics": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "peakMemoryMiB": {
+                    "anyOf": [
+                      {
+                        "type": "number",
+                        "exclusiveMinimum": 0
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "cpuMillicores": {
+                    "anyOf": [
+                      {
+                        "type": "number",
+                        "exclusiveMinimum": 0
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "achievedRps": {
+                    "anyOf": [
+                      {
+                        "type": "number",
+                        "exclusiveMinimum": 0
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "p95LatencyMs": {
+                    "anyOf": [
+                      {
+                        "type": "number",
+                        "exclusiveMinimum": 0
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "errorRate": {
+                    "anyOf": [
+                      {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "peakMemoryMiB",
+                  "cpuMillicores",
+                  "achievedRps",
+                  "p95LatencyMs",
+                  "errorRate"
+                ]
+              },
+              "conditions": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "durationSeconds": {
+                    "anyOf": [
+                      {
+                        "type": "number",
+                        "exclusiveMinimum": 0
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "concurrency": {
+                    "anyOf": [
+                      {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "command": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "architecture": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "x86_64",
+                          "arm64"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "imageDigest": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^sha256:[a-f0-9]{64}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "capacityValidated": {
+                    "type": "boolean",
+                    "description": "Trusted evaluator attests sustained capacity against acceptance criteria; a fixed offered-load sample is false."
+                  }
+                },
+                "required": [
+                  "durationSeconds",
+                  "concurrency",
+                  "command"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "serviceId",
+              "sourceSnapshotId",
+              "kind",
+              "verified",
+              "measuredAt",
+              "metrics",
+              "conditions"
+            ]
+          },
+          "minItems": 0
+        },
+        "pricingCatalog": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "currency": {
+                  "enum": [
+                    "USD"
+                  ]
+                },
+                "sourceUrl": {
+                  "type": "string",
+                  "format": "uri",
+                  "pattern": "^https://"
+                },
+                "verifiedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "verified": {
+                  "type": "boolean"
+                },
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "key": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "cloud": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "region": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "unit": {
+                        "enum": [
+                          "hour",
+                          "gb_month",
+                          "month"
+                        ]
+                      },
+                      "unitPriceUsd": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "instanceType": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "architecture": {
+                        "anyOf": [
+                          {
+                            "enum": [
+                              "x86_64",
+                              "arm64"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "cpuMillicores": {
+                        "anyOf": [
+                          {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "memoryMiB": {
+                        "anyOf": [
+                          {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "sourceUrl": {
+                        "type": "string",
+                        "format": "uri",
+                        "pattern": "^https://"
+                      }
+                    },
+                    "required": [
+                      "key",
+                      "cloud",
+                      "region",
+                      "unit",
+                      "unitPriceUsd",
+                      "instanceType",
+                      "architecture",
+                      "cpuMillicores",
+                      "memoryMiB"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              },
+              "required": [
+                "currency",
+                "sourceUrl",
+                "verifiedAt",
+                "verified",
+                "items"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "bindings": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "network": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "vpcMode": {
+                      "enum": [
+                        "create",
+                        "existing"
+                      ]
+                    },
+                    "vpcId": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^vpc-[a-f0-9]+$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "subnetIds": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^subnet-[a-f0-9]+$"
+                      },
+                      "minItems": 0
+                    },
+                    "availabilityZones": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "minItems": 0
+                    },
+                    "natGatewayCount": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "publicIngress": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "vpcMode",
+                    "vpcId",
+                    "subnetIds",
+                    "availabilityZones",
+                    "natGatewayCount",
+                    "publicIngress"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "runtimeVerified": {
+              "type": "boolean"
+            },
+            "namespace": {
+              "type": "string",
+              "pattern": "^[a-z0-9]([-a-z0-9]{0,61}[a-z0-9])?$"
+            },
+            "clusterName": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[a-z0-9]([-a-z0-9]{0,61}[a-z0-9])?$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "existingClusterContext": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "images": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "serviceId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "reference": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]*@sha256:[a-f0-9]{64}$"
+                  }
+                },
+                "required": [
+                  "serviceId",
+                  "reference"
+                ]
+              },
+              "minItems": 0
+            },
+            "imagePlatforms": {
+              "type": "object",
+              "additionalProperties": {
+                "enum": [
+                  "amd64",
+                  "arm64"
+                ]
+              }
+            },
+            "secretRefs": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "serviceId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "environmentKey": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                  },
+                  "name": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9]([-a-z0-9]{0,61}[a-z0-9])?$"
+                  },
+                  "key": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9._-]+$"
+                  }
+                },
+                "required": [
+                  "serviceId",
+                  "environmentKey",
+                  "name",
+                  "key"
+                ]
+              },
+              "minItems": 0
+            },
+            "ingress": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "serviceId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "host": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9.-]*[A-Za-z0-9]$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "className": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "tlsSecretName": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[a-z0-9]([-a-z0-9]{0,61}[a-z0-9])?$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "path": {
+                    "type": "string",
+                    "pattern": "^/"
+                  }
+                },
+                "required": [
+                  "serviceId",
+                  "enabled",
+                  "host",
+                  "className",
+                  "tlsSecretName",
+                  "path"
+                ]
+              },
+              "minItems": 0
+            },
+            "databases": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "serviceIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "minItems": 1
+                  },
+                  "engine": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "version": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "mode": {
+                    "enum": [
+                      "existing",
+                      "managed"
+                    ]
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "storageGiB": {
+                    "anyOf": [
+                      {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "connectionSecretName": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[a-z0-9]([-a-z0-9]{0,61}[a-z0-9])?$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "serviceIds",
+                  "engine",
+                  "version",
+                  "mode",
+                  "name",
+                  "storageGiB",
+                  "connectionSecretName"
+                ]
+              },
+              "minItems": 0
+            },
+            "volumes": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "serviceId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "name": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9]([-a-z0-9]{0,61}[a-z0-9])?$"
+                  },
+                  "mountPath": {
+                    "type": "string",
+                    "pattern": "^/"
+                  },
+                  "claimName": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[a-z0-9]([-a-z0-9]{0,61}[a-z0-9])?$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "sizeGiB": {
+                    "anyOf": [
+                      {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "storageClass": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "accessMode": {
+                    "enum": [
+                      "ReadWriteOnce",
+                      "ReadWriteMany"
+                    ]
+                  }
+                },
+                "required": [
+                  "serviceId",
+                  "name",
+                  "mountPath",
+                  "claimName",
+                  "sizeGiB",
+                  "storageClass",
+                  "accessMode"
+                ]
+              },
+              "minItems": 0
+            },
+            "terraformInputs": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "kubernetesVersion": {
+                      "type": "string",
+                      "pattern": "^1\\.[0-9]{2}$"
+                    },
+                    "administratorRoleArn": {
+                      "type": "string",
+                      "pattern": "^arn:aws:iam::[0-9]{12}:role/[A-Za-z0-9+=,.@_/-]+$"
+                    },
+                    "nodeDiskGiB": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "desiredNodes": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "privateNetworkEgressVerified": {
+                      "type": "boolean"
+                    },
+                    "executorPrivateApiReachable": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "kubernetesVersion",
+                    "administratorRoleArn",
+                    "nodeDiskGiB",
+                    "desiredNodes",
+                    "privateNetworkEgressVerified",
+                    "executorPrivateApiReachable"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "ingressVerified": {
+              "type": "boolean"
+            },
+            "storageDriverVerified": {
+              "type": "boolean"
+            },
+            "databasesVerified": {
+              "type": "boolean"
+            },
+            "availableCapacity": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "cpuMillicores": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "memoryMiB": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "nodeCount": {
+                      "type": "integer",
+                      "minimum": 1
+                    }
+                  },
+                  "required": [
+                    "cpuMillicores",
+                    "memoryMiB",
+                    "nodeCount"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": []
+        },
+        "overrides": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "instanceType": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "resources": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "serviceId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "requests": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "cpuMillicores": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "memoryMiB": {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    },
+                    "required": [
+                      "cpuMillicores",
+                      "memoryMiB"
+                    ]
+                  },
+                  "limits": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "cpuMillicores": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "memoryMiB": {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    },
+                    "required": [
+                      "cpuMillicores",
+                      "memoryMiB"
+                    ]
+                  }
+                },
+                "required": [
+                  "serviceId",
+                  "requests",
+                  "limits"
+                ]
+              },
+              "minItems": 0
+            },
+            "replicas": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "serviceId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "replicas": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                },
+                "required": [
+                  "serviceId",
+                  "replicas"
+                ]
+              },
+              "minItems": 0
+            }
+          },
+          "required": []
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "target"
+      ]
+    }
+  }
+}

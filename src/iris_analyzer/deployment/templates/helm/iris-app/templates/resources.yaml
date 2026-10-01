@@ -1,0 +1,10 @@
+{{- range .Values.resources }}
+{{- if not (has .kind (list "Deployment" "Service" "Ingress" "PersistentVolumeClaim" "PodDisruptionBudget")) }}
+{{- fail "Only fixed Iris application resource kinds are supported" }}
+{{- end }}
+{{- if ne .metadata.namespace $.Values.namespace }}
+{{- fail "Resource namespace must equal the compiler namespace" }}
+{{- end }}
+---
+{{ toYaml . }}
+{{- end }}

@@ -1,0 +1,7 @@
+apiVersion: v2
+name: iris-app
+description: Fixed compiler output for validated Iris deployment plans
+type: application
+version: 0.1.0
+appVersion: iris.execution.v1
+kubeVersion: ">=1.29.0-0"

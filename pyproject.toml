@@ -21,12 +21,14 @@ demo = ["fastapi>=0.142.2,<1", "uvicorn>=0.54,<1"]
 [project.scripts]
 iris-analyzer = "iris_analyzer.cli:main"
 iris-review-demo = "iris_analyzer.demo.app:main"
+iris-deployment = "iris_analyzer.deployment.cli:main"
+iris-measure = "iris_analyzer.deployment.measure:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.setuptools.package-data]
-iris_analyzer = ["schemas/*.json", "opencode/prompts/*.txt", "opencode/*.json", "demo/static/*"]
+iris_analyzer = ["schemas/*.json", "opencode/prompts/*.txt", "opencode/*.json", "demo/static/*", "deployment/catalogs/*.json", "deployment/templates/**/*", "deployment/templates/terraform/aws_eks/.terraform.lock.hcl"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
