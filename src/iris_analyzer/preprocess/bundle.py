@@ -9,6 +9,7 @@ from iris_analyzer.contracts import AnalyzerError, Limits, canonical_bytes, dige
 
 from .extractors.connections import extract_connections
 from .extractors.docker import extract_docker
+from .extractors.execution import extract_execution
 from .extractors.express import extract_express
 from .extractors.node import extract_node
 from .observations import Observations
@@ -122,6 +123,7 @@ def _build(
     extract_express(selection, observations)
     extract_connections(selection, observations)
     candidates = extract_docker(selection, observations, components)
+    extract_execution(selection, observations)
     selected = []
     manifest = {item["path"]: item for item in snapshot.manifest}
     for path in selection.ordered():

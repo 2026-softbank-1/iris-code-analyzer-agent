@@ -38,6 +38,48 @@ def _matching_versions(service: dict, readiness: dict, scope: str) -> list[dict]
     ]
 
 
+def _build_inputs(service: dict, readiness: dict) -> dict:
+    """Keep host source paths, build-stage paths and serving paths separate."""
+    roots = set(service["componentRoots"]) | {service["root"]["value"]}
+    targets = [copy.deepcopy(row) for row in readiness.get("buildTargets", []) if row["component"] in roots]
+    exact = [
+        row
+        for row in targets
+        if row["serviceName"] is not None
+        and row["contextPath"] is not None
+        and service["serviceId"]
+        == "svc-" + digest({"service": row["serviceName"], "root": row["contextPath"]})[:16]
+    ]
+    if exact:
+        targets = exact
+    else:
+        docker = [row for row in targets if row["dockerfilePath"] is not None and row["serviceName"] is None]
+        targets = docker or [row for row in targets if row["dockerfilePath"] is None]
+    primary = [row for row in targets if row["condition"] is None]
+    selected = primary[0] if len(primary) == 1 and len(targets) == 1 else None
+    return {
+        "command": copy.deepcopy(service["buildCommand"]),
+        "resolvedCommand": selected["buildCommand"] if selected else None,
+        "resolvedCommandBasis": selected["buildCommandBasis"] if selected else "unknown",
+        "workingDirectory": selected["buildWorkingDirectory"] if selected else None,
+        "workingDirectoryScope": "container_build_stage"
+        if selected and selected["dockerfilePath"]
+        else "repository"
+        if selected
+        else "unknown",
+        "buildContext": selected["contextPath"] if selected else None,
+        "dockerfilePath": selected["dockerfilePath"] if selected else None,
+        "target": selected["target"] if selected else None,
+        "installCommand": selected["installCommand"] if selected else None,
+        "installCommandBasis": selected["installCommandBasis"] if selected else "unknown",
+        "buildTargets": targets,
+        "runtimeWorkingDirectory": copy.deepcopy(service.get("workingDirectory")),
+        "outputDirectory": copy.deepcopy(service["outputDirectory"]),
+        "imageReferences": _matching_versions(service, readiness, "build"),
+        "requiresTargetSelection": selected is None,
+    }
+
+
 def _benchmark_plan(analysis: dict, readiness: dict, plan: dict) -> dict:
     request = plan["request"]
     expected = request["constraints"]["expectedRps"]
@@ -73,12 +115,7 @@ def _benchmark_plan(analysis: dict, readiness: dict, plan: dict) -> dict:
                 **common,
                 "kind": "build",
                 "environmentClass": "isolated_build",
-                "inputs": {
-                    "command": copy.deepcopy(service["buildCommand"]),
-                    "workingDirectory": copy.deepcopy(service.get("workingDirectory")),
-                    "outputDirectory": copy.deepcopy(service["outputDirectory"]),
-                    "imageReferences": _matching_versions(service, readiness, "build"),
-                },
+                "inputs": _build_inputs(service, readiness),
                 "metricsToCollect": ["exitCode", "durationSeconds", "peakMemoryMiB", "cpuSeconds"],
                 "capacityEvidenceEligible": False,
                 "purpose": "Check build validity and build-worker requirements; these measurements cannot size production serving workloads.",

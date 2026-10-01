@@ -23,6 +23,8 @@ from iris_analyzer.preprocess.javascript import Source
 from iris_analyzer.preprocess.selector import component_of
 from iris_analyzer.preprocess.snapshot import SOURCE_EXTENSIONS
 
+from .metadata import BUILD_TARGET_SCHEMA, CONNECTION_SCHEMA, ENVIRONMENT_SCHEMA, execution_metadata
+
 _LANGUAGES = {
     ".js": "JavaScript",
     ".jsx": "JavaScript",
@@ -134,6 +136,15 @@ READINESS_SCHEMA = _record(
             }
         ),
         "limitations": {"type": "array", "items": _TEXT, "minItems": 1},
+    }
+)
+# Additive fields remain optional when older stored readiness documents are
+# consumed; new captures always publish these supplemental observations.
+READINESS_SCHEMA["properties"].update(
+    {
+        "buildTargets": {"type": "array", "items": BUILD_TARGET_SCHEMA},
+        "environmentVariables": {"type": "array", "items": ENVIRONMENT_SCHEMA},
+        "serviceConnections": {"type": "array", "items": CONNECTION_SCHEMA},
     }
 )
 
@@ -267,7 +278,7 @@ def _docker_versions(
     # Partial evidence can prove a FROM declaration, but cannot establish that
     # no later FROM exists. An existing final-stage runtime fact is an anchor.
     lines = text.split("\n") if text is not None else []
-    seen = set()
+    stages = {}
     supplied = [
         (number, line)
         for row in rows
@@ -281,14 +292,21 @@ def _docker_versions(
     ]
     for index, (number, match) in enumerate(froms):
         image, alias = match.groups()
-        if image in seen:  # A FROM may refer to an earlier stage, not a registry.
-            continue
+        # Resolve aliases transitively, retaining the base-image evidence.
+        image, inherited_lines = stages.get(image.lower(), (image, []))
+        origin_lines = [*inherited_lines, number]
+        if text is not None:  # Partial evidence cannot establish stage indices.
+            stages[str(index)] = (image, origin_lines)
         if alias:
-            seen.add(alias)
+            stages[alias.lower()] = (image, origin_lines)
         name = image.rsplit("/", 1)[-1].split(":", 1)[0].split("@", 1)[0]
         if name not in _IMAGE_RUNTIMES:
             continue
-        evidence = [row for row in rows if row["startLine"] <= number <= row["endLine"]]
+        evidence = [
+            row
+            for row in rows
+            if any(row["startLine"] <= origin <= row["endLine"] for origin in origin_lines)
+        ]
         identifiers = set(_ids(evidence))
         anchored = any(
             fact["scope"] == "container"
@@ -823,6 +841,7 @@ def build_readiness(bundle: dict) -> dict:
         "schemaVersion": "iris.source-readiness.v1",
         "sourceSnapshotId": bundle["source"]["snapshotId"],
         "contextHash": bundle["contextHash"],
+        **execution_metadata(bundle),
         "languages": [
             {
                 "language": language,

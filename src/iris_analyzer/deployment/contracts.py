@@ -9,6 +9,7 @@ from __future__ import annotations
 import copy
 import json
 import math
+import re
 from datetime import datetime, timedelta, timezone
 from importlib.resources import files
 from typing import Any
@@ -16,6 +17,7 @@ from typing import Any
 from jsonschema import Draft202012Validator, FormatChecker
 
 from iris_analyzer.contracts import AnalyzerError, canonical_bytes, digest, validate_result
+from iris_analyzer.preprocess.redaction import redact
 
 from . import lifecycle
 
@@ -45,6 +47,8 @@ DEFAULT_PLANNING_REQUEST = {
         "images": [],
         "imagePlatforms": {},
         "secretRefs": [],
+        "runtimeEnv": [],
+        "configMapRefs": [],
         "ingress": [],
         "databases": [],
         "volumes": [],
@@ -87,9 +91,63 @@ def _consistent_resources(resources: dict, path: list[Any], code: str) -> None:
             _fail("A resource limit cannot be smaller than its request", [*path, "limits", quantity], code)
 
 
+def is_secret_environment_key(key: str) -> bool:
+    """Conservative credential classification; public values are caller supplied."""
+    return bool(
+        re.search(
+            r"SECRET|PASSWORD|PASSWD|TOKEN|API_?KEY|ACCESS_?KEY|PRIVATE_?KEY|MONGO_URI|DATABASE_URL",
+            key,
+            re.I,
+        )
+    )
+
+
+def _validate_environment(bindings: dict, path: list[Any], code: str, *, scoped: bool) -> None:
+    seen = set()
+    for collection in ("secretRefs", "runtimeEnv", "configMapRefs"):
+        records = bindings.get(collection, [])
+        if not isinstance(records, list):
+            continue  # Shape errors are handled by JSON schema.
+        for index, item in enumerate(records):
+            if not isinstance(item, dict) or not isinstance(item.get("environmentKey"), str):
+                continue
+            key = item["environmentKey"]
+            service_id = item.get("serviceId") if scoped else None
+            if service_id is not None and not isinstance(service_id, str):
+                continue  # Let schema reject malformed IDs without hashing them.
+            identity = (service_id, key)
+            if identity in seen:
+                _fail(
+                    "Environment keys must be unique across value, Secret and ConfigMap bindings",
+                    [*path, collection, index],
+                    code,
+                )
+            seen.add(identity)
+            if collection != "secretRefs" and is_secret_environment_key(key):
+                _fail(
+                    "Credential environment keys require Secret references", [*path, collection, index], code
+                )
+            if collection == "runtimeEnv" and isinstance(item.get("value"), str):
+                value = item["value"]
+                if redact(value, "runtime-value.txt")[1] or "<REDACTED>" in value:
+                    _fail(
+                        "Inline runtime values must not contain credentials or redacted placeholders",
+                        [*path, collection, index],
+                        code,
+                    )
+                if re.search(r"[\x00-\x08\x0b\x0c\x0e-\x1f]", value) or "$(" in value:
+                    _fail(
+                        "Runtime values must be literal text without control bytes or Kubernetes variable expansion",
+                        [*path, collection, index],
+                        code,
+                    )
+
+
 def validate_planning_request(document: dict) -> dict:
     """Validate and return the original JSON without inserting inferred inputs."""
     code = "PLANNING_REQUEST_INVALID"
+    if isinstance(document, dict) and isinstance(document.get("bindings"), dict):
+        _validate_environment(document["bindings"], ["bindings"], code, scoped=True)
     _validate(document, PLANNING_REQUEST_SCHEMA, code)
     measurements = document.get("measurements", [])
     _unique(measurements, "id", ["measurements"], code)
@@ -330,6 +388,15 @@ def _validate_workload(workload: dict, index: int, configuration: dict, eligible
     _unique(
         workload["secretRefs"]["value"], "environmentKey", [*path, "secretRefs"], "DEPLOYMENT_PLAN_INVALID"
     )
+    _validate_environment(
+        {
+            name: workload.get(name, {}).get("value", [])
+            for name in ("secretRefs", "runtimeEnv", "configMapRefs")
+        },
+        path,
+        "DEPLOYMENT_PLAN_INVALID",
+        scoped=False,
+    )
     if not eligible:
         return
     if workload["image"] is None or workload["serviceId"] not in configuration["imagePlatforms"]:
@@ -487,21 +554,25 @@ def _validate_request_preservation(plan: dict) -> None:
     ):
         _fail("Execution network binding differs from the request", ["recommendations", "network"])
     images = {item["serviceId"]: item["reference"] for item in bindings.get("images", [])}
+    workload_ids = {workload["serviceId"] for workload in configuration["workloads"]}
+    for collection in ("images", "secretRefs", "runtimeEnv", "configMapRefs", "volumes", "ingress"):
+        if any(item["serviceId"] not in workload_ids for item in bindings.get(collection, [])):
+            _fail("Execution binding references an unknown workload", ["request", "bindings", collection])
     for index, workload in enumerate(configuration["workloads"]):
         if workload["serviceId"] in images and workload["image"] != images[workload["serviceId"]]:
             _fail(
                 "Immutable image binding differs from the request",
                 ["configuration", "workloads", index, "image"],
             )
-        for collection in ("secretRefs", "volumes", "ingress"):
+        for collection in ("secretRefs", "runtimeEnv", "configMapRefs", "volumes", "ingress"):
             provided = [
                 {key: value for key, value in item.items() if key != "serviceId"}
                 for item in bindings.get(collection, [])
                 if item["serviceId"] == workload["serviceId"]
             ]
-            if not provided:
+            if not provided and collection not in ("runtimeEnv", "configMapRefs"):
                 continue
-            actual = workload[collection]["value"]
+            actual = workload.get(collection, {}).get("value", [])
             expected = provided[0] if collection == "ingress" else provided
             if actual != expected:
                 _fail(
