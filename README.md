@@ -21,6 +21,23 @@ Hive 기본 설정은 `hive-ai / zai-org/glm-5.3-flash`입니다. 다른 모델�
 
 ## 실행
 
+### GitHub 링크를 받는 테스트 프론트
+
+```sh
+uv sync --extra dev --extra demo
+gh auth status  # 비공개 저장소는 서버에서 해당 저장소 접근 권한 필요
+uv run --extra demo iris-review-demo --env-file ../.env
+# 전역 opencode가 없으면 --opencode-executable /path/to/opencode 추가
+```
+
+브라우저에서 <http://127.0.0.1:8765/>를 열고 GitHub 저장소 링크를 입력합니다. 브랜치·태그·커밋을 따로 지정하거나 `/tree/test/feature` 링크를 사용할 수 있습니다. 기본은 Hive AI 보완이며 키가 없으면 정적 분석을 제공합니다. 서비스 구성, 실행 명령, 포트, API 경로, 환경변수 키, 의존성, 확인할 항목을 표시합니다. 근거 버튼은 마스킹한 파일의 줄을 열고 JSON 다운로드는 고정 소스 커밋과 분석 결과를 저장합니다.
+
+테스트 서버는 `127.0.0.1`에 바인딩합니다. 인증된 GitHub CLI로 커밋 SHA를 먼저 고정하고 tarball을 자료로 읽습니다. 다운로드한 프로젝트를 설치·빌드·실행하지 않습니다. 압축 파일 32 MiB, 압축 해제 선언 크기 100 MiB, 파일당 1 MB, 분석 파일 2,000개, 아카이브 항목 10,000개를 제한합니다. 동시 분석 1개, 대기 포함 3개, 프로세스당 기록 24개입니다. 기록 한도에 도달하면 서버를 재시작합니다. 화면의 최근 기록은 탭을 새로고침하면 초기화됩니다.
+
+소스와 분석 산출물은 Git에서 제외된 `artifacts/review-demo/<id>/`에 남습니다. 화면의 근거와 모델 입력에는 기존 비밀 제외·마스킹을 적용하며, 소스 캐시는 운영자가 로컬에서 관리합니다. AI 요청은 기존 `artifacts/model-budget-ledger.json`과 누적 USD 1 상한을 공유합니다. 이 화면의 `/api/reviews`는 독립 테스트용 API입니다. 팀 WAS 연결 범위와 사용 예시는 [연결 준비 문서](docs/control-plane-readiness.md), 검증 결과는 [프론트 검증 보고서](reports/review-demo-validation.md)에 있습니다.
+
+### 분석 CLI
+
 ```sh
 uv run python scripts/preprocess_repository.py \
   --repo ../tested_code/Temp_log --out artifacts/preprocess

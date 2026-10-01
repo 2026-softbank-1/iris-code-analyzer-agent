@@ -1,0 +1,115 @@
+{
+  "date": "2026-10-01",
+  "tests": {
+    "python313": {
+      "passed": 264,
+      "skipped": 2,
+      "nativeRuntimeAdditionalPassed": 2
+    },
+    "python311": {
+      "passed": 264,
+      "skipped": 2
+    },
+    "changedDownloadTestsBothVersions": 14,
+    "combinedBranchCoveragePercent": 85.64
+  },
+  "liveGitHubReviews": [
+    {
+      "repository": "monitor5/Temp_log",
+      "sourceSha": "54fa8072d9fbf817e3352f8eeee2344f37c8a813",
+      "analysisStatus": "complete",
+      "mode": "opencode",
+      "services": 1,
+      "apiRoutes": 21,
+      "environmentKeys": 20,
+      "questions": 0,
+      "contextHash": "9e94e1405ab6e06cbacab2f737537e2210d16678dc19839d29a8f588f84dfb32",
+      "durationSeconds": 6.2036,
+      "modelCalls": [
+        {
+          "provider": "hive-ai",
+          "model": "zai-org/glm-5.3-flash",
+          "serverVersion": "1.18.33",
+          "usage": {
+            "cache": {
+              "read": 0,
+              "write": 0
+            },
+            "input": 52212,
+            "output": 176,
+            "reasoning": 0,
+            "total": 52388
+          },
+          "estimatedCostUsd": 0.00264052,
+          "actualCostUsd": null,
+          "formatRecovery": false
+        }
+      ],
+      "environmentObservations": 30
+    },
+    {
+      "repository": "monitor5/portpolio-production",
+      "sourceSha": "f54230346fbfca4e34ae2cdd1a370217611d2191",
+      "analysisStatus": "complete",
+      "mode": "opencode",
+      "services": 1,
+      "apiRoutes": 0,
+      "environmentKeys": 0,
+      "questions": 0,
+      "contextHash": "f05feb3e5ef29f1344e24877fdf867fb6ffc4c822b9e9effea5ff237b5343084",
+      "durationSeconds": 5.5452,
+      "modelCalls": [
+        {
+          "provider": "hive-ai",
+          "model": "zai-org/glm-5.3-flash",
+          "serverVersion": "1.18.33",
+          "usage": {
+            "cache": {
+              "read": 0,
+              "write": 0
+            },
+            "input": 10746,
+            "output": 160,
+            "reasoning": 0,
+            "total": 10906
+          },
+          "estimatedCostUsd": 0.0005645,
+          "actualCostUsd": null,
+          "formatRecovery": false
+        }
+      ]
+    }
+  ],
+  "demoEstimatedCostUsd": 0.00320502,
+  "staticQuality": true,
+  "wasContract": {
+    "checks": [
+      "existing JobStatus codes",
+      "real ApiResponse camelCase envelope",
+      "unknown value null preserved",
+      "request ID remains a header",
+      "analysis execution and review status separate",
+      "deployment approval not inferred"
+    ],
+    "contractVersion": "iris.control-plane.analysis.v1-draft",
+    "databaseWrites": 0,
+    "deploymentActions": 0,
+    "modelCalls": 0,
+    "passed": true,
+    "wasCommit": "2e1cc108e58a9755a545242efe5a43fecd767355"
+  },
+  "uiChecks": [
+    "GitHub source download and fixed SHA",
+    "static and Hive AI mode",
+    "masked evidence dialog",
+    "server attachment JSON downloaded through browser",
+    "320/390/1280 CSS widths without horizontal overflow",
+    "current review restored after page reload"
+  ],
+  "buildChecks": [
+    "ruff",
+    "Python format",
+    "JavaScript syntax",
+    "wheel includes matching HTML/CSS/JS"
+  ]
+}

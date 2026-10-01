@@ -16,15 +16,17 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8.3,<9", "pytest-cov>=6,<7", "ruff>=0.11,<1"]
+demo = ["fastapi>=0.142.2,<1", "uvicorn>=0.54,<1"]
 
 [project.scripts]
 iris-analyzer = "iris_analyzer.cli:main"
+iris-review-demo = "iris_analyzer.demo.app:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.setuptools.package-data]
-iris_analyzer = ["schemas/*.json", "opencode/prompts/*.txt", "opencode/*.json"]
+iris_analyzer = ["schemas/*.json", "opencode/prompts/*.txt", "opencode/*.json", "demo/static/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
