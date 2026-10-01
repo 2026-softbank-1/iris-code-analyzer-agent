@@ -27,7 +27,7 @@ OPENAI_MODEL=gpt-6-luna
 OPENCODE_PROVIDER=openai
 ```
 
-`OPENCODE_OUTPUT_MODE`를 생략하면 OpenAI는 구조화 응답 도구, Hive는 JSON 텍스트를 사용합니다. GPT-6 Luna 기본 reasoning은 `low`이며 이때 temperature를 보내지 않습니다. 모델 응답의 snapshot/context 및 계획 digest는 요청별 스키마에 고정하고 기존 검증을 유지합니다. 초기 JSON 텍스트 호출의 잘못된 해시를 거절한 기록과 실제 두 프로젝트 검증은 [OpenAI 검증 보고서](reports/openai-validation.md)에 있습니다.
+`OPENCODE_OUTPUT_MODE`를 생략하면 OpenAI는 구조화 응답 도구, Hive는 JSON 텍스트를 사용합니다. GPT-6 Luna 기본 reasoning은 `low`이며 이때 temperature를 보내지 않습니다. 분석 모델은 [v2 추가 제안 프로토콜](docs/model-review-protocol.md)을 사용합니다. 서버가 요청·응답 연결을 확인한 뒤 snapshot/context를 붙이고 의미 검증을 수행합니다. 배포 계획의 digest 검증은 기존 계약을 유지합니다. 이전 분석 프로토콜의 실제 두 프로젝트 검증은 [OpenAI 검증 보고서](reports/openai-validation.md)에 있습니다.
 
 ```sh
 uv run iris-analyzer analyze --repo ../tested_code/Temp_log \
@@ -96,7 +96,7 @@ uv run python scripts/evaluate_quality.py \
 
 ## 산출물과 데이터 계약
 
-전처리는 `manifest.json`, `context.json`, `evidence.jsonl`, `model-input.json`을 저장합니다. 전체 manifest는 로컬에 유지하고 모델에는 선정 파일 정보와 추가 요청이 가능한 경로만 전달합니다. 분석은 `analysis-result.json`, `run-report.json`과 호출별 `revision-01/`, `revision-02/`를 추가합니다. 실제 요청은 `model-request.json`, 응답은 `model-response.json`에 저장합니다. 응답 형식 보정이나 실패 진단에는 안전하게 추린 `model-response-raw.json`을 사용합니다. 보정 여부는 formatRecovery로 기록하며 여러 객체·불완전 JSON·잘린 응답은 거절합니다. run-report에는 단계 이벤트, 모델·서버 버전, 세션 및 메시지 ID, 사용량과 지연, 오류 코드가 들어갑니다. 사용량·비용이 제공되지 않으면 null입니다.
+전처리는 `manifest.json`, `context.json`, `evidence.jsonl`, `model-input.json`을 저장합니다. 전체 manifest는 로컬에 유지하고 모델에는 선정 파일 정보와 추가 요청이 가능한 경로만 전달합니다. 분석은 `analysis-result.json`, `verification-report.json`, `run-report.json`과 호출별 `revision-01/`, `revision-02/`를 추가합니다. 실제 요청은 `model-request.json`, 모델 delta 원본은 `model-wire-response.json`, 서버가 v1 형태로 변환한 응답은 `model-response.json`에 저장합니다. 실패 진단에는 안전하게 추린 `model-response-raw.json`을 사용합니다. 단일 완전 JSON 객체 추출 여부는 formatRecovery로 기록하며 여러 객체·불완전 JSON·잘린 응답은 거절합니다. run-report에는 단계 이벤트, 검증 판정, 모델·서버 버전, 세션 및 메시지 ID, 사용량과 지연, 오류 코드가 들어갑니다. 실제 청구액이 제공되지 않으면 null입니다.
 
 스키마는 `src/iris_analyzer/schemas/`에 있습니다. [공통 계약](docs/implementation-contract.md)에 모듈별 함수와 필드를 설명했습니다.
 
@@ -105,15 +105,15 @@ from iris_analyzer.contracts import Limits
 from iris_analyzer.pipeline import analyze_with_report
 from iris_analyzer.preprocess import prepare_context, expand_context
 
-bundle = prepare_context('/path/to/repository', limits=Limits())
-expanded = expand_context(bundle, ['server/src/middleware.ts'])
-run = analyze_with_report('/path/to/repository', on_event=persist_job_event)
+bundle = prepare_context("/path/to/repository", limits=Limits())
+expanded = expand_context(bundle, ["server/src/middleware.ts"])
+run = analyze_with_report("/path/to/repository", on_event=persist_job_event)
 result = run.result
 ```
 
 on_event는 queued → preprocessing → analyzing → validating → succeeded와 expanding, needs_input, unsupported, failed 이벤트를 전달합니다. worker가 Job 기록에 연결하면 됩니다. 생성 시각·절대 경로는 재현 가능한 context에 넣지 않습니다. 확장은 현재 프로세스가 고정한 스냅샷에서만 읽고 revision·contextHash를 갱신합니다.
 
-표시 필드는 `{value,status,scope,evidenceIds,reason}`입니다. detected는 동일 scope의 정적 관측값과 일치해야 합니다. suggested는 유효한 근거를 가진 모델 제안입니다. 모델용 제안 스키마는 suggested/unknown만 허용하고 이미 감지한 값의 반복을 금지합니다. detected는 전처리와 결과 병합기가 보존합니다. unknown은 값이 null이며 이유를 담습니다. 모델이 관측값을 누락하면 검증기가 복원합니다. 추천이 관측값과 충돌하면 관측값을 보존하고 질문을 추가합니다. 잘못된 detected 값과 존재하지 않는 근거는 오류로 거절합니다.
+표시 필드는 `{value,status,scope,evidenceIds,reason}`입니다. detected는 동일 scope의 정적 관측값과 일치해야 합니다. 모델은 suggested/unknown 추가 제안만 반환하며 관측값은 서버가 보존합니다. unknown은 null과 이유를 담습니다. suggested는 ID 존재 검사에 더해 불변 원본의 관계·서비스·scope를 확인한 제안만 병합합니다. 무관한 제안은 제외하고 미지원 관계는 보류합니다. 확인된 충돌은 관측값을 보존하며 질문으로 남깁니다. 직접 라이브러리 `validate_analysis` 호출도 같은 검증을 적용합니다. 지원하는 좁은 규칙과 남은 한계는 [의미 검증 문서](docs/semantic-evidence-verification.md)에 명시했습니다.
 
 componentRoots는 코드 모듈, deploymentCandidates는 실행 단위입니다. Temp_log의 client/server는 하나의 Web/API 앱으로 합쳐지고 MongoDB·볼륨은 의존성으로 표현합니다. 개발·컨테이너·호스트 매핑 포트는 별도 scope입니다. workingDirectory는 런타임의 작업 디렉터리이며 소스/build 루트와 별개입니다. 포트폴리오의 Node 빌드 정보와 nginx 실행 런타임도 분리합니다. API 경로와 외부 공개 라우팅도 구분합니다.
 
@@ -155,7 +155,16 @@ worker는 `analyze_with_report`에 모델 runner와 Job 이벤트 저장 콜백�
 
 ### AI 판단·근거·기여 평가 기준
 
-[AI 판단 정책](docs/ai-judgment-policy.md)은 각 항목을 입력 → 확인할 근거 → 허용 결론 → 금지 단정 → 기대 결과로 정리합니다. 현재 구현의 보장과 검증 공백을 구분하며, [구조화 평가 사례](evaluations/ai-judgment-cases.json)와 [오프라인 검증기 감사](reports/ai-judgment-audit.json)를 함께 제공합니다. 사례 테스트 통과와 실제 AI 기여 점수는 별개입니다.
+[AI 판단 정책](docs/ai-judgment-policy.md)은 각 항목을 입력 → 확인할 근거 → 허용 결론 → 금지 단정 → 기대 결과로 정리합니다. 운영 프롬프트·입력, 의미 검증기, 원본 delta 기반 기여 평가에 반영했습니다. [실제 Hive 반복 평가](reports/ai-judgment-evaluation.md), [수동 검토](reports/ai-judgment-manual-review.md), [구성한 검증기 반례](reports/ai-judgment-audit.json)를 구분해서 제공합니다. 모델 응답 성공·검증 통과·새 사실 발견·실제 배포 성공은 각각 다른 지표입니다.
+
+```sh
+uv run python scripts/evaluate_ai_judgment.py --live --env-file ../.env \
+  --provider hive-ai --repetitions 3 --max-output-tokens 8192 \
+  --max-model-calls 150 --max-total-tokens 1500000 \
+  --max-cost-usd 20 --out artifacts/ai-judgment/run
+```
+
+위 평가의 USD 20은 이번 작업에서 승인받은 누적 상한이며 라이브러리 기본 상한은 USD 1을 유지합니다. 실제 요청의 프롬프트·스키마·baseline·실행 메타데이터까지 비용 예약에 포함합니다. 보관 프롬프트는 `--prompt-file`, 별도 사례는 `--corpus evaluations/ai-judgment-holdout.json`으로 평가합니다.
 
 ### 검증된 문제의 로그 기반 개선 인계
 

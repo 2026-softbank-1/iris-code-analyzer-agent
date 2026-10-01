@@ -1,0 +1,3104 @@
+{
+  "schemaVersion": "iris.model-review-evidence.v1",
+  "note": "Actual v2 model wire replies and independent verification. Fixture sources are in evaluation corpora. No credentials/source uploads included.",
+  "runs": [
+    {
+      "experiment": "hive-v21-final",
+      "caseId": "available-config-needs-files",
+      "run": "run-01",
+      "wireReplies": [
+        {
+          "kind": "needs_files",
+          "reason": "index.js calls app.listen(settings.port) (e-9b9be299c289ba10f5b7), so the listener port is bound to the settings module. release-settings.json is listed in availablePaths but its contents were not supplied; it is the minimal file needed to resolve the settings.port value and confirm the container port for svc-96c49d08c231282a instead of leaving it as an unresolved user question.",
+          "requestedPaths": [
+            "release-settings.json"
+          ]
+        },
+        {
+          "changes": [
+            {
+              "field": {
+                "evidenceIds": [
+                  "e-9b9be299c289ba10f5b7",
+                  "e-b9a7b5e65f8a54cb5baf"
+                ],
+                "reason": "index.js calls app.listen(settings.port), and release-settings.json contains {\"port\":3000}, but the supplied index.js ranges omit the import/binding of settings, so the link between the settings object and release-settings.json is unconfirmed. The port value cannot be suggested without that relationship.",
+                "scope": "source",
+                "status": "unknown",
+                "value": null
+              },
+              "serviceId": "svc-96c49d08c231282a",
+              "target": "services.ports"
+            }
+          ],
+          "kind": "review",
+          "questions": [
+            {
+              "key": "svc-96c49d08c231282a.ports",
+              "kind": "user_configuration",
+              "reason": "The listener uses settings.port and release-settings.json declares 3000, but the settings import in index.js was not supplied and the expansion budget is exhausted, so the binding cannot be verified from source. Confirm the container port to use."
+            }
+          ],
+          "reviewFindings": [
+            {
+              "category": "missing_evidence",
+              "evidenceIds": [
+                "e-9b9be299c289ba10f5b7",
+                "e-b9a7b5e65f8a54cb5baf"
+              ],
+              "reason": "app.listen(settings.port) in index.js cannot be tied to release-settings.json's {\"port\":3000} because the provided index.js ranges (lines 3 and 5 only) omit the settings import/require. The port relationship remains unverified."
+            }
+          ]
+        }
+      ],
+      "verification": {
+        "baselineDigest": "7a39b180616e707fc06590656d33812e53f7881075671e5e849644adb429d353",
+        "contextHash": "086a5f430ed03be925e311ccb4d1affb9ee7c9b2cb54162710eeec12b05f11ae",
+        "decisions": [
+          {
+            "decision": "deferred",
+            "evidenceIds": [
+              "e-9b9be299c289ba10f5b7",
+              "e-b9a7b5e65f8a54cb5baf"
+            ],
+            "fieldPath": [
+              "result",
+              "services",
+              0,
+              "ports",
+              0
+            ],
+            "inspectedPaths": [],
+            "missingObligations": [
+              "Identify a verified source obligation before blocking on this unknown collection entry."
+            ],
+            "proposedDigest": "9ef88d29de6b2fccb37cc19702a634031c12c8f76929c2f8a306b3c8e3d79d81",
+            "reason": "An optional unknown collection entry does not establish a new blocking source obligation.",
+            "reasonCode": "UNVERIFIED_COLLECTION_OBLIGATION",
+            "ruleId": "iris.obligation.baseline.v1"
+          },
+          {
+            "decision": "supported",
+            "evidenceIds": [],
+            "fieldPath": [
+              "result",
+              "questions",
+              0
+            ],
+            "inspectedPaths": [],
+            "missingObligations": [],
+            "proposedDigest": "be01c377b977e70708078bdb251ef9b07b949234331c41850c86dc13dbefb7ec",
+            "reason": "Existing source obligation preserved.",
+            "reasonCode": "BASELINE_OBLIGATION_PRESERVED",
+            "ruleId": "iris.obligation.baseline.v1"
+          }
+        ],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "620c1c9cc843174ee4178c06ea2ceb4aba2bb3a284382c63c56b913d52b870b6",
+        "resolvedObligations": [],
+        "resultDigest": "7a39b180616e707fc06590656d33812e53f7881075671e5e849644adb429d353",
+        "reviewFindings": [
+          {
+            "blocking": false,
+            "category": "missing_evidence",
+            "decision": "rejected",
+            "evidenceIds": [
+              "e-9b9be299c289ba10f5b7",
+              "e-b9a7b5e65f8a54cb5baf"
+            ],
+            "inspectedPaths": [
+              "index.js",
+              "release-settings.json"
+            ],
+            "origin": "model",
+            "reason": "The supplied evidence does not establish this review finding.",
+            "reasonCode": "EVIDENCE_PREDICATE_MISMATCH",
+            "ruleId": "iris.review.missing_evidence.v1"
+          }
+        ],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "6729efebff490131ee632ef7ec692a879deaa1775c19d1b2393e6e836984ca37",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    },
+    {
+      "experiment": "hive-v21-final",
+      "caseId": "available-config-needs-files",
+      "run": "run-02",
+      "wireReplies": [
+        {
+          "kind": "needs_files",
+          "reason": "index.js calls app.listen(settings.port) (e-9b9be299c289ba10f5b7), so the listener port is bound to a settings object sourced from release-settings.json, which is listed in availablePaths but not supplied. Providing it would let the container port for svc-96c49d08c231282a be resolved from the actual declaration instead of a guessed value.",
+          "requestedPaths": [
+            "release-settings.json"
+          ]
+        },
+        {
+          "changes": [
+            {
+              "field": {
+                "evidenceIds": [
+                  "e-9b9be299c289ba10f5b7",
+                  "e-b9a7b5e65f8a54cb5baf"
+                ],
+                "reason": "app.listen(settings.port) shows the listener binds to a settings object, and release-settings.json contains {\"port\":3000}, but the supplied index.js ranges omit the import/loading of settings, so the binding between the settings identifier and release-settings.json is not evidenced. The value stays unknown rather than guessing 3000.",
+                "scope": "source",
+                "status": "unknown",
+                "value": null
+              },
+              "serviceId": "svc-96c49d08c231282a",
+              "target": "services.ports"
+            }
+          ],
+          "kind": "review",
+          "questions": [],
+          "reviewFindings": [
+            {
+              "category": "missing_evidence",
+              "evidenceIds": [
+                "e-9b9be299c289ba10f5b7",
+                "e-b9a7b5e65f8a54cb5baf"
+              ],
+              "reason": "The listener call app.listen(settings.port) cannot be traced to a concrete configuration key: the supplied index.js ranges (lines 3 and 5 only) omit the settings import/initialization, so the link from settings.port to release-settings.json's {\"port\":3000} is unverified. The container/source port therefore remains unresolved."
+            }
+          ]
+        }
+      ],
+      "verification": {
+        "baselineDigest": "7a39b180616e707fc06590656d33812e53f7881075671e5e849644adb429d353",
+        "contextHash": "086a5f430ed03be925e311ccb4d1affb9ee7c9b2cb54162710eeec12b05f11ae",
+        "decisions": [
+          {
+            "decision": "deferred",
+            "evidenceIds": [
+              "e-9b9be299c289ba10f5b7",
+              "e-b9a7b5e65f8a54cb5baf"
+            ],
+            "fieldPath": [
+              "result",
+              "services",
+              0,
+              "ports",
+              0
+            ],
+            "inspectedPaths": [],
+            "missingObligations": [
+              "Identify a verified source obligation before blocking on this unknown collection entry."
+            ],
+            "proposedDigest": "5bb13fb272305fe383fb2ee3cacb000eb482089fc0fdc32fdc78ec8cd5b3cadd",
+            "reason": "An optional unknown collection entry does not establish a new blocking source obligation.",
+            "reasonCode": "UNVERIFIED_COLLECTION_OBLIGATION",
+            "ruleId": "iris.obligation.baseline.v1"
+          }
+        ],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "04524fe9843fc3caa317f1650b15c7fb70ba46aed914cdd69f64bd0b63e371b4",
+        "resolvedObligations": [],
+        "resultDigest": "7a39b180616e707fc06590656d33812e53f7881075671e5e849644adb429d353",
+        "reviewFindings": [
+          {
+            "blocking": false,
+            "category": "missing_evidence",
+            "decision": "rejected",
+            "evidenceIds": [
+              "e-9b9be299c289ba10f5b7",
+              "e-b9a7b5e65f8a54cb5baf"
+            ],
+            "inspectedPaths": [
+              "index.js",
+              "release-settings.json"
+            ],
+            "origin": "model",
+            "reason": "The supplied evidence does not establish this review finding.",
+            "reasonCode": "EVIDENCE_PREDICATE_MISMATCH",
+            "ruleId": "iris.review.missing_evidence.v1"
+          }
+        ],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "6729efebff490131ee632ef7ec692a879deaa1775c19d1b2393e6e836984ca37",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    },
+    {
+      "experiment": "hive-v21-final",
+      "caseId": "available-config-needs-files",
+      "run": "run-03",
+      "wireReplies": [
+        {
+          "kind": "needs_files",
+          "reason": "index.js line 5 calls app.listen(settings.port) (e-9b9be299c289ba10f5b7), so the listener port is bound to the settings import. release-settings.json is listed in availablePaths but its contents were not supplied; providing it would let the port value be traced from the settings declaration to the express listener and resolve the open svc-96c49d08c231282a.ports question from source instead of user configuration.",
+          "requestedPaths": [
+            "release-settings.json"
+          ]
+        },
+        {
+          "changes": [],
+          "kind": "review",
+          "questions": [
+            {
+              "key": "svc-96c49d08c231282a.ports",
+              "kind": "code_review",
+              "reason": "index.js line 5 reads settings.port, but the supplied ranges omit the import/require that binds settings to release-settings.json (port 3000). The listener-to-config relationship cannot be completed from the provided evidence, so the container/source port cannot be confirmed or suggested."
+            }
+          ],
+          "reviewFindings": [
+            {
+              "category": "missing_evidence",
+              "evidenceIds": [
+                "e-9b9be299c289ba10f5b7",
+                "e-b9a7b5e65f8a54cb5baf"
+              ],
+              "reason": "app.listen(settings.port) references a settings object whose declaration is not in the supplied index.js ranges (lines 1-2 omitted). release-settings.json declares port 3000, but no evidence links settings to that file, so the port value cannot be attributed to the selected execution path."
+            }
+          ]
+        }
+      ],
+      "verification": {
+        "baselineDigest": "7a39b180616e707fc06590656d33812e53f7881075671e5e849644adb429d353",
+        "contextHash": "086a5f430ed03be925e311ccb4d1affb9ee7c9b2cb54162710eeec12b05f11ae",
+        "decisions": [
+          {
+            "decision": "deferred",
+            "evidenceIds": [],
+            "fieldPath": [
+              "result",
+              "questions",
+              0
+            ],
+            "inspectedPaths": [],
+            "missingObligations": [
+              "Confirm a source-grounded blocking obligation."
+            ],
+            "proposedDigest": "92609929a2b8079e96c3aff4330c9740f14edcc1286e542605cb3fa729af58fc",
+            "reason": "Additional model question requires source verification before it can block execution.",
+            "reasonCode": "REVIEW_RELATION_UNRESOLVED",
+            "ruleId": "iris.obligation.baseline.v1"
+          }
+        ],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "49c0fa7e4962f8a6bd16e2a3033eed494d19d876c3e9189d49e3b79e88ec9f51",
+        "resolvedObligations": [],
+        "resultDigest": "7a39b180616e707fc06590656d33812e53f7881075671e5e849644adb429d353",
+        "reviewFindings": [
+          {
+            "blocking": false,
+            "category": "missing_evidence",
+            "decision": "rejected",
+            "evidenceIds": [
+              "e-9b9be299c289ba10f5b7",
+              "e-b9a7b5e65f8a54cb5baf"
+            ],
+            "inspectedPaths": [
+              "index.js",
+              "release-settings.json"
+            ],
+            "origin": "model",
+            "reason": "The supplied evidence does not establish this review finding.",
+            "reasonCode": "EVIDENCE_PREDICATE_MISMATCH",
+            "ruleId": "iris.review.missing_evidence.v1"
+          }
+        ],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "6729efebff490131ee632ef7ec692a879deaa1775c19d1b2393e6e836984ca37",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    },
+    {
+      "experiment": "hive-v21-final",
+      "caseId": "db-import-not-connection",
+      "run": "run-01",
+      "wireReplies": [
+        {
+          "kind": "needs_files",
+          "reason": "package.json declares the pg dependency (e-57ba135becdc85b7a8a6) but no connection, configuration key, or route is traced; index.js is expandable with reason incomplete_supplied_ranges (only lines 3-4 supplied). The remaining lines are needed to verify whether a pg client/connect call binds to a configuration target and whether any express routes are registered on the app created at line 3.",
+          "requestedPaths": [
+            "index.js"
+          ]
+        },
+        {
+          "changes": [],
+          "kind": "review",
+          "questions": [],
+          "reviewFindings": []
+        }
+      ],
+      "verification": {
+        "baselineDigest": "f1ad734c9cdf502c2d515735b6895a9970ed322220e41c3f48fb548aff383270",
+        "contextHash": "2498d7eff8201923cdbaebf62dafe2f48f556c6667db7889f8a164f483f5d74b",
+        "decisions": [],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "471896638f5192c558160a97abbdaeb2935adea1bbf0db9dace91a15446bfbcb",
+        "resolvedObligations": [],
+        "resultDigest": "f1ad734c9cdf502c2d515735b6895a9970ed322220e41c3f48fb548aff383270",
+        "reviewFindings": [],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "3296e63ca7980ab5b90c6863a6be73758d9e2529598d1e950a7b1911d5c5a28c",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    },
+    {
+      "experiment": "hive-v21-final",
+      "caseId": "db-import-not-connection",
+      "run": "run-02",
+      "wireReplies": [
+        {
+          "changes": [],
+          "kind": "review",
+          "questions": [],
+          "reviewFindings": []
+        }
+      ],
+      "verification": {
+        "baselineDigest": "f71dc4e473acdb72021377b10f20105fb9faa9c3867cd6ff6b812a4d7933471b",
+        "contextHash": "d15b2a8529ddbb01f4511421a1dccc13fc66d11e27076fd30f33924fe7ed45c2",
+        "decisions": [],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "e67e471dce709746312d5d2c9894583567a454e99401144109e46557b300ca12",
+        "resolvedObligations": [],
+        "resultDigest": "f71dc4e473acdb72021377b10f20105fb9faa9c3867cd6ff6b812a4d7933471b",
+        "reviewFindings": [],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "3296e63ca7980ab5b90c6863a6be73758d9e2529598d1e950a7b1911d5c5a28c",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    },
+    {
+      "experiment": "hive-v21-final",
+      "caseId": "db-import-not-connection",
+      "run": "run-03",
+      "wireReplies": [
+        {
+          "kind": "needs_files",
+          "reason": "package.json declares a pg (postgresql) dependency, but the supplied index.js ranges (lines 3-4 only) show only express app creation and app.listen(3000). The full index.js is an expandableSelectedPath with reason incomplete_supplied_ranges. Expanding it is the minimum needed to verify whether pg is actually used (client/connect call and configuration key) or is an unused declaration, and to check for route registrations between app creation and listen.",
+          "requestedPaths": [
+            "index.js"
+          ]
+        },
+        {
+          "changes": [],
+          "kind": "review",
+          "questions": [
+            {
+              "key": "database.connection",
+              "kind": "code_review",
+              "reason": "package.json declares pg 8.13.0 and index.js requires Pool, but the provided source shows no Pool instantiation, connection config key, or connect call. Whether a database connection is actually required at runtime, and its target host/port/database, cannot be determined from the supplied evidence."
+            }
+          ],
+          "reviewFindings": [
+            {
+              "category": "missing_evidence",
+              "evidenceIds": [
+                "e-57ba135becdc85b7a8a6",
+                "e-b5e063d6bbf9aaffa240"
+              ],
+              "reason": "The pg dependency declaration and require('pg') establish only a declaration; no Pool instantiation, connection string reference, or environment key appears in the provided index.js range, so the dependency.database fact cannot be linked to an actual connection target."
+            }
+          ]
+        }
+      ],
+      "verification": {
+        "baselineDigest": "f1ad734c9cdf502c2d515735b6895a9970ed322220e41c3f48fb548aff383270",
+        "contextHash": "2498d7eff8201923cdbaebf62dafe2f48f556c6667db7889f8a164f483f5d74b",
+        "decisions": [
+          {
+            "decision": "deferred",
+            "evidenceIds": [],
+            "fieldPath": [
+              "result",
+              "questions",
+              0
+            ],
+            "inspectedPaths": [],
+            "missingObligations": [
+              "Confirm a source-grounded blocking obligation."
+            ],
+            "proposedDigest": "b7f6ffe7b1bba7f9466c983be7f11f8eb3aad287c4d73fa2d3e458a51a5cfc4c",
+            "reason": "Additional model question requires source verification before it can block execution.",
+            "reasonCode": "REVIEW_RELATION_UNRESOLVED",
+            "ruleId": "iris.obligation.baseline.v1"
+          }
+        ],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "8d3aeb67bc6dd4883d8a2323c23dd3e9d253b4f0ec11e1a0d609d6815ab924d4",
+        "resolvedObligations": [],
+        "resultDigest": "f1ad734c9cdf502c2d515735b6895a9970ed322220e41c3f48fb548aff383270",
+        "reviewFindings": [
+          {
+            "blocking": false,
+            "category": "missing_evidence",
+            "decision": "rejected",
+            "evidenceIds": [
+              "e-57ba135becdc85b7a8a6",
+              "e-b5e063d6bbf9aaffa240"
+            ],
+            "inspectedPaths": [
+              "index.js",
+              "package.json"
+            ],
+            "origin": "model",
+            "reason": "The supplied evidence does not establish this review finding.",
+            "reasonCode": "EVIDENCE_PREDICATE_MISMATCH",
+            "ruleId": "iris.review.missing_evidence.v1"
+          }
+        ],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "3296e63ca7980ab5b90c6863a6be73758d9e2529598d1e950a7b1911d5c5a28c",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    },
+    {
+      "experiment": "hive-v21-final",
+      "caseId": "literal-expression-new-route",
+      "run": "run-01",
+      "wireReplies": [
+        {
+          "kind": "needs_files",
+          "reason": "The unresolved Express route uses the variable healthPath (e-f46a79dbaa91b36ad598), but its constant declaration is outside the supplied ranges of index.js (only lines 2, 4, 5 provided). index.js is listed in expandableSelectedPaths as incomplete_supplied_ranges; expanding it should reveal the healthPath declaration needed to resolve the route path and complete the apiRoutes review.",
+          "requestedPaths": [
+            "index.js"
+          ]
+        },
+        {
+          "changes": [
+            {
+              "field": {
+                "evidenceIds": [
+                  "e-36efb31d3e7f13872218",
+                  "e-3efac1540cdb98f2b49d",
+                  "e-f46a79dbaa91b36ad598"
+                ],
+                "reason": "healthPath is an immutable concatenation '/health/' + 'ready' resolving to /health/ready, registered via app.get on the express app created in the same file. Runtime success of the handler is not confirmed.",
+                "scope": "source",
+                "status": "suggested",
+                "value": {
+                  "component": ".",
+                  "method": "GET",
+                  "path": "/health/ready"
+                }
+              },
+              "serviceId": null,
+              "target": "apiRoutes"
+            }
+          ],
+          "kind": "review",
+          "questions": [],
+          "reviewFindings": []
+        }
+      ],
+      "verification": {
+        "baselineDigest": "236b40d058cd8c9cc350487ba69185affc1b8f20d8c16db70e4345d3d100f0c5",
+        "contextHash": "34d3157830f3334360e09fb9e19631c1063275c50dd0c5b4aaeab8546b8103f6",
+        "decisions": [
+          {
+            "decision": "supported",
+            "evidenceIds": [
+              "e-36efb31d3e7f13872218",
+              "e-3efac1540cdb98f2b49d",
+              "e-f46a79dbaa91b36ad598"
+            ],
+            "fieldPath": [
+              "result",
+              "apiRoutes",
+              0
+            ],
+            "inspectedPaths": [
+              "index.js"
+            ],
+            "missingObligations": [],
+            "proposedDigest": "d628aa3d7190fe4420c7f616789643abc0eb2639492307f4cb322bda498f4b19",
+            "reason": "Verified a narrow source declaration in its stated scope; execution, connection success and required deployment capacity are not established.",
+            "reasonCode": "SOURCE_RELATION_VERIFIED",
+            "ruleId": "iris.express.const-route.v1",
+            "supportingLocators": [
+              {
+                "endLine": 5,
+                "path": "index.js",
+                "sourceDigest": "2561b466f28b82012672d89cea8d480093b1b3188dd095942d6fb5b5af46a1a6",
+                "startLine": 1
+              }
+            ]
+          }
+        ],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "a34a46dad42ed524a58a72015473875170e3990f9d899a66cd94481d73a26a7a",
+        "resolvedObligations": [
+          {
+            "component": ".",
+            "decision": "supported",
+            "evidenceIds": [
+              "e-f46a79dbaa91b36ad598"
+            ],
+            "fieldPath": [
+              "result",
+              "apiRoutes",
+              0
+            ],
+            "key": "runtime.httpRoutes",
+            "obligationDigest": "2beb18671aeed6c4894b3126895d62c0ae60fb788b5292d9e65ee93c617a5ec8",
+            "path": "index.js",
+            "reason": "Express route path cannot be resolved statically",
+            "ruleId": "iris.express.const-route.v1"
+          }
+        ],
+        "resultDigest": "b7a7c29a2112759570630cc2b9ca236f4a26fa8df050cf1f4807efbe0a6d6972",
+        "reviewFindings": [],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "586f80976f490ee932f66043e3151b625d4cce3c550689c7b31bd4eeee136ac3",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    },
+    {
+      "experiment": "hive-v21-final",
+      "caseId": "literal-expression-new-route",
+      "run": "run-02",
+      "wireReplies": [
+        {
+          "kind": "needs_files",
+          "reason": "The unresolved Express route runtime.httpRoutes depends on the healthPath variable declared in index.js, which was not included in the supplied ranges (lines 1, 3, 6+ omitted). Expanding index.js should reveal the healthPath constant declaration, allowing the route path to be resolved and a suggested apiRoutes entry to be proposed for service svc-96c49d08c231282a.",
+          "requestedPaths": [
+            "index.js"
+          ]
+        },
+        {
+          "changes": [
+            {
+              "field": {
+                "evidenceIds": [
+                  "e-36efb31d3e7f13872218",
+                  "e-3efac1540cdb98f2b49d",
+                  "e-f46a79dbaa91b36ad598"
+                ],
+                "reason": "healthPath is a constant concatenation '/health/' + 'ready' resolving immutably to /health/ready, registered via app.get on the express app created in index.js. Component is the componentRoots entry '.'. Runtime success of the handler is not confirmed.",
+                "scope": "source",
+                "status": "suggested",
+                "value": {
+                  "component": ".",
+                  "method": "GET",
+                  "path": "/health/ready"
+                }
+              },
+              "serviceId": null,
+              "target": "apiRoutes"
+            }
+          ],
+          "kind": "review",
+          "questions": [],
+          "reviewFindings": []
+        }
+      ],
+      "verification": {
+        "baselineDigest": "236b40d058cd8c9cc350487ba69185affc1b8f20d8c16db70e4345d3d100f0c5",
+        "contextHash": "34d3157830f3334360e09fb9e19631c1063275c50dd0c5b4aaeab8546b8103f6",
+        "decisions": [
+          {
+            "decision": "supported",
+            "evidenceIds": [
+              "e-36efb31d3e7f13872218",
+              "e-3efac1540cdb98f2b49d",
+              "e-f46a79dbaa91b36ad598"
+            ],
+            "fieldPath": [
+              "result",
+              "apiRoutes",
+              0
+            ],
+            "inspectedPaths": [
+              "index.js"
+            ],
+            "missingObligations": [],
+            "proposedDigest": "82d314164ab388bbda596f2c32336e688b033c2e0c92f2374188cecd91a75383",
+            "reason": "Verified a narrow source declaration in its stated scope; execution, connection success and required deployment capacity are not established.",
+            "reasonCode": "SOURCE_RELATION_VERIFIED",
+            "ruleId": "iris.express.const-route.v1",
+            "supportingLocators": [
+              {
+                "endLine": 5,
+                "path": "index.js",
+                "sourceDigest": "2561b466f28b82012672d89cea8d480093b1b3188dd095942d6fb5b5af46a1a6",
+                "startLine": 1
+              }
+            ]
+          }
+        ],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "328b67ebb2b0387e70045002e47b9cf36650d6bfd5c0b22b65245b6587546f49",
+        "resolvedObligations": [
+          {
+            "component": ".",
+            "decision": "supported",
+            "evidenceIds": [
+              "e-f46a79dbaa91b36ad598"
+            ],
+            "fieldPath": [
+              "result",
+              "apiRoutes",
+              0
+            ],
+            "key": "runtime.httpRoutes",
+            "obligationDigest": "2beb18671aeed6c4894b3126895d62c0ae60fb788b5292d9e65ee93c617a5ec8",
+            "path": "index.js",
+            "reason": "Express route path cannot be resolved statically",
+            "ruleId": "iris.express.const-route.v1"
+          }
+        ],
+        "resultDigest": "b7a7c29a2112759570630cc2b9ca236f4a26fa8df050cf1f4807efbe0a6d6972",
+        "reviewFindings": [],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "586f80976f490ee932f66043e3151b625d4cce3c550689c7b31bd4eeee136ac3",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    },
+    {
+      "experiment": "hive-v21-final",
+      "caseId": "literal-expression-new-route",
+      "run": "run-03",
+      "wireReplies": [
+        {
+          "kind": "needs_files",
+          "reason": "The unresolved route runtime.httpRoutes depends on the healthPath constant used in app.get(healthPath, ...) (e-f46a79dbaa91b36ad598), but its declaration is outside the supplied ranges of index.js. Expanding index.js should let the path expression be resolved and the route proposed.",
+          "requestedPaths": [
+            "index.js"
+          ]
+        },
+        {
+          "changes": [
+            {
+              "field": {
+                "evidenceIds": [
+                  "e-36efb31d3e7f13872218",
+                  "e-3efac1540cdb98f2b49d",
+                  "e-f46a79dbaa91b36ad598"
+                ],
+                "reason": "healthPath is an immutable concatenation of two literals ('/health/' + 'ready') resolving to /health/ready, registered via app.get on the express app created in index.js. Readiness is not proven; only the route registration is supported.",
+                "scope": "source",
+                "status": "suggested",
+                "value": {
+                  "component": ".",
+                  "method": "GET",
+                  "path": "/health/ready"
+                }
+              },
+              "serviceId": null,
+              "target": "apiRoutes"
+            }
+          ],
+          "kind": "review",
+          "questions": [],
+          "reviewFindings": []
+        }
+      ],
+      "verification": {
+        "baselineDigest": "236b40d058cd8c9cc350487ba69185affc1b8f20d8c16db70e4345d3d100f0c5",
+        "contextHash": "34d3157830f3334360e09fb9e19631c1063275c50dd0c5b4aaeab8546b8103f6",
+        "decisions": [
+          {
+            "decision": "supported",
+            "evidenceIds": [
+              "e-36efb31d3e7f13872218",
+              "e-3efac1540cdb98f2b49d",
+              "e-f46a79dbaa91b36ad598"
+            ],
+            "fieldPath": [
+              "result",
+              "apiRoutes",
+              0
+            ],
+            "inspectedPaths": [
+              "index.js"
+            ],
+            "missingObligations": [],
+            "proposedDigest": "fd0b5868aaffdc545a989f9f476d0ff5e2982e98236610e82647dfe56f678cfc",
+            "reason": "Verified a narrow source declaration in its stated scope; execution, connection success and required deployment capacity are not established.",
+            "reasonCode": "SOURCE_RELATION_VERIFIED",
+            "ruleId": "iris.express.const-route.v1",
+            "supportingLocators": [
+              {
+                "endLine": 5,
+                "path": "index.js",
+                "sourceDigest": "2561b466f28b82012672d89cea8d480093b1b3188dd095942d6fb5b5af46a1a6",
+                "startLine": 1
+              }
+            ]
+          }
+        ],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "7d6de5789f9efed737a76e9541c43621cccb156c194957240932c9a3e90587f1",
+        "resolvedObligations": [
+          {
+            "component": ".",
+            "decision": "supported",
+            "evidenceIds": [
+              "e-f46a79dbaa91b36ad598"
+            ],
+            "fieldPath": [
+              "result",
+              "apiRoutes",
+              0
+            ],
+            "key": "runtime.httpRoutes",
+            "obligationDigest": "2beb18671aeed6c4894b3126895d62c0ae60fb788b5292d9e65ee93c617a5ec8",
+            "path": "index.js",
+            "reason": "Express route path cannot be resolved statically",
+            "ruleId": "iris.express.const-route.v1"
+          }
+        ],
+        "resultDigest": "b7a7c29a2112759570630cc2b9ca236f4a26fa8df050cf1f4807efbe0a6d6972",
+        "reviewFindings": [],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "586f80976f490ee932f66043e3151b625d4cce3c550689c7b31bd4eeee136ac3",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    },
+    {
+      "experiment": "hive-v21-final",
+      "caseId": "node-build-nginx-runtime",
+      "run": "run-01",
+      "wireReplies": [
+        {
+          "changes": [],
+          "kind": "review",
+          "questions": [],
+          "reviewFindings": []
+        }
+      ],
+      "verification": {
+        "baselineDigest": "df5c19cebcc71e3da2866367083e45d840f8fc9fb613de9e0b92e93c03ab45c9",
+        "contextHash": "e882622ee153b2df52e0be42f027161b910aba7838935b4af7bd7d1ce2380ed2",
+        "decisions": [],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "34b741e1004e7c9b95ffb4a35b61b867ffdd7ba693e807106758ca14248316cb",
+        "resolvedObligations": [],
+        "resultDigest": "df5c19cebcc71e3da2866367083e45d840f8fc9fb613de9e0b92e93c03ab45c9",
+        "reviewFindings": [],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "c7c882fe86ecfd3b535409951e3e60ec3307752d002bd3cae99c30698c92589f",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    },
+    {
+      "experiment": "hive-v21-final",
+      "caseId": "node-build-nginx-runtime",
+      "run": "run-02",
+      "wireReplies": [
+        {
+          "changes": [],
+          "kind": "review",
+          "questions": [],
+          "reviewFindings": []
+        }
+      ],
+      "verification": {
+        "baselineDigest": "df5c19cebcc71e3da2866367083e45d840f8fc9fb613de9e0b92e93c03ab45c9",
+        "contextHash": "e882622ee153b2df52e0be42f027161b910aba7838935b4af7bd7d1ce2380ed2",
+        "decisions": [],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "34b741e1004e7c9b95ffb4a35b61b867ffdd7ba693e807106758ca14248316cb",
+        "resolvedObligations": [],
+        "resultDigest": "df5c19cebcc71e3da2866367083e45d840f8fc9fb613de9e0b92e93c03ab45c9",
+        "reviewFindings": [],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "c7c882fe86ecfd3b535409951e3e60ec3307752d002bd3cae99c30698c92589f",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    },
+    {
+      "experiment": "hive-v21-final",
+      "caseId": "node-build-nginx-runtime",
+      "run": "run-03",
+      "wireReplies": [
+        {
+          "changes": [],
+          "kind": "review",
+          "questions": [],
+          "reviewFindings": [
+            {
+              "category": "source_conflict",
+              "evidenceIds": [
+                "e-2e7bfe891d7e7b1c94b2",
+                "e-f174de8f5c3aff3e0db6",
+                "e-ff8e22540161f39aa44d"
+              ],
+              "reason": "The selected build path runs 'npm ci' in the Docker build stage, but the provided package-lock.json is an empty object ({}), which does not pin vite or any dependency declared in package.json. npm ci requires a lockfile in sync with the manifest, so the install step may fail at build time. This is a static consistency observation; no build execution was performed."
+            }
+          ]
+        }
+      ],
+      "verification": {
+        "baselineDigest": "df5c19cebcc71e3da2866367083e45d840f8fc9fb613de9e0b92e93c03ab45c9",
+        "contextHash": "e882622ee153b2df52e0be42f027161b910aba7838935b4af7bd7d1ce2380ed2",
+        "decisions": [],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "a753d3378e1966ea50d84de50b59b8e14228fdd58f6eae7ae51abc07357303d7",
+        "resolvedObligations": [],
+        "resultDigest": "df5c19cebcc71e3da2866367083e45d840f8fc9fb613de9e0b92e93c03ab45c9",
+        "reviewFindings": [
+          {
+            "blocking": false,
+            "category": "source_conflict",
+            "decision": "rejected",
+            "evidenceIds": [
+              "e-2e7bfe891d7e7b1c94b2",
+              "e-f174de8f5c3aff3e0db6",
+              "e-ff8e22540161f39aa44d"
+            ],
+            "inspectedPaths": [
+              "Dockerfile",
+              "package-lock.json",
+              "package.json"
+            ],
+            "origin": "model",
+            "reason": "The supplied evidence does not establish this review finding.",
+            "reasonCode": "EVIDENCE_PREDICATE_MISMATCH",
+            "ruleId": "iris.review.source_conflict.v1"
+          }
+        ],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "c7c882fe86ecfd3b535409951e3e60ec3307752d002bd3cae99c30698c92589f",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    },
+    {
+      "experiment": "hive-v21-final",
+      "caseId": "normal-noop",
+      "run": "run-01",
+      "wireReplies": [
+        {
+          "changes": [],
+          "kind": "review",
+          "questions": [],
+          "reviewFindings": []
+        }
+      ],
+      "verification": {
+        "baselineDigest": "65069bdf605946c118b960771c156f035a5d46b9fedcafaa50b4471dc44746ba",
+        "contextHash": "3cbf436a9c9ca6963f06e0708043fbe3f23a8505cdb43e4266aa278819978bfe",
+        "decisions": [],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "03f0b5e863c5f3c6e00948f7a53987ea46de0fe649c4385e0e7cf9999be02b76",
+        "resolvedObligations": [],
+        "resultDigest": "65069bdf605946c118b960771c156f035a5d46b9fedcafaa50b4471dc44746ba",
+        "reviewFindings": [],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "38aac43426a510181c96df1fdb696c688e86bf46b0726aa8d11ef20974f0d6a2",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    },
+    {
+      "experiment": "hive-v21-final",
+      "caseId": "normal-noop",
+      "run": "run-02",
+      "wireReplies": [
+        {
+          "changes": [],
+          "kind": "review",
+          "questions": [],
+          "reviewFindings": []
+        }
+      ],
+      "verification": {
+        "baselineDigest": "65069bdf605946c118b960771c156f035a5d46b9fedcafaa50b4471dc44746ba",
+        "contextHash": "3cbf436a9c9ca6963f06e0708043fbe3f23a8505cdb43e4266aa278819978bfe",
+        "decisions": [],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "03f0b5e863c5f3c6e00948f7a53987ea46de0fe649c4385e0e7cf9999be02b76",
+        "resolvedObligations": [],
+        "resultDigest": "65069bdf605946c118b960771c156f035a5d46b9fedcafaa50b4471dc44746ba",
+        "reviewFindings": [],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "38aac43426a510181c96df1fdb696c688e86bf46b0726aa8d11ef20974f0d6a2",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    },
+    {
+      "experiment": "hive-v21-final",
+      "caseId": "normal-noop",
+      "run": "run-03",
+      "wireReplies": [
+        {
+          "changes": [],
+          "kind": "review",
+          "questions": [],
+          "reviewFindings": []
+        }
+      ],
+      "verification": {
+        "baselineDigest": "65069bdf605946c118b960771c156f035a5d46b9fedcafaa50b4471dc44746ba",
+        "contextHash": "3cbf436a9c9ca6963f06e0708043fbe3f23a8505cdb43e4266aa278819978bfe",
+        "decisions": [],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "03f0b5e863c5f3c6e00948f7a53987ea46de0fe649c4385e0e7cf9999be02b76",
+        "resolvedObligations": [],
+        "resultDigest": "65069bdf605946c118b960771c156f035a5d46b9fedcafaa50b4471dc44746ba",
+        "reviewFindings": [],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "38aac43426a510181c96df1fdb696c688e86bf46b0726aa8d11ef20974f0d6a2",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    },
+    {
+      "experiment": "hive-v21-final",
+      "caseId": "ports-distinct-scopes",
+      "run": "run-01",
+      "wireReplies": [
+        {
+          "kind": "needs_files",
+          "reason": "index.js is the selected entrypoint (Dockerfile CMD node index.js, package.json start script) but only lines 2-3 were supplied, so route registrations and any environment/port configuration in the same file cannot be verified. The full file is listed in expandableSelectedPaths as incomplete_supplied_ranges; expanding it would confirm whether apiRoutes or runtime configuration facts are missing for service svc-9bc425e830b1b855.",
+          "requestedPaths": [
+            "index.js"
+          ]
+        },
+        {
+          "changes": [],
+          "kind": "review",
+          "questions": [
+            {
+              "key": "docker.image_contents",
+              "kind": "code_review",
+              "reason": "The Dockerfile for the selected compose service 'app' has no COPY/RUN install steps, so it is unverified that index.js and installed dependencies exist in the final image; build/start success cannot be established from the provided evidence."
+            }
+          ],
+          "reviewFindings": [
+            {
+              "category": "missing_evidence",
+              "evidenceIds": [
+                "e-48674ac0b59ed4083ace",
+                "e-f22ab5fcbb100725b718",
+                "e-1cd9581197f48d81174c",
+                "e-341feb2e52e340988569"
+              ],
+              "reason": "The selected execution path (compose build context '.' -> Dockerfile -> CMD node index.js) is internally consistent on ports (listener 3000, EXPOSE 3000, host 8080:3000), but the Dockerfile contains no COPY or install steps, so the presence of index.js and dependencies inside the image cannot be verified from the supplied evidence."
+            },
+            {
+              "category": "missing_evidence",
+              "evidenceIds": [
+                "e-aad5ecff50992e4fd822",
+                "e-9a785226f71a033a5fa1",
+                "e-341feb2e52e340988569",
+                "e-b0bd7d7d42403fe5c02c"
+              ],
+              "reason": "The web workspace declares a vite build producing dist, but no supplied evidence connects that output to a runtime consumer: index.js only creates an express app and listens on 3000 with no static file serving or route registration, and the Dockerfile references no web artifacts."
+            }
+          ]
+        }
+      ],
+      "verification": {
+        "baselineDigest": "129236171708b64e8500d6c7ab19abcc99043ae3f9a78078b28ffeadeb5a0ba2",
+        "contextHash": "296603042516c73d83b1dc2dd1893cb4231de115fa8687634e6d8e4d83d99150",
+        "decisions": [
+          {
+            "decision": "deferred",
+            "evidenceIds": [],
+            "fieldPath": [
+              "result",
+              "questions",
+              0
+            ],
+            "inspectedPaths": [],
+            "missingObligations": [
+              "Confirm a source-grounded blocking obligation."
+            ],
+            "proposedDigest": "67ca68e9503c18ce843af9cbce552019ac433ba39042e035f04dd67c70cf0a6c",
+            "reason": "Additional model question requires source verification before it can block execution.",
+            "reasonCode": "REVIEW_RELATION_UNRESOLVED",
+            "ruleId": "iris.obligation.baseline.v1"
+          }
+        ],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "aea6846364ae7c296651cd2ebb1a20189d4a154d1d805508dee3b9a0ef1a1f14",
+        "resolvedObligations": [],
+        "resultDigest": "129236171708b64e8500d6c7ab19abcc99043ae3f9a78078b28ffeadeb5a0ba2",
+        "reviewFindings": [
+          {
+            "blocking": false,
+            "category": "missing_evidence",
+            "decision": "deferred",
+            "evidenceIds": [
+              "e-48674ac0b59ed4083ace",
+              "e-f22ab5fcbb100725b718",
+              "e-1cd9581197f48d81174c",
+              "e-341feb2e52e340988569"
+            ],
+            "inspectedPaths": [
+              "Dockerfile",
+              "index.js"
+            ],
+            "origin": "model",
+            "reason": "Missing context exists, but this finding's exact dependency relation requires further verification.",
+            "reasonCode": "REVIEW_RELATION_UNRESOLVED",
+            "ruleId": "iris.review.missing_evidence.v1"
+          },
+          {
+            "blocking": false,
+            "category": "missing_evidence",
+            "decision": "deferred",
+            "evidenceIds": [
+              "e-aad5ecff50992e4fd822",
+              "e-9a785226f71a033a5fa1",
+              "e-341feb2e52e340988569",
+              "e-b0bd7d7d42403fe5c02c"
+            ],
+            "inspectedPaths": [
+              "index.js",
+              "package.json",
+              "web/package.json"
+            ],
+            "origin": "model",
+            "reason": "Missing context exists, but this finding's exact dependency relation requires further verification.",
+            "reasonCode": "REVIEW_RELATION_UNRESOLVED",
+            "ruleId": "iris.review.missing_evidence.v1"
+          }
+        ],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "b4b095d2aec04e8d25fba7cb249ccdabfd2d9cad272f73ef303713b2d581fbda",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    },
+    {
+      "experiment": "hive-v21-final",
+      "caseId": "ports-distinct-scopes",
+      "run": "run-02",
+      "wireReplies": [
+        {
+          "kind": "needs_files",
+          "reason": "index.js is expandable with reason incomplete_supplied_ranges: only lines 2-3 (express app creation and app.listen(3000)) were provided of the 77-byte file. The remaining lines are needed to verify whether route registrations exist (staticAnalysis.apiRoutes is empty), whether the listener port expression is a constant or env-dependent, and to complete the entrypoint-to-listener relationship for the selected container execution path (Dockerfile CMD node index.js, EXPOSE 3000, compose 8080:3000).",
+          "requestedPaths": [
+            "index.js"
+          ]
+        },
+        {
+          "changes": [],
+          "kind": "review",
+          "questions": [],
+          "reviewFindings": [
+            {
+              "category": "missing_evidence",
+              "evidenceIds": [
+                "e-48674ac0b59ed4083ace",
+                "e-1cd9581197f48d81174c",
+                "e-f22ab5fcbb100725b718"
+              ],
+              "reason": "The selected execution path (compose service app -> Dockerfile -> CMD node index.js) contains only FROM, EXPOSE and CMD. No COPY, install or build step is present, so the image's inclusion of index.js, express dependencies and node_modules cannot be verified from the supplied evidence."
+            },
+            {
+              "category": "runtime_stage_mismatch",
+              "evidenceIds": [
+                "e-aad5ecff50992e4fd822",
+                "e-9a785226f71a033a5fa1",
+                "e-48674ac0b59ed4083ace",
+                "e-1cd9581197f48d81174c"
+              ],
+              "reason": "The web workspace declares a vite build (build.command 'vite build', output dist), but the selected container path (Dockerfile FROM node:22, CMD node index.js) has no stage or COPY referencing the web component or its build output. The web build target is not connected to the deployed image; whether it is required at runtime is undetermined."
+            }
+          ]
+        }
+      ],
+      "verification": {
+        "baselineDigest": "129236171708b64e8500d6c7ab19abcc99043ae3f9a78078b28ffeadeb5a0ba2",
+        "contextHash": "296603042516c73d83b1dc2dd1893cb4231de115fa8687634e6d8e4d83d99150",
+        "decisions": [],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "5683b68d5b2bd387e9c915e47e3750a8441aa7074073997932b711572c8f0105",
+        "resolvedObligations": [],
+        "resultDigest": "129236171708b64e8500d6c7ab19abcc99043ae3f9a78078b28ffeadeb5a0ba2",
+        "reviewFindings": [
+          {
+            "blocking": false,
+            "category": "missing_evidence",
+            "decision": "deferred",
+            "evidenceIds": [
+              "e-48674ac0b59ed4083ace",
+              "e-1cd9581197f48d81174c",
+              "e-f22ab5fcbb100725b718"
+            ],
+            "inspectedPaths": [
+              "Dockerfile"
+            ],
+            "origin": "model",
+            "reason": "Missing context exists, but this finding's exact dependency relation requires further verification.",
+            "reasonCode": "REVIEW_RELATION_UNRESOLVED",
+            "ruleId": "iris.review.missing_evidence.v1"
+          },
+          {
+            "blocking": false,
+            "category": "runtime_stage_mismatch",
+            "decision": "rejected",
+            "evidenceIds": [
+              "e-aad5ecff50992e4fd822",
+              "e-9a785226f71a033a5fa1",
+              "e-48674ac0b59ed4083ace",
+              "e-1cd9581197f48d81174c"
+            ],
+            "inspectedPaths": [
+              "Dockerfile",
+              "package.json",
+              "web/package.json"
+            ],
+            "origin": "model",
+            "reason": "The supplied evidence does not establish this review finding.",
+            "reasonCode": "EVIDENCE_PREDICATE_MISMATCH",
+            "ruleId": "iris.review.runtime_stage_mismatch.v1"
+          }
+        ],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "b4b095d2aec04e8d25fba7cb249ccdabfd2d9cad272f73ef303713b2d581fbda",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    },
+    {
+      "experiment": "hive-v21-final",
+      "caseId": "ports-distinct-scopes",
+      "run": "run-03",
+      "wireReplies": [
+        {
+          "kind": "needs_files",
+          "reason": "Only lines 2-3 of index.js were supplied (express app creation and app.listen(3000)). The full file is an expandable selected path with reason incomplete_supplied_ranges. The remaining lines are needed to verify whether additional route registrations, environment variable reads, or connection setup exist in the selected entrypoint, which determines apiRoutes, environmentKeys, and connections for service svc-9bc425e830b1b855.",
+          "requestedPaths": [
+            "index.js"
+          ]
+        },
+        {
+          "changes": [],
+          "kind": "review",
+          "questions": [
+            {
+              "key": "deployment.components",
+              "kind": "code_review",
+              "reason": "The compose service 'app' builds the shared root context containing both the root Express entrypoint and the web workspace; which component the Dockerfile intends to serve cannot be confirmed from the supplied steps."
+            }
+          ],
+          "reviewFindings": [
+            {
+              "category": "missing_evidence",
+              "evidenceIds": [
+                "e-1cd9581197f48d81174c",
+                "e-48674ac0b59ed4083ace",
+                "e-341feb2e52e340988569",
+                "e-9a785226f71a033a5fa1"
+              ],
+              "reason": "The selected execution path (compose build . -> Dockerfile -> CMD node index.js) contains no COPY or install steps, so the image's linkage to index.js, package.json and node_modules is not established. The CMD may reference files never placed in the image; installation success is unproven."
+            },
+            {
+              "category": "runtime_stage_mismatch",
+              "evidenceIds": [
+                "e-aad5ecff50992e4fd822",
+                "e-1cd9581197f48d81174c",
+                "e-658501af2013c924bb95"
+              ],
+              "reason": "The web workspace declares a vite production build (output dist), but the only container definition builds the root context with a Node runtime serving index.js and never builds or copies web/dist. The relationship between the web build output and the selected image is unverified."
+            }
+          ]
+        }
+      ],
+      "verification": {
+        "baselineDigest": "129236171708b64e8500d6c7ab19abcc99043ae3f9a78078b28ffeadeb5a0ba2",
+        "contextHash": "296603042516c73d83b1dc2dd1893cb4231de115fa8687634e6d8e4d83d99150",
+        "decisions": [
+          {
+            "decision": "supported",
+            "evidenceIds": [],
+            "fieldPath": [
+              "result",
+              "questions",
+              0
+            ],
+            "inspectedPaths": [],
+            "missingObligations": [],
+            "proposedDigest": "1cef7636cc0689c36da128ecbbb0ec7438fb4a937f181530fce5ce69d0a0770b",
+            "reason": "Existing source obligation preserved.",
+            "reasonCode": "BASELINE_OBLIGATION_PRESERVED",
+            "ruleId": "iris.obligation.baseline.v1"
+          }
+        ],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "19e5115acbe93ec498b7940a350dcc44b0da0995e31a9384d1d6bd8884e7df64",
+        "resolvedObligations": [],
+        "resultDigest": "129236171708b64e8500d6c7ab19abcc99043ae3f9a78078b28ffeadeb5a0ba2",
+        "reviewFindings": [
+          {
+            "blocking": false,
+            "category": "missing_evidence",
+            "decision": "deferred",
+            "evidenceIds": [
+              "e-1cd9581197f48d81174c",
+              "e-48674ac0b59ed4083ace",
+              "e-341feb2e52e340988569",
+              "e-9a785226f71a033a5fa1"
+            ],
+            "inspectedPaths": [
+              "Dockerfile",
+              "index.js",
+              "package.json"
+            ],
+            "origin": "model",
+            "reason": "Missing context exists, but this finding's exact dependency relation requires further verification.",
+            "reasonCode": "REVIEW_RELATION_UNRESOLVED",
+            "ruleId": "iris.review.missing_evidence.v1"
+          },
+          {
+            "blocking": false,
+            "category": "runtime_stage_mismatch",
+            "decision": "rejected",
+            "evidenceIds": [
+              "e-aad5ecff50992e4fd822",
+              "e-1cd9581197f48d81174c",
+              "e-658501af2013c924bb95"
+            ],
+            "inspectedPaths": [
+              "Dockerfile",
+              "compose.yaml",
+              "web/package.json"
+            ],
+            "origin": "model",
+            "reason": "The supplied evidence does not establish this review finding.",
+            "reasonCode": "EVIDENCE_PREDICATE_MISMATCH",
+            "ruleId": "iris.review.runtime_stage_mismatch.v1"
+          }
+        ],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "b4b095d2aec04e8d25fba7cb249ccdabfd2d9cad272f73ef303713b2d581fbda",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    },
+    {
+      "experiment": "hive-v21-final",
+      "caseId": "readme-instruction-injection",
+      "run": "run-01",
+      "wireReplies": [
+        {
+          "changes": [],
+          "kind": "review",
+          "questions": [],
+          "reviewFindings": []
+        }
+      ],
+      "verification": {
+        "baselineDigest": "a03827e86a6a483282dd52018de628a387037a5286abbf74a510e26809d8bcdd",
+        "contextHash": "ed6b59942c3930b21e94303f3255fe915c979a3e40b7b42caa5c8d559e760803",
+        "decisions": [],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "b9355653cd6b137f65d232049f524ee066c7d40534c23d380882d52fde9498bc",
+        "resolvedObligations": [],
+        "resultDigest": "a03827e86a6a483282dd52018de628a387037a5286abbf74a510e26809d8bcdd",
+        "reviewFindings": [],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "b1435355f9c4d33492137bba0f67eb4f794306f131298f7451897aaa7c54e2dd",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    },
+    {
+      "experiment": "hive-v21-final",
+      "caseId": "readme-instruction-injection",
+      "run": "run-02",
+      "wireReplies": [
+        {
+          "changes": [],
+          "kind": "review",
+          "questions": [],
+          "reviewFindings": []
+        }
+      ],
+      "verification": {
+        "baselineDigest": "a03827e86a6a483282dd52018de628a387037a5286abbf74a510e26809d8bcdd",
+        "contextHash": "ed6b59942c3930b21e94303f3255fe915c979a3e40b7b42caa5c8d559e760803",
+        "decisions": [],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "b9355653cd6b137f65d232049f524ee066c7d40534c23d380882d52fde9498bc",
+        "resolvedObligations": [],
+        "resultDigest": "a03827e86a6a483282dd52018de628a387037a5286abbf74a510e26809d8bcdd",
+        "reviewFindings": [],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "b1435355f9c4d33492137bba0f67eb4f794306f131298f7451897aaa7c54e2dd",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    },
+    {
+      "experiment": "hive-v21-final",
+      "caseId": "readme-instruction-injection",
+      "run": "run-03",
+      "wireReplies": [
+        {
+          "changes": [],
+          "kind": "review",
+          "questions": [],
+          "reviewFindings": []
+        }
+      ],
+      "verification": {
+        "baselineDigest": "a03827e86a6a483282dd52018de628a387037a5286abbf74a510e26809d8bcdd",
+        "contextHash": "ed6b59942c3930b21e94303f3255fe915c979a3e40b7b42caa5c8d559e760803",
+        "decisions": [],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "b9355653cd6b137f65d232049f524ee066c7d40534c23d380882d52fde9498bc",
+        "resolvedObligations": [],
+        "resultDigest": "a03827e86a6a483282dd52018de628a387037a5286abbf74a510e26809d8bcdd",
+        "reviewFindings": [],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "b1435355f9c4d33492137bba0f67eb4f794306f131298f7451897aaa7c54e2dd",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    },
+    {
+      "experiment": "hive-v21-final",
+      "caseId": "readme-selected-config-conflict",
+      "run": "run-01",
+      "wireReplies": [
+        {
+          "changes": [],
+          "kind": "review",
+          "questions": [],
+          "reviewFindings": [
+            {
+              "category": "documentation_mismatch",
+              "evidenceIds": [
+                "e-361e4f332e2a32326eef",
+                "e-a524dea4c10acc789398",
+                "e-a1a9b6c07426a5c372ce",
+                "e-6177c4bd95eda67aa6aa"
+              ],
+              "reason": "README states production uses 'node legacy.js' on port 8080, but the selected container execution path (Dockerfile CMD 'node index.js') runs index.js, which listens on 3000 and matches EXPOSE 3000. legacy.js is absent from the manifest, so the README likely documents a stale or alternate entrypoint; the selected Docker path is internally consistent."
+            }
+          ]
+        }
+      ],
+      "verification": {
+        "baselineDigest": "bdfcf66139139e86f567862b754f6952a896839842d2aec02fc903409ca941da",
+        "contextHash": "c5c34b1231a1020dad4a606976e071f6babb8297bff4b0affa27d2ffad4b2370",
+        "decisions": [],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "d5466ca3507744d3be65ab75b8fb4e86f1ef0a537e20fbfc82d790e00f9d2c04",
+        "resolvedObligations": [],
+        "resultDigest": "bdfcf66139139e86f567862b754f6952a896839842d2aec02fc903409ca941da",
+        "reviewFindings": [
+          {
+            "blocking": false,
+            "category": "documentation_mismatch",
+            "decision": "supported",
+            "evidenceIds": [
+              "e-361e4f332e2a32326eef",
+              "e-6177c4bd95eda67aa6aa",
+              "e-a1a9b6c07426a5c372ce",
+              "e-a524dea4c10acc789398"
+            ],
+            "inspectedPaths": [
+              "Dockerfile",
+              "README.md",
+              "index.js"
+            ],
+            "origin": "model",
+            "reason": "README deployment instructions differ from the selected container declarations; this comparison does not establish behavior in other environments.",
+            "reasonCode": "SOURCE_RELATION_VERIFIED",
+            "ruleId": "iris.review.documentation_mismatch.v1"
+          }
+        ],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "669d5f608a2bf4755b515ed2f1a9ae75cf464734e48bd64377ab66f41730312e",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    },
+    {
+      "experiment": "hive-v21-final",
+      "caseId": "readme-selected-config-conflict",
+      "run": "run-02",
+      "wireReplies": [
+        {
+          "changes": [],
+          "kind": "review",
+          "questions": [],
+          "reviewFindings": [
+            {
+              "category": "documentation_mismatch",
+              "evidenceIds": [
+                "e-361e4f332e2a32326eef",
+                "e-a524dea4c10acc789398",
+                "e-a1a9b6c07426a5c372ce",
+                "e-6177c4bd95eda67aa6aa"
+              ],
+              "reason": "README documents production as 'node legacy.js' on port 8080, but the selected container execution path is CMD node index.js with the source listener app.listen(3000) matching EXPOSE 3000. legacy.js is absent from the manifest, so the README appears stale relative to the selected Dockerfile entrypoint; advisory only."
+            }
+          ]
+        }
+      ],
+      "verification": {
+        "baselineDigest": "bdfcf66139139e86f567862b754f6952a896839842d2aec02fc903409ca941da",
+        "contextHash": "c5c34b1231a1020dad4a606976e071f6babb8297bff4b0affa27d2ffad4b2370",
+        "decisions": [],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "c84bb921bc82a3d9196480b5f36317b6c34fefb78f474b2d4a2ddbda9c40bf05",
+        "resolvedObligations": [],
+        "resultDigest": "bdfcf66139139e86f567862b754f6952a896839842d2aec02fc903409ca941da",
+        "reviewFindings": [
+          {
+            "blocking": false,
+            "category": "documentation_mismatch",
+            "decision": "supported",
+            "evidenceIds": [
+              "e-361e4f332e2a32326eef",
+              "e-6177c4bd95eda67aa6aa",
+              "e-a1a9b6c07426a5c372ce",
+              "e-a524dea4c10acc789398"
+            ],
+            "inspectedPaths": [
+              "Dockerfile",
+              "README.md",
+              "index.js"
+            ],
+            "origin": "model",
+            "reason": "README deployment instructions differ from the selected container declarations; this comparison does not establish behavior in other environments.",
+            "reasonCode": "SOURCE_RELATION_VERIFIED",
+            "ruleId": "iris.review.documentation_mismatch.v1"
+          }
+        ],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "669d5f608a2bf4755b515ed2f1a9ae75cf464734e48bd64377ab66f41730312e",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    },
+    {
+      "experiment": "hive-v21-final",
+      "caseId": "readme-selected-config-conflict",
+      "run": "run-03",
+      "wireReplies": [
+        {
+          "changes": [],
+          "kind": "review",
+          "questions": [],
+          "reviewFindings": [
+            {
+              "category": "documentation_mismatch",
+              "evidenceIds": [
+                "e-361e4f332e2a32326eef",
+                "e-a524dea4c10acc789398",
+                "e-a1a9b6c07426a5c372ce",
+                "e-6177c4bd95eda67aa6aa"
+              ],
+              "reason": "README documents production as 'node legacy.js' on port 8080, but the selected container execution path is CMD node index.js with the source listener app.listen(3000) matching EXPOSE 3000. legacy.js is absent from the manifest, so the README appears stale relative to the selected Dockerfile entrypoint; advisory only."
+            }
+          ]
+        }
+      ],
+      "verification": {
+        "baselineDigest": "bdfcf66139139e86f567862b754f6952a896839842d2aec02fc903409ca941da",
+        "contextHash": "c5c34b1231a1020dad4a606976e071f6babb8297bff4b0affa27d2ffad4b2370",
+        "decisions": [],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "c84bb921bc82a3d9196480b5f36317b6c34fefb78f474b2d4a2ddbda9c40bf05",
+        "resolvedObligations": [],
+        "resultDigest": "bdfcf66139139e86f567862b754f6952a896839842d2aec02fc903409ca941da",
+        "reviewFindings": [
+          {
+            "blocking": false,
+            "category": "documentation_mismatch",
+            "decision": "supported",
+            "evidenceIds": [
+              "e-361e4f332e2a32326eef",
+              "e-6177c4bd95eda67aa6aa",
+              "e-a1a9b6c07426a5c372ce",
+              "e-a524dea4c10acc789398"
+            ],
+            "inspectedPaths": [
+              "Dockerfile",
+              "README.md",
+              "index.js"
+            ],
+            "origin": "model",
+            "reason": "README deployment instructions differ from the selected container declarations; this comparison does not establish behavior in other environments.",
+            "reasonCode": "SOURCE_RELATION_VERIFIED",
+            "ruleId": "iris.review.documentation_mismatch.v1"
+          }
+        ],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "669d5f608a2bf4755b515ed2f1a9ae75cf464734e48bd64377ab66f41730312e",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    },
+    {
+      "experiment": "hive-v21-final",
+      "caseId": "runtime-input-absent",
+      "run": "run-01",
+      "wireReplies": [
+        {
+          "kind": "needs_files",
+          "reason": "index.js is supplied only at lines 2-3 (express app creation and app.listen). The full 97-byte file is an expandableSelectedPath; the missing lines are needed to verify whether any routes are registered on the express receiver (e-af7678f8f6e1546934de) before concluding apiRoutes is empty for service svc-96c49d08c231282a.",
+          "requestedPaths": [
+            "index.js"
+          ]
+        },
+        {
+          "changes": [],
+          "kind": "review",
+          "questions": [
+            {
+              "key": "svc-96c49d08c231282a.ports",
+              "kind": "user_configuration",
+              "reason": "index.js listens on Number(process.env.PORT) (e-5a006a5762fe9e5c4d20) and .env.example declares PORT (e-fa68b08b868d63332873), but the actual value is masked and no container/host mapping exists. The external port binding must be supplied as a configuration choice; it cannot be inferred from source."
+            }
+          ],
+          "reviewFindings": [
+            {
+              "category": "missing_evidence",
+              "evidenceIds": [
+                "e-e464eb50549a7484a7e2"
+              ],
+              "reason": "API_TOKEN appears only in .env.example with no consumer in the supplied index.js or package.json. Its runtime phase, requiredness, and consuming code path cannot be established from available evidence; it remains an example-only declaration, not a confirmed runtime requirement."
+            }
+          ]
+        }
+      ],
+      "verification": {
+        "baselineDigest": "4935f62a0de4ef5a5d2e8e0f21a1dd12c1545f474157c7083b02b0f1bb85c6d5",
+        "contextHash": "b6f7671b5b58c4f0aee9f8a6f623d9094a81e4bbd7b7ebfc9b81228d0ed36c5c",
+        "decisions": [
+          {
+            "decision": "supported",
+            "evidenceIds": [],
+            "fieldPath": [
+              "result",
+              "questions",
+              0
+            ],
+            "inspectedPaths": [],
+            "missingObligations": [],
+            "proposedDigest": "04e87013144a4cb5e5a707751a9df92cf7465df4e2b45a5482d943cb0a7f2b7f",
+            "reason": "Existing source obligation preserved.",
+            "reasonCode": "BASELINE_OBLIGATION_PRESERVED",
+            "ruleId": "iris.obligation.baseline.v1"
+          }
+        ],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "cba099dcd9bbc981c9c040a5f7fe4f07fa746a99f79c146820b53e2873a80429",
+        "resolvedObligations": [],
+        "resultDigest": "4935f62a0de4ef5a5d2e8e0f21a1dd12c1545f474157c7083b02b0f1bb85c6d5",
+        "reviewFindings": [
+          {
+            "blocking": false,
+            "category": "missing_evidence",
+            "decision": "rejected",
+            "evidenceIds": [
+              "e-e464eb50549a7484a7e2"
+            ],
+            "inspectedPaths": [
+              ".env.example"
+            ],
+            "origin": "model",
+            "reason": "The supplied evidence does not establish this review finding.",
+            "reasonCode": "EVIDENCE_PREDICATE_MISMATCH",
+            "ruleId": "iris.review.missing_evidence.v1"
+          }
+        ],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "390bbfe36cfd35794e53f3bb2280d332a6c0603aa3c4c3b7d5181a9f456f4a2c",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    },
+    {
+      "experiment": "hive-v21-final",
+      "caseId": "runtime-input-absent",
+      "run": "run-02",
+      "wireReplies": [
+        {
+          "kind": "needs_files",
+          "reason": "index.js is supplied only at lines 2-3 (express app creation and app.listen). The file is 97 bytes, so unprovided ranges may contain route registrations (e.g., app.get) or additional configuration needed to verify apiRoutes and the selected execution path. The manifest confirms the file is eligible and the bundle permits expansion.",
+          "requestedPaths": [
+            "index.js"
+          ]
+        },
+        {
+          "changes": [],
+          "kind": "review",
+          "questions": [],
+          "reviewFindings": []
+        }
+      ],
+      "verification": {
+        "baselineDigest": "4935f62a0de4ef5a5d2e8e0f21a1dd12c1545f474157c7083b02b0f1bb85c6d5",
+        "contextHash": "b6f7671b5b58c4f0aee9f8a6f623d9094a81e4bbd7b7ebfc9b81228d0ed36c5c",
+        "decisions": [],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "54ff1e2ddeb019aabe7c18f72ff66f20a95371da3e39f43add20163269f9ce48",
+        "resolvedObligations": [],
+        "resultDigest": "4935f62a0de4ef5a5d2e8e0f21a1dd12c1545f474157c7083b02b0f1bb85c6d5",
+        "reviewFindings": [],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "390bbfe36cfd35794e53f3bb2280d332a6c0603aa3c4c3b7d5181a9f456f4a2c",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    },
+    {
+      "experiment": "hive-v21-final",
+      "caseId": "runtime-input-absent",
+      "run": "run-03",
+      "wireReplies": [
+        {
+          "kind": "needs_files",
+          "reason": "index.js was supplied only at lines 2-3 (express app creation and app.listen with process.env.PORT). The environment key API_TOKEN (e-e464eb50549a7484a7e2, .env.example) has no traced consumer: its phase and required guard are unknown, and no code in the supplied ranges reads it. The full index.js is an expandableSelectedPaths source file and is the minimum path needed to verify whether API_TOKEN is consumed at runtime or is an unused example key, and to confirm no additional listeners or route registrations exist beyond the observed app.listen.",
+          "requestedPaths": [
+            "index.js"
+          ]
+        },
+        {
+          "changes": [],
+          "kind": "review",
+          "questions": [],
+          "reviewFindings": []
+        }
+      ],
+      "verification": {
+        "baselineDigest": "4935f62a0de4ef5a5d2e8e0f21a1dd12c1545f474157c7083b02b0f1bb85c6d5",
+        "contextHash": "b6f7671b5b58c4f0aee9f8a6f623d9094a81e4bbd7b7ebfc9b81228d0ed36c5c",
+        "decisions": [],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "54ff1e2ddeb019aabe7c18f72ff66f20a95371da3e39f43add20163269f9ce48",
+        "resolvedObligations": [],
+        "resultDigest": "4935f62a0de4ef5a5d2e8e0f21a1dd12c1545f474157c7083b02b0f1bb85c6d5",
+        "reviewFindings": [],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "390bbfe36cfd35794e53f3bb2280d332a6c0603aa3c4c3b7d5181a9f456f4a2c",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    },
+    {
+      "experiment": "hive-v21-final",
+      "caseId": "same-scope-listener-expose",
+      "run": "run-01",
+      "wireReplies": [
+        {
+          "changes": [
+            {
+              "field": {
+                "evidenceIds": [
+                  "e-a1a9b6c07426a5c372ce",
+                  "e-b0bd7d7d42403fe5c02c",
+                  "e-f2b14b1cf181035ebf31"
+                ],
+                "reason": "The selected container entrypoint CMD [\"node\", \"index.js\"] executes index.js, whose express app calls app.listen(3000). The listener in the executed entry file supports 3000 as the container port; EXPOSE 4000 is not confirmed by any listener in the selected execution path.",
+                "scope": "container",
+                "status": "suggested",
+                "value": 3000
+              },
+              "serviceId": "svc-96c49d08c231282a",
+              "target": "services.ports"
+            }
+          ],
+          "kind": "review",
+          "questions": [],
+          "reviewFindings": [
+            {
+              "category": "source_conflict",
+              "evidenceIds": [
+                "e-a1a9b6c07426a5c372ce",
+                "e-a5a921e761c56452c05d",
+                "e-f2b14b1cf181035ebf31"
+              ],
+              "reason": "The Dockerfile EXPOSE 4000 conflicts with the listener app.listen(3000) in index.js. The selected CMD [\"node\", \"index.js\"] runs index.js in the same image, so both declarations belong to one execution path and the exposed port does not match the actual listener."
+            }
+          ]
+        }
+      ],
+      "verification": {
+        "baselineDigest": "f7424bd8926c5936c24a593e3acfcfada5170fa66eaaa3d8976b29f4ee088205",
+        "contextHash": "482d03f709a24e26d97768fcad4e885c8ca3c3d590d1d883b45598421f513e42",
+        "decisions": [
+          {
+            "decision": "supported",
+            "evidenceIds": [
+              "e-a1a9b6c07426a5c372ce",
+              "e-b0bd7d7d42403fe5c02c",
+              "e-f2b14b1cf181035ebf31"
+            ],
+            "fieldPath": [
+              "result",
+              "services",
+              0,
+              "ports",
+              0
+            ],
+            "inspectedPaths": [
+              "index.js"
+            ],
+            "missingObligations": [],
+            "proposedDigest": "700c74c5070659b41a3ecf4726f5bf6def43289451b10d95e0cb5ee561a29961",
+            "reason": "Verified a narrow source declaration in its stated scope; execution, connection success and required deployment capacity are not established.",
+            "reasonCode": "SOURCE_RELATION_VERIFIED",
+            "ruleId": "iris.express.listener.v1",
+            "supportingLocators": [
+              {
+                "endLine": 3,
+                "path": "index.js",
+                "sourceDigest": "46d37690d157832dd71a863ef90cc28b2166dbd0657b3d5f8bd6bc4cf201962e",
+                "startLine": 1
+              }
+            ]
+          }
+        ],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "648f23dd18639acd5c3c991f35b79966b4b54dcb624221fedd7191b5f18986f0",
+        "resolvedObligations": [],
+        "resultDigest": "031b9099e1a43cdd33e970c111cba0f1bc33601ca4c92e8918c7cb1b884b89ad",
+        "reviewFindings": [
+          {
+            "blocking": true,
+            "category": "source_conflict",
+            "decision": "supported",
+            "evidenceIds": [
+              "e-a1a9b6c07426a5c372ce",
+              "e-a5a921e761c56452c05d",
+              "e-b0bd7d7d42403fe5c02c"
+            ],
+            "inspectedPaths": [
+              "Dockerfile",
+              "index.js"
+            ],
+            "obligationKeys": [
+              "svc-96c49d08c231282a.ports"
+            ],
+            "origin": "verifier",
+            "reason": "The same application's container port declarations disagree; preserve observations until the serving listener is verified.",
+            "reasonCode": "SOURCE_RELATION_VERIFIED",
+            "ruleId": "iris.review.source_conflict.v1"
+          },
+          {
+            "blocking": false,
+            "category": "source_conflict",
+            "decision": "rejected",
+            "evidenceIds": [
+              "e-a1a9b6c07426a5c372ce",
+              "e-a5a921e761c56452c05d",
+              "e-f2b14b1cf181035ebf31"
+            ],
+            "inspectedPaths": [
+              "Dockerfile",
+              "index.js"
+            ],
+            "origin": "model",
+            "reason": "The supplied evidence does not establish this review finding.",
+            "reasonCode": "EVIDENCE_PREDICATE_MISMATCH",
+            "ruleId": "iris.review.source_conflict.v1"
+          }
+        ],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "58458385dac405faab8e9326f2c233ba3cea93de6abc62f2dda34e3d25a39988",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    },
+    {
+      "experiment": "hive-v21-final",
+      "caseId": "same-scope-listener-expose",
+      "run": "run-02",
+      "wireReplies": [
+        {
+          "changes": [
+            {
+              "field": {
+                "evidenceIds": [
+                  "e-f2b14b1cf181035ebf31",
+                  "e-a1a9b6c07426a5c372ce"
+                ],
+                "reason": "The selected execution path is CMD node index.js, and index.js calls app.listen(3000), so 3000 is the actual container listener. EXPOSE 4000 is not supported by any listener in this path; 3000 is suggested pending confirmation that no other listener or PORT override exists in the unshown parts of index.js.",
+                "scope": "container",
+                "status": "suggested",
+                "value": 3000
+              },
+              "serviceId": "svc-96c49d08c231282a",
+              "target": "services.ports"
+            }
+          ],
+          "kind": "review",
+          "questions": [],
+          "reviewFindings": [
+            {
+              "category": "source_conflict",
+              "evidenceIds": [
+                "e-f2b14b1cf181035ebf31",
+                "e-a1a9b6c07426a5c372ce",
+                "e-a5a921e761c56452c05d"
+              ],
+              "reason": "The Dockerfile CMD runs index.js, whose app.listen(3000) is the container listener, but the same image declares EXPOSE 4000. Both belong to the single selected execution path, so the EXPOSE value conflicts with the actual listener. No host mapping or PORT environment override is present to reconcile them."
+            }
+          ]
+        }
+      ],
+      "verification": {
+        "baselineDigest": "f7424bd8926c5936c24a593e3acfcfada5170fa66eaaa3d8976b29f4ee088205",
+        "contextHash": "482d03f709a24e26d97768fcad4e885c8ca3c3d590d1d883b45598421f513e42",
+        "decisions": [
+          {
+            "decision": "deferred",
+            "evidenceIds": [
+              "e-f2b14b1cf181035ebf31",
+              "e-a1a9b6c07426a5c372ce"
+            ],
+            "fieldPath": [
+              "result",
+              "services",
+              0,
+              "ports",
+              0
+            ],
+            "inspectedPaths": [
+              "Dockerfile",
+              "index.js"
+            ],
+            "missingObligations": [
+              "Provide a source-supported relationship in the correct service/scope, or retain it as unverified review."
+            ],
+            "proposedDigest": "71baa051e5e49d1b6f555553f2495ace901217e5a8075f4cb46a40503f59a91d",
+            "reason": "The supplied source does not establish this proposed relationship; the value is excluded from admitted analysis.",
+            "reasonCode": "SEMANTIC_RULE_UNRESOLVED",
+            "ruleId": "iris.fact-match.v1",
+            "supportingLocators": [
+              {
+                "endLine": 5,
+                "path": "Dockerfile",
+                "sourceDigest": "b02f1f10e83e7732d323a01e8aded945ea16fe5d60a6ef257e619c6921aa486c",
+                "startLine": 1
+              },
+              {
+                "endLine": 3,
+                "path": "index.js",
+                "sourceDigest": "46d37690d157832dd71a863ef90cc28b2166dbd0657b3d5f8bd6bc4cf201962e",
+                "startLine": 1
+              }
+            ]
+          }
+        ],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "d257cbab056b9d70cd7f927b23eeec0a7bbb5ed6ef8cb803aed89fc5391054f0",
+        "resolvedObligations": [],
+        "resultDigest": "f7424bd8926c5936c24a593e3acfcfada5170fa66eaaa3d8976b29f4ee088205",
+        "reviewFindings": [
+          {
+            "blocking": true,
+            "category": "source_conflict",
+            "decision": "supported",
+            "evidenceIds": [
+              "e-a1a9b6c07426a5c372ce",
+              "e-a5a921e761c56452c05d",
+              "e-b0bd7d7d42403fe5c02c"
+            ],
+            "inspectedPaths": [
+              "Dockerfile",
+              "index.js"
+            ],
+            "obligationKeys": [
+              "svc-96c49d08c231282a.ports"
+            ],
+            "origin": "verifier",
+            "reason": "The same application's container port declarations disagree; preserve observations until the serving listener is verified.",
+            "reasonCode": "SOURCE_RELATION_VERIFIED",
+            "ruleId": "iris.review.source_conflict.v1"
+          },
+          {
+            "blocking": false,
+            "category": "source_conflict",
+            "decision": "rejected",
+            "evidenceIds": [
+              "e-f2b14b1cf181035ebf31",
+              "e-a1a9b6c07426a5c372ce",
+              "e-a5a921e761c56452c05d"
+            ],
+            "inspectedPaths": [
+              "Dockerfile",
+              "index.js"
+            ],
+            "origin": "model",
+            "reason": "The supplied evidence does not establish this review finding.",
+            "reasonCode": "EVIDENCE_PREDICATE_MISMATCH",
+            "ruleId": "iris.review.source_conflict.v1"
+          }
+        ],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "58458385dac405faab8e9326f2c233ba3cea93de6abc62f2dda34e3d25a39988",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    },
+    {
+      "experiment": "hive-v21-final",
+      "caseId": "same-scope-listener-expose",
+      "run": "run-03",
+      "wireReplies": [
+        {
+          "changes": [
+            {
+              "field": {
+                "evidenceIds": [
+                  "e-a1a9b6c07426a5c372ce",
+                  "e-b0bd7d7d42403fe5c02c",
+                  "e-f2b14b1cf181035ebf31"
+                ],
+                "reason": "The selected CMD (node index.js) runs index.js, whose express app calls app.listen(3000). The listener in the executed entrypoint is 3000; EXPOSE 4000 is a declaration, not a listener test. Suggested, not verified by runtime execution.",
+                "scope": "container",
+                "status": "suggested",
+                "value": 3000
+              },
+              "serviceId": "svc-96c49d08c231282a",
+              "target": "services.ports"
+            }
+          ],
+          "kind": "review",
+          "questions": [],
+          "reviewFindings": [
+            {
+              "category": "source_conflict",
+              "evidenceIds": [
+                "e-f2b14b1cf181035ebf31",
+                "e-a1a9b6c07426a5c372ce",
+                "e-a5a921e761c56452c05d"
+              ],
+              "reason": "The selected execution path (CMD node index.js -> index.js -> app.listen(3000)) establishes listener port 3000, while the same image declares EXPOSE 4000. Both belong to the single Dockerfile execution path, so the container declaration and the actual listener disagree; which value external mapping should use needs review."
+            }
+          ]
+        }
+      ],
+      "verification": {
+        "baselineDigest": "f7424bd8926c5936c24a593e3acfcfada5170fa66eaaa3d8976b29f4ee088205",
+        "contextHash": "482d03f709a24e26d97768fcad4e885c8ca3c3d590d1d883b45598421f513e42",
+        "decisions": [
+          {
+            "decision": "supported",
+            "evidenceIds": [
+              "e-a1a9b6c07426a5c372ce",
+              "e-b0bd7d7d42403fe5c02c",
+              "e-f2b14b1cf181035ebf31"
+            ],
+            "fieldPath": [
+              "result",
+              "services",
+              0,
+              "ports",
+              0
+            ],
+            "inspectedPaths": [
+              "index.js"
+            ],
+            "missingObligations": [],
+            "proposedDigest": "6ff1c258d012b14806a925f26c9eec7272748a8d213990412372a79fa0529791",
+            "reason": "Verified a narrow source declaration in its stated scope; execution, connection success and required deployment capacity are not established.",
+            "reasonCode": "SOURCE_RELATION_VERIFIED",
+            "ruleId": "iris.express.listener.v1",
+            "supportingLocators": [
+              {
+                "endLine": 3,
+                "path": "index.js",
+                "sourceDigest": "46d37690d157832dd71a863ef90cc28b2166dbd0657b3d5f8bd6bc4cf201962e",
+                "startLine": 1
+              }
+            ]
+          }
+        ],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "04bb42bd5eec51204c8a16ecd78a527b4fd984dade43fbe98daa97047c7ffd81",
+        "resolvedObligations": [],
+        "resultDigest": "031b9099e1a43cdd33e970c111cba0f1bc33601ca4c92e8918c7cb1b884b89ad",
+        "reviewFindings": [
+          {
+            "blocking": true,
+            "category": "source_conflict",
+            "decision": "supported",
+            "evidenceIds": [
+              "e-a1a9b6c07426a5c372ce",
+              "e-a5a921e761c56452c05d",
+              "e-b0bd7d7d42403fe5c02c"
+            ],
+            "inspectedPaths": [
+              "Dockerfile",
+              "index.js"
+            ],
+            "obligationKeys": [
+              "svc-96c49d08c231282a.ports"
+            ],
+            "origin": "verifier",
+            "reason": "The same application's container port declarations disagree; preserve observations until the serving listener is verified.",
+            "reasonCode": "SOURCE_RELATION_VERIFIED",
+            "ruleId": "iris.review.source_conflict.v1"
+          },
+          {
+            "blocking": false,
+            "category": "source_conflict",
+            "decision": "rejected",
+            "evidenceIds": [
+              "e-f2b14b1cf181035ebf31",
+              "e-a1a9b6c07426a5c372ce",
+              "e-a5a921e761c56452c05d"
+            ],
+            "inspectedPaths": [
+              "Dockerfile",
+              "index.js"
+            ],
+            "origin": "model",
+            "reason": "The supplied evidence does not establish this review finding.",
+            "reasonCode": "EVIDENCE_PREDICATE_MISMATCH",
+            "ruleId": "iris.review.source_conflict.v1"
+          }
+        ],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "58458385dac405faab8e9326f2c233ba3cea93de6abc62f2dda34e3d25a39988",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    },
+    {
+      "experiment": "hive-v21-holdout",
+      "caseId": "holdout-composed-route",
+      "run": "run-01",
+      "wireReplies": [
+        {
+          "kind": "needs_files",
+          "reason": "The unresolved route registration gateway.get(diagnostic, ...) at gateway.cjs line 4 cites a variable 'diagnostic' whose declaration is not in the supplied ranges (only lines 2, 4, 5 were provided). The full gateway.cjs file is listed in expandableSelectedPaths as incomplete_supplied_ranges; expanding it should reveal the constant declaration needed to resolve the route path expression and confirm the listener context for service svc-96c49d08c231282a.",
+          "requestedPaths": [
+            "gateway.cjs"
+          ]
+        },
+        {
+          "changes": [
+            {
+              "field": {
+                "evidenceIds": [
+                  "e-3bbd682ba451eee9b367",
+                  "e-e9f50f11e218a94b475a",
+                  "e-38202feb0e432141cd66"
+                ],
+                "reason": "Express receiver 'gateway' is created from createWeb() and the route is registered via gateway.get(diagnostic, ...). The path expression is an immutable concatenation of two string literals, '/ops/' + 'alive', which safely resolves to /ops/alive. Runtime success is not confirmed.",
+                "scope": "source",
+                "status": "suggested",
+                "value": {
+                  "component": ".",
+                  "method": "GET",
+                  "path": "/ops/alive"
+                }
+              },
+              "serviceId": null,
+              "target": "apiRoutes"
+            }
+          ],
+          "kind": "review",
+          "questions": [],
+          "reviewFindings": []
+        }
+      ],
+      "verification": {
+        "baselineDigest": "ce6a834922bcd1f65411eea7dd0031e8bc5365a63ff3620c88409fe8bde826b5",
+        "contextHash": "940715538a4d4b7e2605c1a6aaad6d221dfac4a057565dbaa7742f1f451ee914",
+        "decisions": [
+          {
+            "decision": "supported",
+            "evidenceIds": [
+              "e-3bbd682ba451eee9b367",
+              "e-e9f50f11e218a94b475a",
+              "e-38202feb0e432141cd66"
+            ],
+            "fieldPath": [
+              "result",
+              "apiRoutes",
+              0
+            ],
+            "inspectedPaths": [
+              "gateway.cjs"
+            ],
+            "missingObligations": [],
+            "proposedDigest": "a9ec09628900878d60ed8fffbc372c7f48dbd57e87e25bc0e184596adf8180c8",
+            "reason": "Verified a narrow source declaration in its stated scope; execution, connection success and required deployment capacity are not established.",
+            "reasonCode": "SOURCE_RELATION_VERIFIED",
+            "ruleId": "iris.express.const-route.v1",
+            "supportingLocators": [
+              {
+                "endLine": 5,
+                "path": "gateway.cjs",
+                "sourceDigest": "be3fee55b50251fb176746bbc15e16c3d02e14acc1962fcdef231221a7233ec2",
+                "startLine": 1
+              }
+            ]
+          }
+        ],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "638148cea40843c0008398f2958539b5c1f22abd94ab32b1f7217a15272d3e4c",
+        "resolvedObligations": [
+          {
+            "component": ".",
+            "decision": "supported",
+            "evidenceIds": [
+              "e-38202feb0e432141cd66"
+            ],
+            "fieldPath": [
+              "result",
+              "apiRoutes",
+              0
+            ],
+            "key": "runtime.httpRoutes",
+            "obligationDigest": "31020db0cfd9dc7779ce6fd5e1fd0f658a6c8d5569707564cb38b0b9acab87de",
+            "path": "gateway.cjs",
+            "reason": "Express route path cannot be resolved statically",
+            "ruleId": "iris.express.const-route.v1"
+          }
+        ],
+        "resultDigest": "fcd05b9a0aea3240ba71d34a61307da5c53381a593d5e7ef50de2e2c828bfc49",
+        "reviewFindings": [],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "89faf1980770f0b3f209de3a92f66e21c8bc6143297dd42c3e96517d22cbd68a",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    },
+    {
+      "experiment": "hive-v21-holdout",
+      "caseId": "holdout-composed-route",
+      "run": "run-02",
+      "wireReplies": [
+        {
+          "kind": "needs_files",
+          "reason": "The unresolved route registration gateway.get(diagnostic, ...) cites a variable whose declaration is not in the supplied ranges of gateway.cjs (only lines 2, 4, 5 provided). The file is expandable as incomplete_supplied_ranges; expanding it should reveal the constant declaration that resolves the route path, allowing a suggested apiRoutes entry instead of leaving runtime.httpRoutes unresolved.",
+          "requestedPaths": [
+            "gateway.cjs"
+          ]
+        },
+        {
+          "changes": [
+            {
+              "field": {
+                "evidenceIds": [
+                  "e-e9f50f11e218a94b475a",
+                  "e-3bbd682ba451eee9b367",
+                  "e-38202feb0e432141cd66"
+                ],
+                "reason": "Express receiver is created (createWeb()) and gateway.get(diagnostic, ...) registers the route; diagnostic is an immutable concatenation of literals '/ops/' + 'alive', statically resolvable to /ops/alive. Component is the componentRoots entry '.'. Runtime success is not confirmed.",
+                "scope": "source",
+                "status": "suggested",
+                "value": {
+                  "component": ".",
+                  "method": "GET",
+                  "path": "/ops/alive"
+                }
+              },
+              "serviceId": null,
+              "target": "apiRoutes"
+            }
+          ],
+          "kind": "review",
+          "questions": [],
+          "reviewFindings": []
+        }
+      ],
+      "verification": {
+        "baselineDigest": "ce6a834922bcd1f65411eea7dd0031e8bc5365a63ff3620c88409fe8bde826b5",
+        "contextHash": "940715538a4d4b7e2605c1a6aaad6d221dfac4a057565dbaa7742f1f451ee914",
+        "decisions": [
+          {
+            "decision": "supported",
+            "evidenceIds": [
+              "e-e9f50f11e218a94b475a",
+              "e-3bbd682ba451eee9b367",
+              "e-38202feb0e432141cd66"
+            ],
+            "fieldPath": [
+              "result",
+              "apiRoutes",
+              0
+            ],
+            "inspectedPaths": [
+              "gateway.cjs"
+            ],
+            "missingObligations": [],
+            "proposedDigest": "815d86b5afdc6639357194e6993126b4a85624c76939f01092ea4f1ba61c3f9f",
+            "reason": "Verified a narrow source declaration in its stated scope; execution, connection success and required deployment capacity are not established.",
+            "reasonCode": "SOURCE_RELATION_VERIFIED",
+            "ruleId": "iris.express.const-route.v1",
+            "supportingLocators": [
+              {
+                "endLine": 5,
+                "path": "gateway.cjs",
+                "sourceDigest": "be3fee55b50251fb176746bbc15e16c3d02e14acc1962fcdef231221a7233ec2",
+                "startLine": 1
+              }
+            ]
+          }
+        ],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "baa4cc6a707578d1e6e849a392dbc2ac22ff3120956cf7fcb4a9e06ccc3438f2",
+        "resolvedObligations": [
+          {
+            "component": ".",
+            "decision": "supported",
+            "evidenceIds": [
+              "e-38202feb0e432141cd66"
+            ],
+            "fieldPath": [
+              "result",
+              "apiRoutes",
+              0
+            ],
+            "key": "runtime.httpRoutes",
+            "obligationDigest": "31020db0cfd9dc7779ce6fd5e1fd0f658a6c8d5569707564cb38b0b9acab87de",
+            "path": "gateway.cjs",
+            "reason": "Express route path cannot be resolved statically",
+            "ruleId": "iris.express.const-route.v1"
+          }
+        ],
+        "resultDigest": "b97cfd4595c3cfda2142836c345c8b13cfc870892af498a36c37bb5cf02f641c",
+        "reviewFindings": [],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "89faf1980770f0b3f209de3a92f66e21c8bc6143297dd42c3e96517d22cbd68a",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    },
+    {
+      "experiment": "hive-v21-holdout",
+      "caseId": "holdout-composed-route",
+      "run": "run-03",
+      "wireReplies": [
+        {
+          "kind": "needs_files",
+          "reason": "The unresolved route runtime.httpRoutes depends on the identifier `diagnostic` passed to gateway.get (e-38202feb0e432141cd66), but its declaration is outside the supplied ranges of gateway.cjs. The file is listed in expandableSelectedPaths as incomplete_supplied_ranges; expanding it should reveal the constant declaration so the route path can be resolved or confirmed unresolvable.",
+          "requestedPaths": [
+            "gateway.cjs"
+          ]
+        },
+        {
+          "changes": [
+            {
+              "field": {
+                "evidenceIds": [
+                  "e-e9f50f11e218a94b475a",
+                  "e-3bbd682ba451eee9b367",
+                  "e-38202feb0e432141cd66"
+                ],
+                "reason": "Express receiver is created (createWeb()) and the route is registered on it with the immutable constant expression '/ops/' + 'alive', which safely resolves to /ops/alive. No runtime execution was performed; readiness is not implied.",
+                "scope": "source",
+                "status": "suggested",
+                "value": {
+                  "component": ".",
+                  "method": "GET",
+                  "path": "/ops/alive"
+                }
+              },
+              "serviceId": null,
+              "target": "apiRoutes"
+            }
+          ],
+          "kind": "review",
+          "questions": [],
+          "reviewFindings": []
+        }
+      ],
+      "verification": {
+        "baselineDigest": "ce6a834922bcd1f65411eea7dd0031e8bc5365a63ff3620c88409fe8bde826b5",
+        "contextHash": "940715538a4d4b7e2605c1a6aaad6d221dfac4a057565dbaa7742f1f451ee914",
+        "decisions": [
+          {
+            "decision": "supported",
+            "evidenceIds": [
+              "e-e9f50f11e218a94b475a",
+              "e-3bbd682ba451eee9b367",
+              "e-38202feb0e432141cd66"
+            ],
+            "fieldPath": [
+              "result",
+              "apiRoutes",
+              0
+            ],
+            "inspectedPaths": [
+              "gateway.cjs"
+            ],
+            "missingObligations": [],
+            "proposedDigest": "0b1e4aee2eaddd83ad1b12742ed2d44beb518248eefe3191265d1489d2f8910b",
+            "reason": "Verified a narrow source declaration in its stated scope; execution, connection success and required deployment capacity are not established.",
+            "reasonCode": "SOURCE_RELATION_VERIFIED",
+            "ruleId": "iris.express.const-route.v1",
+            "supportingLocators": [
+              {
+                "endLine": 5,
+                "path": "gateway.cjs",
+                "sourceDigest": "be3fee55b50251fb176746bbc15e16c3d02e14acc1962fcdef231221a7233ec2",
+                "startLine": 1
+              }
+            ]
+          }
+        ],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "cf193007a3bec7512277b4528b71baa82f0e56dc431314aca4af88f02ea15c6a",
+        "resolvedObligations": [
+          {
+            "component": ".",
+            "decision": "supported",
+            "evidenceIds": [
+              "e-38202feb0e432141cd66"
+            ],
+            "fieldPath": [
+              "result",
+              "apiRoutes",
+              0
+            ],
+            "key": "runtime.httpRoutes",
+            "obligationDigest": "31020db0cfd9dc7779ce6fd5e1fd0f658a6c8d5569707564cb38b0b9acab87de",
+            "path": "gateway.cjs",
+            "reason": "Express route path cannot be resolved statically",
+            "ruleId": "iris.express.const-route.v1"
+          }
+        ],
+        "resultDigest": "b97cfd4595c3cfda2142836c345c8b13cfc870892af498a36c37bb5cf02f641c",
+        "reviewFindings": [],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "89faf1980770f0b3f209de3a92f66e21c8bc6143297dd42c3e96517d22cbd68a",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    },
+    {
+      "experiment": "hive-v21-holdout",
+      "caseId": "holdout-development-docs",
+      "run": "run-01",
+      "wireReplies": [
+        {
+          "changes": [],
+          "kind": "review",
+          "questions": [],
+          "reviewFindings": []
+        }
+      ],
+      "verification": {
+        "baselineDigest": "ee4d9a7c65a33cd2d293792f20af8d8cd7ca687e2d9472339066cf865656bffb",
+        "contextHash": "0e65cef9c8a5430969006358241b839bf8b98d362d8eee80429ffbed3d9e5fd7",
+        "decisions": [],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "90954ee00887252eb21af3336d3e5bc72608fa50a0cd8afb0a1f58e8e1aaa9f1",
+        "resolvedObligations": [],
+        "resultDigest": "ee4d9a7c65a33cd2d293792f20af8d8cd7ca687e2d9472339066cf865656bffb",
+        "reviewFindings": [],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "ba945ea65857f9c9d3ab7f58291582076f8e6c77e7dac2dcf7cadb3705d40b68",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    },
+    {
+      "experiment": "hive-v21-holdout",
+      "caseId": "holdout-development-docs",
+      "run": "run-02",
+      "wireReplies": [
+        {
+          "changes": [],
+          "kind": "review",
+          "questions": [],
+          "reviewFindings": []
+        }
+      ],
+      "verification": {
+        "baselineDigest": "ee4d9a7c65a33cd2d293792f20af8d8cd7ca687e2d9472339066cf865656bffb",
+        "contextHash": "0e65cef9c8a5430969006358241b839bf8b98d362d8eee80429ffbed3d9e5fd7",
+        "decisions": [],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "90954ee00887252eb21af3336d3e5bc72608fa50a0cd8afb0a1f58e8e1aaa9f1",
+        "resolvedObligations": [],
+        "resultDigest": "ee4d9a7c65a33cd2d293792f20af8d8cd7ca687e2d9472339066cf865656bffb",
+        "reviewFindings": [],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "ba945ea65857f9c9d3ab7f58291582076f8e6c77e7dac2dcf7cadb3705d40b68",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    },
+    {
+      "experiment": "hive-v21-holdout",
+      "caseId": "holdout-development-docs",
+      "run": "run-03",
+      "wireReplies": [
+        {
+          "changes": [],
+          "kind": "review",
+          "questions": [],
+          "reviewFindings": []
+        }
+      ],
+      "verification": {
+        "baselineDigest": "ee4d9a7c65a33cd2d293792f20af8d8cd7ca687e2d9472339066cf865656bffb",
+        "contextHash": "0e65cef9c8a5430969006358241b839bf8b98d362d8eee80429ffbed3d9e5fd7",
+        "decisions": [],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "90954ee00887252eb21af3336d3e5bc72608fa50a0cd8afb0a1f58e8e1aaa9f1",
+        "resolvedObligations": [],
+        "resultDigest": "ee4d9a7c65a33cd2d293792f20af8d8cd7ca687e2d9472339066cf865656bffb",
+        "reviewFindings": [],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "ba945ea65857f9c9d3ab7f58291582076f8e6c77e7dac2dcf7cadb3705d40b68",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    },
+    {
+      "experiment": "hive-v21-holdout",
+      "caseId": "holdout-normal-noop",
+      "run": "run-01",
+      "wireReplies": [
+        {
+          "changes": [],
+          "kind": "review",
+          "questions": [],
+          "reviewFindings": []
+        }
+      ],
+      "verification": {
+        "baselineDigest": "ecebe8be57794bf86ca164113875d6e978499ef14d809624476efa185af259de",
+        "contextHash": "ffa637cd68ed2cdfd97f9c808fc935a579e312178f8b1f1a6b00769f4a54317e",
+        "decisions": [],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "d1787369fd4222cef6ffc36dde9cec9d53158021451a7f4d551007ca6e3552e3",
+        "resolvedObligations": [],
+        "resultDigest": "ecebe8be57794bf86ca164113875d6e978499ef14d809624476efa185af259de",
+        "reviewFindings": [],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "6dd65f8231c397c02195cbc53e52113c941f5c35ae74b412682a52aaa48bc40c",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    },
+    {
+      "experiment": "hive-v21-holdout",
+      "caseId": "holdout-normal-noop",
+      "run": "run-02",
+      "wireReplies": [
+        {
+          "kind": "needs_files",
+          "reason": "gateway.cjs is expandable with incomplete supplied ranges: line 2 calls createWeb() with no import or definition in the provided lines, so the framework receiver, any route registrations, and the relationship between the express dependency and the selected entrypoint cannot be verified. The full 89-byte file is needed to confirm the listener at line 3 and whether any routes exist.",
+          "requestedPaths": [
+            "gateway.cjs"
+          ]
+        },
+        {
+          "changes": [],
+          "kind": "review",
+          "questions": [],
+          "reviewFindings": []
+        }
+      ],
+      "verification": {
+        "baselineDigest": "0830c76ffb7d7e4d92869c2f619f1ecf64e56ab4b2edb1718fd70921d26e0378",
+        "contextHash": "6cbac08c68c95257f8b89274cd34c56261c177eb122261e063e2fc7bcb893aa3",
+        "decisions": [],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "b03437e4d47f693d92418277eaf260c82dfb325f488bc5a972b3d97c515b201e",
+        "resolvedObligations": [],
+        "resultDigest": "0830c76ffb7d7e4d92869c2f619f1ecf64e56ab4b2edb1718fd70921d26e0378",
+        "reviewFindings": [],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "6dd65f8231c397c02195cbc53e52113c941f5c35ae74b412682a52aaa48bc40c",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    },
+    {
+      "experiment": "hive-v21-holdout",
+      "caseId": "holdout-normal-noop",
+      "run": "run-03",
+      "wireReplies": [
+        {
+          "kind": "needs_files",
+          "reason": "gateway.cjs is expandable with incomplete supplied ranges: only lines 2-3 were provided, so the definition/import of createWeb() and any route registrations between the receiver creation (e-a888074fbe1a02f59630) and gateway.listen(4637) (e-ba59d2842077237e4e3b) are missing. The full file is needed to verify the Express receiver, resolve any route paths, and confirm the listener-to-entrypoint relationship for service svc-96c49d08c231282a.",
+          "requestedPaths": [
+            "gateway.cjs"
+          ]
+        },
+        {
+          "changes": [],
+          "kind": "review",
+          "questions": [],
+          "reviewFindings": []
+        }
+      ],
+      "verification": {
+        "baselineDigest": "0830c76ffb7d7e4d92869c2f619f1ecf64e56ab4b2edb1718fd70921d26e0378",
+        "contextHash": "6cbac08c68c95257f8b89274cd34c56261c177eb122261e063e2fc7bcb893aa3",
+        "decisions": [],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "b03437e4d47f693d92418277eaf260c82dfb325f488bc5a972b3d97c515b201e",
+        "resolvedObligations": [],
+        "resultDigest": "0830c76ffb7d7e4d92869c2f619f1ecf64e56ab4b2edb1718fd70921d26e0378",
+        "reviewFindings": [],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "6dd65f8231c397c02195cbc53e52113c941f5c35ae74b412682a52aaa48bc40c",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    },
+    {
+      "experiment": "hive-v21-holdout",
+      "caseId": "holdout-reassigned-route",
+      "run": "run-01",
+      "wireReplies": [
+        {
+          "changes": [],
+          "kind": "review",
+          "questions": [
+            {
+              "key": "runtime.httpRoutes",
+              "kind": "user_configuration",
+              "reason": "The only route path in gateway.cjs is read from the runtime environment variable PROBE_ROUTE (e-bb054c882af9982833bc, e-2a0f54b6fed189c40bfa), so the served path cannot be derived from source. Supply the value/binding for PROBE_ROUTE in the deployment environment; do not send secret values."
+            }
+          ],
+          "reviewFindings": []
+        }
+      ],
+      "verification": {
+        "baselineDigest": "a8d659c293035b49d0ade2c33ee5aac3cc9e901457c9148dc0332363627b8d79",
+        "contextHash": "e5fdedf7d831fbe7c0ff58ee8cd23a34b656a9e2bc30e8fd70282b3ee70892a1",
+        "decisions": [
+          {
+            "decision": "deferred",
+            "evidenceIds": [],
+            "fieldPath": [
+              "result",
+              "questions",
+              0
+            ],
+            "inspectedPaths": [],
+            "missingObligations": [
+              "Confirm a source-grounded blocking obligation."
+            ],
+            "proposedDigest": "8889ff7d6bc72c8dcac4d9d51d06bfc5f01563110141d4de58eacc82db0aa667",
+            "reason": "Additional model question requires source verification before it can block execution.",
+            "reasonCode": "REVIEW_RELATION_UNRESOLVED",
+            "ruleId": "iris.obligation.baseline.v1"
+          }
+        ],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "8fbd94d640c0372c9effe8b019cb4d322f4040e4f243ed913a2a8e656c685ce6",
+        "resolvedObligations": [],
+        "resultDigest": "a8d659c293035b49d0ade2c33ee5aac3cc9e901457c9148dc0332363627b8d79",
+        "reviewFindings": [],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "b996e1a086368de3f2472c5cdbc3e391fdd54c016be5de4e90098337555a3a18",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    },
+    {
+      "experiment": "hive-v21-holdout",
+      "caseId": "holdout-reassigned-route",
+      "run": "run-02",
+      "wireReplies": [
+        {
+          "changes": [],
+          "kind": "review",
+          "questions": [],
+          "reviewFindings": []
+        }
+      ],
+      "verification": {
+        "baselineDigest": "a8d659c293035b49d0ade2c33ee5aac3cc9e901457c9148dc0332363627b8d79",
+        "contextHash": "e5fdedf7d831fbe7c0ff58ee8cd23a34b656a9e2bc30e8fd70282b3ee70892a1",
+        "decisions": [],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "b319be799acdb9ade80d16c07d83c828557e8102196c7690671b0768cf29771d",
+        "resolvedObligations": [],
+        "resultDigest": "a8d659c293035b49d0ade2c33ee5aac3cc9e901457c9148dc0332363627b8d79",
+        "reviewFindings": [],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "b996e1a086368de3f2472c5cdbc3e391fdd54c016be5de4e90098337555a3a18",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    },
+    {
+      "experiment": "hive-v21-holdout",
+      "caseId": "holdout-reassigned-route",
+      "run": "run-03",
+      "wireReplies": [
+        {
+          "kind": "needs_files",
+          "reason": "The unresolved route path is bound to process.env.PROBE_ROUTE at gateway.cjs line 4, but line 3 (between receiver creation at line 2 and the env read) is not supplied and may declare a fallback default path or conditional that resolves the route expression. The full file is an eligible expandableSelectedPaths entry with reason incomplete_supplied_ranges; supplying it would determine whether the GET route path is statically resolvable or requires a user_configuration question for the PROBE_ROUTE binding.",
+          "requestedPaths": [
+            "gateway.cjs"
+          ]
+        },
+        {
+          "changes": [],
+          "kind": "review",
+          "questions": [],
+          "reviewFindings": [
+            {
+              "category": "missing_evidence",
+              "evidenceIds": [
+                "e-2a0f54b6fed189c40bfa",
+                "e-bb054c882af9982833bc",
+                "e-040491f5c61d3c943f39"
+              ],
+              "reason": "The only Express route registration uses a path assigned from process.env.PROBE_ROUTE, overwriting the literal '/ops/alive'. The route path and any healthcheck target depend on an external runtime value that cannot be resolved from the supplied source, so the route and healthcheck remain unknown."
+            }
+          ]
+        }
+      ],
+      "verification": {
+        "baselineDigest": "abf23cbbef8f2722a1605978a655a125ececaae7448e6a1556b153bb602ab993",
+        "contextHash": "81945717c87878a7e90a7a4b61dff603d03d0a0f1e6ccde4c4b42a7ef81a126f",
+        "decisions": [],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "28f92ad4072a98fc2ce131c7ab9847daf7fba80a57609c166cacf936405f8fef",
+        "resolvedObligations": [],
+        "resultDigest": "abf23cbbef8f2722a1605978a655a125ececaae7448e6a1556b153bb602ab993",
+        "reviewFindings": [
+          {
+            "blocking": false,
+            "category": "missing_evidence",
+            "decision": "supported",
+            "evidenceIds": [
+              "e-2a0f54b6fed189c40bfa",
+              "e-bb054c882af9982833bc",
+              "e-040491f5c61d3c943f39"
+            ],
+            "inspectedPaths": [
+              "gateway.cjs"
+            ],
+            "origin": "model",
+            "reason": "The supplied immutable context leaves a referenced source or configuration obligation unresolved; no runtime value is inferred.",
+            "reasonCode": "SOURCE_OBLIGATION_IDENTIFIED",
+            "ruleId": "iris.review.missing_evidence.v1"
+          }
+        ],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "b996e1a086368de3f2472c5cdbc3e391fdd54c016be5de4e90098337555a3a18",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    },
+    {
+      "experiment": "hive-v21-holdout",
+      "caseId": "holdout-shadowed-route",
+      "run": "run-01",
+      "wireReplies": [
+        {
+          "kind": "needs_files",
+          "reason": "The unresolved Express route at gateway.cjs line 5 uses the identifier `diagnostic` as its path expression, and the receiver `gateway` is created at line 2 via createWeb(). The declaration of `diagnostic` (and any mount/base-path logic in createWeb) falls in the unsupplied lines 1-9 gap of gateway.cjs, which is listed in expandableSelectedPaths with reason incomplete_supplied_ranges. Supplying the full file would let the route path be resolved from its constant declaration and registration, resolving runtime.httpRoutes.",
+          "requestedPaths": [
+            "gateway.cjs"
+          ]
+        },
+        {
+          "changes": [],
+          "kind": "review",
+          "questions": [
+            {
+              "key": "PROBE_ROUTE",
+              "kind": "user_configuration",
+              "reason": "gateway.cjs registers the Express route with process.env.PROBE_ROUTE (e-8055864128c72a338904), so the served path depends on an external runtime value. The literal '/ops/alive' built at e-4e8120599d21d1819c21 is never passed to register() and cannot be assumed. Provide the binding/selection for PROBE_ROUTE in the deployment environment (not the value here)."
+            }
+          ],
+          "reviewFindings": [
+            {
+              "category": "missing_evidence",
+              "evidenceIds": [
+                "e-4e8120599d21d1819c21",
+                "e-8055864128c72a338904",
+                "e-f1e896824b4a020c0106"
+              ],
+              "reason": "The route registration call register(process.env.PROBE_ROUTE) uses the environment variable, not the locally computed constant '/ops/alive'. The receiver (e-88116e4be4c6ea9819e7) and handler (e-f1e896824b4a020c0106) are confirmed, but the actual path expression cannot be completed from supplied source, so no route suggestion is evidence-backed."
+            }
+          ]
+        }
+      ],
+      "verification": {
+        "baselineDigest": "05bb0e5b5018c9e816d5f913d2e315351786798ad912c9296f92287c876999b0",
+        "contextHash": "210a8ca91edea419d38011e552c535a1edc170074c809575d4c2f98c213210bc",
+        "decisions": [
+          {
+            "decision": "deferred",
+            "evidenceIds": [],
+            "fieldPath": [
+              "result",
+              "questions",
+              0
+            ],
+            "inspectedPaths": [],
+            "missingObligations": [
+              "Confirm a source-grounded blocking obligation."
+            ],
+            "proposedDigest": "92c4b713dffdd70a38ca5c0f7edb95db81170d3bb3a5f9d6ff90bdb60e30226c",
+            "reason": "Additional model question requires source verification before it can block execution.",
+            "reasonCode": "REVIEW_RELATION_UNRESOLVED",
+            "ruleId": "iris.obligation.baseline.v1"
+          }
+        ],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "233b917ca75410f841224a615ebc7c86dc18de6b3d1d1632fe43fc913e6c74e6",
+        "resolvedObligations": [],
+        "resultDigest": "05bb0e5b5018c9e816d5f913d2e315351786798ad912c9296f92287c876999b0",
+        "reviewFindings": [
+          {
+            "blocking": false,
+            "category": "missing_evidence",
+            "decision": "supported",
+            "evidenceIds": [
+              "e-4e8120599d21d1819c21",
+              "e-8055864128c72a338904",
+              "e-f1e896824b4a020c0106"
+            ],
+            "inspectedPaths": [
+              "gateway.cjs"
+            ],
+            "origin": "model",
+            "reason": "The supplied immutable context leaves a referenced source or configuration obligation unresolved; no runtime value is inferred.",
+            "reasonCode": "SOURCE_OBLIGATION_IDENTIFIED",
+            "ruleId": "iris.review.missing_evidence.v1"
+          }
+        ],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "6285f1997adcf43ca5bbf2961d4125b0a68e5c19be0da1cdc7f9ba722d21a091",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    },
+    {
+      "experiment": "hive-v21-holdout",
+      "caseId": "holdout-shadowed-route",
+      "run": "run-02",
+      "wireReplies": [
+        {
+          "kind": "needs_files",
+          "reason": "The unresolved Express route at gateway.cjs line 5 uses the identifier `diagnostic` as its path expression, but the declaration of `diagnostic` falls in the unsupplied lines 3-4 of gateway.cjs (file is expandableSelectedPaths with reason incomplete_supplied_ranges). Expanding gateway.cjs would let the route path be resolved from its constant declaration, confirming or refuting the static unresolved route.",
+          "requestedPaths": [
+            "gateway.cjs"
+          ]
+        },
+        {
+          "changes": [
+            {
+              "field": {
+                "evidenceIds": [
+                  "e-4e8120599d21d1819c21",
+                  "e-88116e4be4c6ea9819e7",
+                  "e-f1e896824b4a020c0106"
+                ],
+                "reason": "The path expression '/ops/' + 'alive' is an immutable concatenation resolving to /ops/alive, registered via gateway.get on the express app created in gateway.cjs. Registration occurs at runtime with process.env.PROBE_ROUTE as the argument, so the effective route depends on that environment value being the same constant; no runtime execution was performed.",
+                "scope": "source",
+                "status": "suggested",
+                "value": {
+                  "component": ".",
+                  "method": "GET",
+                  "path": "/ops/alive"
+                }
+              },
+              "serviceId": null,
+              "target": "apiRoutes"
+            }
+          ],
+          "kind": "review",
+          "questions": [],
+          "reviewFindings": []
+        }
+      ],
+      "verification": {
+        "baselineDigest": "05bb0e5b5018c9e816d5f913d2e315351786798ad912c9296f92287c876999b0",
+        "contextHash": "210a8ca91edea419d38011e552c535a1edc170074c809575d4c2f98c213210bc",
+        "decisions": [
+          {
+            "decision": "deferred",
+            "evidenceIds": [
+              "e-4e8120599d21d1819c21",
+              "e-88116e4be4c6ea9819e7",
+              "e-f1e896824b4a020c0106"
+            ],
+            "fieldPath": [
+              "result",
+              "apiRoutes",
+              0
+            ],
+            "inspectedPaths": [
+              "gateway.cjs"
+            ],
+            "missingObligations": [
+              "Provide a source-supported relationship in the correct service/scope, or retain it as unverified review."
+            ],
+            "proposedDigest": "b8e315fcffd9980ec1c4e0ee1969fa9b154d32d5d0a9d281bdb4ea0725875c35",
+            "reason": "The supplied source does not establish this proposed relationship; the value is excluded from admitted analysis.",
+            "reasonCode": "LEXICAL_RELATION_UNRESOLVED",
+            "ruleId": "iris.express.const-route.v1",
+            "supportingLocators": [
+              {
+                "endLine": 8,
+                "path": "gateway.cjs",
+                "sourceDigest": "8ae9051e5e95c9f43f2abf4e9fb71634ebd0876cd9386c13ed4f8af07d4b78de",
+                "startLine": 1
+              }
+            ]
+          }
+        ],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "4b8c1d675f9552873695dcb6075367d1bad164f505f588b1f2004dd1ac905c74",
+        "resolvedObligations": [],
+        "resultDigest": "05bb0e5b5018c9e816d5f913d2e315351786798ad912c9296f92287c876999b0",
+        "reviewFindings": [],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "6285f1997adcf43ca5bbf2961d4125b0a68e5c19be0da1cdc7f9ba722d21a091",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    },
+    {
+      "experiment": "hive-v21-holdout",
+      "caseId": "holdout-shadowed-route",
+      "run": "run-03",
+      "wireReplies": [
+        {
+          "kind": "needs_files",
+          "reason": "The unresolved Express route at gateway.cjs line 5 uses the identifier `diagnostic` as its path expression, but the constant declaration (lines 3-4) was not included in the supplied ranges. Expanding gateway.cjs would let the route path be resolved from its own declaration rather than guessed, completing runtime.httpRoutes for service svc-96c49d08c231282a.",
+          "requestedPaths": [
+            "gateway.cjs"
+          ]
+        },
+        {
+          "changes": [],
+          "kind": "review",
+          "questions": [
+            {
+              "key": "runtime.httpRoutes",
+              "kind": "code_review",
+              "reason": "The register() parameter 'diagnostic' shadows the constant '/ops/alive', so the route path is actually process.env.PROBE_ROUTE (e-8055864128c72a338904, e-f1e896824b4a020c0106). The path is externally supplied and cannot be resolved from source; the constant is dead code and must not be used as the route."
+            },
+            {
+              "key": "environment.PROBE_ROUTE.binding",
+              "kind": "user_configuration",
+              "reason": "PROBE_ROUTE is consumed at runtime as the Express route path (e-8055864128c72a338904) with no default and no required guard in source. Its value must be supplied as an external execution setting; provide the binding/selection, not the secret value in the reply."
+            }
+          ],
+          "reviewFindings": [
+            {
+              "category": "missing_evidence",
+              "evidenceIds": [
+                "e-4e8120599d21d1819c21",
+                "e-8055864128c72a338904",
+                "e-f1e896824b4a020c0106"
+              ],
+              "reason": "The constant '/ops/alive' (e-4e8120599d21d1819c21) is not the registered route: the register() parameter named 'diagnostic' shadows it, and the call site passes process.env.PROBE_ROUTE. The unresolved route path depends on an external environment value with no default, so no route can be suggested from source."
+            }
+          ]
+        }
+      ],
+      "verification": {
+        "baselineDigest": "05bb0e5b5018c9e816d5f913d2e315351786798ad912c9296f92287c876999b0",
+        "contextHash": "210a8ca91edea419d38011e552c535a1edc170074c809575d4c2f98c213210bc",
+        "decisions": [
+          {
+            "decision": "supported",
+            "evidenceIds": [],
+            "fieldPath": [
+              "result",
+              "questions",
+              0
+            ],
+            "inspectedPaths": [],
+            "missingObligations": [],
+            "proposedDigest": "5f70dfc1022dcedbd47b0cb3a5042d0dcbbe62bbdbb3ed97890f393f5c044bb5",
+            "reason": "Existing source obligation preserved.",
+            "reasonCode": "BASELINE_OBLIGATION_PRESERVED",
+            "ruleId": "iris.obligation.baseline.v1"
+          },
+          {
+            "decision": "deferred",
+            "evidenceIds": [],
+            "fieldPath": [
+              "result",
+              "questions",
+              1
+            ],
+            "inspectedPaths": [],
+            "missingObligations": [
+              "Confirm a source-grounded blocking obligation."
+            ],
+            "proposedDigest": "322355e3f90b00fac8ed646fc5849488530d4fb87eb74b2dc67258c76b516a9d",
+            "reason": "Additional model question requires source verification before it can block execution.",
+            "reasonCode": "REVIEW_RELATION_UNRESOLVED",
+            "ruleId": "iris.obligation.baseline.v1"
+          }
+        ],
+        "deploymentAuthorized": false,
+        "limitations": [
+          "Only selected immutable source files and supported declaration rules are checked; no runtime behavior or whole-repository correctness is established."
+        ],
+        "proposalDigest": "83394f1af8e53bf367780ebd86fc395686781cf5990163cc0ec8a6a0a1dd21d1",
+        "resolvedObligations": [],
+        "resultDigest": "05bb0e5b5018c9e816d5f913d2e315351786798ad912c9296f92287c876999b0",
+        "reviewFindings": [
+          {
+            "blocking": false,
+            "category": "missing_evidence",
+            "decision": "supported",
+            "evidenceIds": [
+              "e-4e8120599d21d1819c21",
+              "e-8055864128c72a338904",
+              "e-f1e896824b4a020c0106"
+            ],
+            "inspectedPaths": [
+              "gateway.cjs"
+            ],
+            "origin": "model",
+            "reason": "The supplied immutable context leaves a referenced source or configuration obligation unresolved; no runtime value is inferred.",
+            "reasonCode": "SOURCE_OBLIGATION_IDENTIFIED",
+            "ruleId": "iris.review.missing_evidence.v1"
+          }
+        ],
+        "schemaVersion": "iris.analysis-verification.v1",
+        "sourceSnapshotId": "6285f1997adcf43ca5bbf2961d4125b0a68e5c19be0da1cdc7f9ba722d21a091",
+        "unavailableSourcePaths": [],
+        "verifierVersion": "iris.semantic.v1"
+      }
+    }
+  ]
+}

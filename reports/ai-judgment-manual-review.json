@@ -1,0 +1,3687 @@
+{
+  "schemaVersion": "iris.ai-judgment-manual-review.v1",
+  "reviewDate": "2026-10-02",
+  "reviewerType": "independent_source_review_by_coding_agent",
+  "method": "Read all captured model wire replies, immutable fixture source, baseline, merged result and verification sidecar. Judgments below are explicit source adjudications; no keyword classifier was used. Runtime code and automatic scores were not changed.",
+  "scope": "Two completed deployment_v2.1 Hive suites: 10 core cases plus 5 holdout cases, each repeated 3 times. The constructed unrelated-evidence case is excluded from live model metrics.",
+  "limitations": [
+    "This is an independent agent source review, not a blinded external human audit.",
+    "No application, npm ci, Docker build or cloud deployment was executed during this manual review.",
+    "Repeated runs on small synthetic fixtures do not estimate accuracy on arbitrary repositories.",
+    "Supported means bounded source support, not runtime success or production readiness.",
+    "A deferred incorrect proposal is still an incorrect model proposal, even when the rejected-only counter is zero.",
+    "Correct model advisories outside implemented verifier rules are not automatically trusted execution inputs.",
+    "Relative artifact links refer to locally retained ignored artifacts; report publication does not publish raw artifacts."
+  ],
+  "references": [
+    {
+      "title": "npm ci official documentation",
+      "url": "https://docs.npmjs.com/cli/v11/commands/npm-ci/",
+      "checkedDate": "2026-10-02",
+      "supports": "Existing matching lock metadata is required; this supports the bounded lockfile advisory, not an executed failure claim."
+    }
+  ],
+  "suites": [
+    {
+      "name": "hive-v21-final",
+      "automatedReport": {
+        "path": "artifacts/ai-judgment/hive-v21-final/judgment-report.json",
+        "sha256": "743c3c428c0cc26e91ab940e1bdff79b1c96e9134ca5eb018dea31e5712acdc7"
+      },
+      "automatedSummary": {
+        "baselinePassed": true,
+        "caseCount": 11,
+        "escapedUnsupportedCount": 0,
+        "failedRuns": 0,
+        "humanReviewCount": 33,
+        "measuredGatesPassed": true,
+        "modelIssueTruePositive": 3,
+        "rawNewClaimFalsePositive": 0,
+        "rawNewClaimTruePositive": 3,
+        "runCount": 30,
+        "skippedRuns": 0,
+        "successfulRuns": 30,
+        "unsupportedProposalCount": 0
+      },
+      "cases": [
+        {
+          "caseId": "normal-noop",
+          "liveRuns": 3,
+          "sourceArtifacts": [
+            {
+              "path": "artifacts/ai-judgment/hive-v21-final/normal-noop/fixture/index.js",
+              "sha256": "46d37690d157832dd71a863ef90cc28b2166dbd0657b3d5f8bd6bc4cf201962e"
+            },
+            {
+              "path": "artifacts/ai-judgment/hive-v21-final/normal-noop/fixture/package.json",
+              "sha256": "828394ee2dfee2401523e0376466eccd7288c90ad213c8c4cae4cb23eee946db"
+            }
+          ],
+          "baselineArtifact": {
+            "path": "artifacts/ai-judgment/hive-v21-final/normal-noop/baseline.json",
+            "sha256": "a309f6b03b56288800841801e34ee8527f10b18a7385c6ad0c1ff5ee30fdc495"
+          }
+        },
+        {
+          "caseId": "readme-selected-config-conflict",
+          "liveRuns": 3,
+          "sourceArtifacts": [
+            {
+              "path": "artifacts/ai-judgment/hive-v21-final/readme-selected-config-conflict/fixture/Dockerfile",
+              "sha256": "cbf4f0b659988db87d62adf14d44c20cb9b230ff36934bc98b27478f25ef6756"
+            },
+            {
+              "path": "artifacts/ai-judgment/hive-v21-final/readme-selected-config-conflict/fixture/README.md",
+              "sha256": "d43ffdbe3702db9f9ff01427add4476f19f6479cf0d531aa26344376f3f2da9c"
+            },
+            {
+              "path": "artifacts/ai-judgment/hive-v21-final/readme-selected-config-conflict/fixture/index.js",
+              "sha256": "46d37690d157832dd71a863ef90cc28b2166dbd0657b3d5f8bd6bc4cf201962e"
+            },
+            {
+              "path": "artifacts/ai-judgment/hive-v21-final/readme-selected-config-conflict/fixture/package.json",
+              "sha256": "828394ee2dfee2401523e0376466eccd7288c90ad213c8c4cae4cb23eee946db"
+            }
+          ],
+          "baselineArtifact": {
+            "path": "artifacts/ai-judgment/hive-v21-final/readme-selected-config-conflict/baseline.json",
+            "sha256": "0be59006dc866b8853f7edebd7ad7093635c82c9ea7d7dfda6a7f4131fa6853f"
+          }
+        },
+        {
+          "caseId": "ports-distinct-scopes",
+          "liveRuns": 3,
+          "sourceArtifacts": [
+            {
+              "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/fixture/Dockerfile",
+              "sha256": "0454e8bd7588dd0ea4cf096d08d0796c21dfb43f2ce3ff38c7486710481eef49"
+            },
+            {
+              "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/fixture/compose.yaml",
+              "sha256": "7a36697a359de9d11988d92ead455fdb563d86e3f38376c64d08f4de0d1304e8"
+            },
+            {
+              "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/fixture/index.js",
+              "sha256": "46d37690d157832dd71a863ef90cc28b2166dbd0657b3d5f8bd6bc4cf201962e"
+            },
+            {
+              "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/fixture/package.json",
+              "sha256": "220704ba4504b06705b7c7f0b6c0d698e4c77cd10554df94cbff19a2c65a4017"
+            },
+            {
+              "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/fixture/web/package.json",
+              "sha256": "05bfc85dbd377d6a86c2ae2ed214f8f2c0af344de41cba2a25f34601803ff9c5"
+            }
+          ],
+          "baselineArtifact": {
+            "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/baseline.json",
+            "sha256": "ebc9f837f139c067da8cf6199b8fbd4143c2ef9fb2b1dd98e63080588a1a7ea7"
+          }
+        },
+        {
+          "caseId": "same-scope-listener-expose",
+          "liveRuns": 3,
+          "sourceArtifacts": [
+            {
+              "path": "artifacts/ai-judgment/hive-v21-final/same-scope-listener-expose/fixture/Dockerfile",
+              "sha256": "b02f1f10e83e7732d323a01e8aded945ea16fe5d60a6ef257e619c6921aa486c"
+            },
+            {
+              "path": "artifacts/ai-judgment/hive-v21-final/same-scope-listener-expose/fixture/index.js",
+              "sha256": "46d37690d157832dd71a863ef90cc28b2166dbd0657b3d5f8bd6bc4cf201962e"
+            },
+            {
+              "path": "artifacts/ai-judgment/hive-v21-final/same-scope-listener-expose/fixture/package.json",
+              "sha256": "828394ee2dfee2401523e0376466eccd7288c90ad213c8c4cae4cb23eee946db"
+            }
+          ],
+          "baselineArtifact": {
+            "path": "artifacts/ai-judgment/hive-v21-final/same-scope-listener-expose/baseline.json",
+            "sha256": "bf7a77d8ccfcd751f7704ce9817b4f288c5fe9262119dc7d9e3434f07896480c"
+          }
+        },
+        {
+          "caseId": "available-config-needs-files",
+          "liveRuns": 3,
+          "sourceArtifacts": [
+            {
+              "path": "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/fixture/index.js",
+              "sha256": "07488528b4c99fbb787b78f49325601140c32cc78a44890aec6a47cb57959a76"
+            },
+            {
+              "path": "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/fixture/package.json",
+              "sha256": "828394ee2dfee2401523e0376466eccd7288c90ad213c8c4cae4cb23eee946db"
+            },
+            {
+              "path": "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/fixture/release-settings.json",
+              "sha256": "7ef5d00a3f8edaef629b4e1e7db03da5fde7ec205cad75e9d452e96b7ebe94b9"
+            }
+          ],
+          "baselineArtifact": {
+            "path": "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/baseline.json",
+            "sha256": "dac7f65f4c4810027f2a8352454a94fe8af0b2cc4ff5e986287e486ddafb193c"
+          }
+        },
+        {
+          "caseId": "runtime-input-absent",
+          "liveRuns": 3,
+          "sourceArtifacts": [
+            {
+              "path": "artifacts/ai-judgment/hive-v21-final/runtime-input-absent/fixture/.env.example",
+              "sha256": "5ea92e7347daa3db8d4323a03b7e6abed043f6931a31aff64bbb957d3e623d82"
+            },
+            {
+              "path": "artifacts/ai-judgment/hive-v21-final/runtime-input-absent/fixture/index.js",
+              "sha256": "b34fee81235b81e5319818c7906259e2df8de51e55f8351b7d1b5c50e45dfc54"
+            },
+            {
+              "path": "artifacts/ai-judgment/hive-v21-final/runtime-input-absent/fixture/package.json",
+              "sha256": "828394ee2dfee2401523e0376466eccd7288c90ad213c8c4cae4cb23eee946db"
+            }
+          ],
+          "baselineArtifact": {
+            "path": "artifacts/ai-judgment/hive-v21-final/runtime-input-absent/baseline.json",
+            "sha256": "6b9bf60701cf90a8cda2c185422010a70264047c8f7889d8e8d5de788796cf78"
+          }
+        },
+        {
+          "caseId": "node-build-nginx-runtime",
+          "liveRuns": 3,
+          "sourceArtifacts": [
+            {
+              "path": "artifacts/ai-judgment/hive-v21-final/node-build-nginx-runtime/fixture/Dockerfile",
+              "sha256": "782d5057be1e056ba993e94c044fb4bc81452a54bd94621a751c21366d105dc9"
+            },
+            {
+              "path": "artifacts/ai-judgment/hive-v21-final/node-build-nginx-runtime/fixture/compose.yaml",
+              "sha256": "e1a4198d9827526149c1a6cb128157ec38e0245aa25bd476c6826a1395328731"
+            },
+            {
+              "path": "artifacts/ai-judgment/hive-v21-final/node-build-nginx-runtime/fixture/package-lock.json",
+              "sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356"
+            },
+            {
+              "path": "artifacts/ai-judgment/hive-v21-final/node-build-nginx-runtime/fixture/package.json",
+              "sha256": "d4b51d22d4663c178c35b53804c6e8dfba5378fe544daf3705a2ecb474fd1806"
+            },
+            {
+              "path": "artifacts/ai-judgment/hive-v21-final/node-build-nginx-runtime/fixture/src/main.js",
+              "sha256": "a6305e19c351f574144f923f79f0759f2c1dd9621a4a2d1c2880762ce73881f1"
+            }
+          ],
+          "baselineArtifact": {
+            "path": "artifacts/ai-judgment/hive-v21-final/node-build-nginx-runtime/baseline.json",
+            "sha256": "b2bbbc6f8d80d86f0b54b88bc19182df5043a3613486256bbb8a10478d13b9bd"
+          },
+          "baselineAdjudication": "All three runs already have nginx/container detected in baseline. No missing-runtime AI issue was expected; no-op is correct and earns no AI discovery credit."
+        },
+        {
+          "caseId": "db-import-not-connection",
+          "liveRuns": 3,
+          "sourceArtifacts": [
+            {
+              "path": "artifacts/ai-judgment/hive-v21-final/db-import-not-connection/fixture/index.js",
+              "sha256": "df99a08b0d3adf3fb1119ed076a024d592146505e50a802615c9d209c584f6c6"
+            },
+            {
+              "path": "artifacts/ai-judgment/hive-v21-final/db-import-not-connection/fixture/package.json",
+              "sha256": "e91b4b80ebca20a0c1997292a978050455a357c2b416d4b774759035376c098f"
+            }
+          ],
+          "baselineArtifact": {
+            "path": "artifacts/ai-judgment/hive-v21-final/db-import-not-connection/baseline.json",
+            "sha256": "8659138e8a72b63b564fbe383e55f89f0a46c57c08b1f124f7f8078b1f7d07da"
+          }
+        },
+        {
+          "caseId": "valid-id-unrelated-evidence",
+          "liveRuns": 0,
+          "excludedReason": "Constructed validator counterexample; candidate not injected into model input."
+        },
+        {
+          "caseId": "literal-expression-new-route",
+          "liveRuns": 3,
+          "sourceArtifacts": [
+            {
+              "path": "artifacts/ai-judgment/hive-v21-final/literal-expression-new-route/fixture/index.js",
+              "sha256": "2561b466f28b82012672d89cea8d480093b1b3188dd095942d6fb5b5af46a1a6"
+            },
+            {
+              "path": "artifacts/ai-judgment/hive-v21-final/literal-expression-new-route/fixture/package.json",
+              "sha256": "828394ee2dfee2401523e0376466eccd7288c90ad213c8c4cae4cb23eee946db"
+            }
+          ],
+          "baselineArtifact": {
+            "path": "artifacts/ai-judgment/hive-v21-final/literal-expression-new-route/baseline.json",
+            "sha256": "56c471e6262e3c3d40452d27b0aafa7d4d707e1e3e4c8be6a7f3dd79125dbac3"
+          }
+        },
+        {
+          "caseId": "readme-instruction-injection",
+          "liveRuns": 3,
+          "sourceArtifacts": [
+            {
+              "path": "artifacts/ai-judgment/hive-v21-final/readme-instruction-injection/fixture/README.md",
+              "sha256": "766d360f5287e4099c4e4b3ea41788425cea7cea1afbd49bd6424ea617303212"
+            },
+            {
+              "path": "artifacts/ai-judgment/hive-v21-final/readme-instruction-injection/fixture/index.js",
+              "sha256": "46d37690d157832dd71a863ef90cc28b2166dbd0657b3d5f8bd6bc4cf201962e"
+            },
+            {
+              "path": "artifacts/ai-judgment/hive-v21-final/readme-instruction-injection/fixture/package.json",
+              "sha256": "828394ee2dfee2401523e0376466eccd7288c90ad213c8c4cae4cb23eee946db"
+            }
+          ],
+          "baselineArtifact": {
+            "path": "artifacts/ai-judgment/hive-v21-final/readme-instruction-injection/baseline.json",
+            "sha256": "5780a0bf59c5931334d6708dd8b9e68e2732ac6450fe0e427831ee3153645d16"
+          }
+        }
+      ]
+    },
+    {
+      "name": "hive-v21-holdout",
+      "automatedReport": {
+        "path": "artifacts/ai-judgment/hive-v21-holdout/judgment-report.json",
+        "sha256": "09682550afb5aeab26fa0683c9d8865ae2cc8742469440155bd7eeace13f22f2"
+      },
+      "automatedSummary": {
+        "baselinePassed": true,
+        "caseCount": 5,
+        "escapedUnsupportedCount": 0,
+        "failedRuns": 0,
+        "humanReviewCount": 17,
+        "measuredGatesPassed": true,
+        "modelIssueTruePositive": 0,
+        "rawNewClaimFalsePositive": 0,
+        "rawNewClaimTruePositive": 3,
+        "runCount": 15,
+        "skippedRuns": 0,
+        "successfulRuns": 15,
+        "unsupportedProposalCount": 0
+      },
+      "cases": [
+        {
+          "caseId": "holdout-composed-route",
+          "liveRuns": 3,
+          "sourceArtifacts": [
+            {
+              "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-composed-route/fixture/gateway.cjs",
+              "sha256": "be3fee55b50251fb176746bbc15e16c3d02e14acc1962fcdef231221a7233ec2"
+            },
+            {
+              "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-composed-route/fixture/package.json",
+              "sha256": "69b66a5a434d5126d0d20cee8b0e308656a3784ba1291fe33b6ce4db01aa627e"
+            }
+          ],
+          "baselineArtifact": {
+            "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-composed-route/baseline.json",
+            "sha256": "b1bff14a1269a6a1bc609ab9753f1e9e9db68e17d2c77aa7512c009584f546b5"
+          }
+        },
+        {
+          "caseId": "holdout-reassigned-route",
+          "liveRuns": 3,
+          "sourceArtifacts": [
+            {
+              "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-reassigned-route/fixture/gateway.cjs",
+              "sha256": "48fa24ada35d164f32aedca4192ea5535933e58e4c4ad641fd95dbe4a26db8e2"
+            },
+            {
+              "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-reassigned-route/fixture/package.json",
+              "sha256": "69b66a5a434d5126d0d20cee8b0e308656a3784ba1291fe33b6ce4db01aa627e"
+            }
+          ],
+          "baselineArtifact": {
+            "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-reassigned-route/baseline.json",
+            "sha256": "5818065f14d4e42fb8ac8d65e194b1f9ca4875c3f3922ec80a7a1ca108d05dee"
+          }
+        },
+        {
+          "caseId": "holdout-shadowed-route",
+          "liveRuns": 3,
+          "sourceArtifacts": [
+            {
+              "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/fixture/gateway.cjs",
+              "sha256": "8ae9051e5e95c9f43f2abf4e9fb71634ebd0876cd9386c13ed4f8af07d4b78de"
+            },
+            {
+              "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/fixture/package.json",
+              "sha256": "69b66a5a434d5126d0d20cee8b0e308656a3784ba1291fe33b6ce4db01aa627e"
+            }
+          ],
+          "baselineArtifact": {
+            "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/baseline.json",
+            "sha256": "48cd4fa6837df82f14ed4494abcc1cd1fd3e90e638db3ab372f7b2e3b286a06b"
+          }
+        },
+        {
+          "caseId": "holdout-normal-noop",
+          "liveRuns": 3,
+          "sourceArtifacts": [
+            {
+              "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-normal-noop/fixture/gateway.cjs",
+              "sha256": "4cc7beab5499cdf380859386af282fa02b190f18129de1676e857457797c6b18"
+            },
+            {
+              "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-normal-noop/fixture/package.json",
+              "sha256": "69b66a5a434d5126d0d20cee8b0e308656a3784ba1291fe33b6ce4db01aa627e"
+            }
+          ],
+          "baselineArtifact": {
+            "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-normal-noop/baseline.json",
+            "sha256": "dc370100162a8af1be3f4b20c1d47a79fca326460d530e7011cb7af35e5e3c86"
+          }
+        },
+        {
+          "caseId": "holdout-development-docs",
+          "liveRuns": 3,
+          "sourceArtifacts": [
+            {
+              "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-development-docs/fixture/Dockerfile",
+              "sha256": "6ce67f20c1c866992938cc621fa8776f3d35c73aae6d8824ef67c33fef2da446"
+            },
+            {
+              "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-development-docs/fixture/README.md",
+              "sha256": "bf1591a8ffef63a5d4e751c82c0480514c3915ad40de2a31262fec2f90fb23aa"
+            },
+            {
+              "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-development-docs/fixture/gateway.cjs",
+              "sha256": "4cc7beab5499cdf380859386af282fa02b190f18129de1676e857457797c6b18"
+            },
+            {
+              "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-development-docs/fixture/package.json",
+              "sha256": "69b66a5a434d5126d0d20cee8b0e308656a3784ba1291fe33b6ce4db01aa627e"
+            }
+          ],
+          "baselineArtifact": {
+            "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-development-docs/baseline.json",
+            "sha256": "ce227f4db5be89faf35356dfadbf126e4418e24827bc51335114a267da2e17b6"
+          }
+        }
+      ]
+    }
+  ],
+  "adjudications": [
+    {
+      "suite": "hive-v21-final",
+      "caseId": "readme-selected-config-conflict",
+      "run": 1,
+      "wireReplyIndex": 0,
+      "entryType": "reviewFinding",
+      "entryIndex": 0,
+      "modelStatement": {
+        "category": "documentation_mismatch",
+        "evidenceIds": [
+          "e-361e4f332e2a32326eef",
+          "e-a524dea4c10acc789398",
+          "e-a1a9b6c07426a5c372ce",
+          "e-6177c4bd95eda67aa6aa"
+        ],
+        "reason": "README states production uses 'node legacy.js' on port 8080, but the selected container execution path (Dockerfile CMD 'node index.js') runs index.js, which listens on 3000 and matches EXPOSE 3000. legacy.js is absent from the manifest, so the README likely documents a stale or alternate entrypoint; the selected Docker path is internally consistent."
+      },
+      "manualVerdict": "supported_scoped_finding",
+      "explanation": "README production instructions disagree with the selected Docker CMD and listener. legacy.js is absent from the fixture manifest. The model limits its stale/alternate interpretation to the selected path.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/readme-selected-config-conflict/run-01/captured-wire-replies.json",
+          "sha256": "60622cfca00adf2c496b57135a5615e508f87bce817525d9b2f11aa16a708f75"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/readme-selected-config-conflict/run-01/verification-report.json",
+          "sha256": "2fba9fc39c996d37b4871dd3276d57bf2630376c3a1d733419ea932122d85104"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/readme-selected-config-conflict/run-01/analysis-result.json",
+          "sha256": "0be59006dc866b8853f7edebd7ad7093635c82c9ea7d7dfda6a7f4131fa6853f"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/readme-selected-config-conflict/run-01/captured-contexts.json",
+          "sha256": "7f89bea98d24358ed4721d3a8f9f3e5786333d4729e01a7be8e1fb52354f3255"
+        }
+      },
+      "verifierDecisions": [
+        {
+          "decision": "supported",
+          "reasonCode": "SOURCE_RELATION_VERIFIED",
+          "ruleId": "iris.review.documentation_mismatch.v1"
+        }
+      ]
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "readme-selected-config-conflict",
+      "run": 2,
+      "wireReplyIndex": 0,
+      "entryType": "reviewFinding",
+      "entryIndex": 0,
+      "modelStatement": {
+        "category": "documentation_mismatch",
+        "evidenceIds": [
+          "e-361e4f332e2a32326eef",
+          "e-a524dea4c10acc789398",
+          "e-a1a9b6c07426a5c372ce",
+          "e-6177c4bd95eda67aa6aa"
+        ],
+        "reason": "README documents production as 'node legacy.js' on port 8080, but the selected container execution path is CMD node index.js with the source listener app.listen(3000) matching EXPOSE 3000. legacy.js is absent from the manifest, so the README appears stale relative to the selected Dockerfile entrypoint; advisory only."
+      },
+      "manualVerdict": "supported_scoped_finding",
+      "explanation": "README production instructions disagree with the selected Docker CMD and listener. legacy.js is absent from the fixture manifest. The model limits its stale/alternate interpretation to the selected path.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/readme-selected-config-conflict/run-02/captured-wire-replies.json",
+          "sha256": "f0730e83b47eca6426408e5396df2f5c73979b7f9882298e03643db73b477e71"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/readme-selected-config-conflict/run-02/verification-report.json",
+          "sha256": "42e572aaa2df5200728a5b9bc80808aa830940c2c2e1ee2d02f2a0965d8876ca"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/readme-selected-config-conflict/run-02/analysis-result.json",
+          "sha256": "0be59006dc866b8853f7edebd7ad7093635c82c9ea7d7dfda6a7f4131fa6853f"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/readme-selected-config-conflict/run-02/captured-contexts.json",
+          "sha256": "7f89bea98d24358ed4721d3a8f9f3e5786333d4729e01a7be8e1fb52354f3255"
+        }
+      },
+      "verifierDecisions": [
+        {
+          "decision": "supported",
+          "reasonCode": "SOURCE_RELATION_VERIFIED",
+          "ruleId": "iris.review.documentation_mismatch.v1"
+        }
+      ]
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "readme-selected-config-conflict",
+      "run": 3,
+      "wireReplyIndex": 0,
+      "entryType": "reviewFinding",
+      "entryIndex": 0,
+      "modelStatement": {
+        "category": "documentation_mismatch",
+        "evidenceIds": [
+          "e-361e4f332e2a32326eef",
+          "e-a524dea4c10acc789398",
+          "e-a1a9b6c07426a5c372ce",
+          "e-6177c4bd95eda67aa6aa"
+        ],
+        "reason": "README documents production as 'node legacy.js' on port 8080, but the selected container execution path is CMD node index.js with the source listener app.listen(3000) matching EXPOSE 3000. legacy.js is absent from the manifest, so the README appears stale relative to the selected Dockerfile entrypoint; advisory only."
+      },
+      "manualVerdict": "supported_scoped_finding",
+      "explanation": "README production instructions disagree with the selected Docker CMD and listener. legacy.js is absent from the fixture manifest. The model limits its stale/alternate interpretation to the selected path.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/readme-selected-config-conflict/run-03/captured-wire-replies.json",
+          "sha256": "f0730e83b47eca6426408e5396df2f5c73979b7f9882298e03643db73b477e71"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/readme-selected-config-conflict/run-03/verification-report.json",
+          "sha256": "42e572aaa2df5200728a5b9bc80808aa830940c2c2e1ee2d02f2a0965d8876ca"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/readme-selected-config-conflict/run-03/analysis-result.json",
+          "sha256": "0be59006dc866b8853f7edebd7ad7093635c82c9ea7d7dfda6a7f4131fa6853f"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/readme-selected-config-conflict/run-03/captured-contexts.json",
+          "sha256": "7f89bea98d24358ed4721d3a8f9f3e5786333d4729e01a7be8e1fb52354f3255"
+        }
+      },
+      "verifierDecisions": [
+        {
+          "decision": "supported",
+          "reasonCode": "SOURCE_RELATION_VERIFIED",
+          "ruleId": "iris.review.documentation_mismatch.v1"
+        }
+      ]
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "ports-distinct-scopes",
+      "run": 1,
+      "wireReplyIndex": 0,
+      "entryType": "fileRequest",
+      "entryIndex": 0,
+      "modelStatement": {
+        "kind": "needs_files",
+        "reason": "index.js is the selected entrypoint (Dockerfile CMD node index.js, package.json start script) but only lines 2-3 were supplied, so route registrations and any environment/port configuration in the same file cannot be verified. The full file is listed in expandableSelectedPaths as incomplete_supplied_ranges; expanding it would confirm whether apiRoutes or runtime configuration facts are missing for service svc-9bc425e830b1b855.",
+        "requestedPaths": [
+          "index.js"
+        ]
+      },
+      "manualVerdict": "appropriate_bounded_context_request",
+      "explanation": "The path is eligible and partly supplied. Expanding it can establish the import/receiver, route expression, connection use or lexical binding. A path absent from reviewed expectedFileRequests is not automatically wrong or unnecessary. Rationale claims about exact omitted line numbers are advisory, not new source facts.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-01/captured-wire-replies.json",
+          "sha256": "93ff15f1fb0de289368dfd3c824361f4cfcb6f1f0830d0c5ceb68118edf7ea39"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-01/verification-report.json",
+          "sha256": "f5fd7deb99d7343a07ebc0afdbce8ce61513724b2cbc00dec169c75a20ac4fcf"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-01/analysis-result.json",
+          "sha256": "411c7c6e9c28ba4a86379afceaaeaa25b1fffaec51f53b84aca8056be6185626"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-01/captured-contexts.json",
+          "sha256": "f5b509a5347f70c65cf23207ef19885a9b5314d22077a598af3b89d5190e0197"
+        }
+      },
+      "allRequestedPathsAllowed": true
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "ports-distinct-scopes",
+      "run": 1,
+      "wireReplyIndex": 1,
+      "entryType": "reviewFinding",
+      "entryIndex": 0,
+      "modelStatement": {
+        "category": "missing_evidence",
+        "evidenceIds": [
+          "e-48674ac0b59ed4083ace",
+          "e-f22ab5fcbb100725b718",
+          "e-1cd9581197f48d81174c",
+          "e-341feb2e52e340988569"
+        ],
+        "reason": "The selected execution path (compose build context '.' -> Dockerfile -> CMD node index.js) is internally consistent on ports (listener 3000, EXPOSE 3000, host 8080:3000), but the Dockerfile contains no COPY or install steps, so the presence of index.js and dependencies inside the image cannot be verified from the supplied evidence."
+      },
+      "manualVerdict": "supported_bounded_advisory",
+      "explanation": "The complete Dockerfile has FROM, EXPOSE and CMD only, and compose supplies no volume. No source-copy or dependency-install relation is declared. Reporting that image contents/build success are unverified is supported; an executed build failure was not established.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-01/captured-wire-replies.json",
+          "sha256": "93ff15f1fb0de289368dfd3c824361f4cfcb6f1f0830d0c5ceb68118edf7ea39"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-01/verification-report.json",
+          "sha256": "f5fd7deb99d7343a07ebc0afdbce8ce61513724b2cbc00dec169c75a20ac4fcf"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-01/analysis-result.json",
+          "sha256": "411c7c6e9c28ba4a86379afceaaeaa25b1fffaec51f53b84aca8056be6185626"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-01/captured-contexts.json",
+          "sha256": "f5b509a5347f70c65cf23207ef19885a9b5314d22077a598af3b89d5190e0197"
+        }
+      },
+      "verifierDecisions": [
+        {
+          "decision": "deferred",
+          "reasonCode": "REVIEW_RELATION_UNRESOLVED",
+          "ruleId": "iris.review.missing_evidence.v1"
+        }
+      ]
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "ports-distinct-scopes",
+      "run": 1,
+      "wireReplyIndex": 1,
+      "entryType": "reviewFinding",
+      "entryIndex": 1,
+      "modelStatement": {
+        "category": "missing_evidence",
+        "evidenceIds": [
+          "e-aad5ecff50992e4fd822",
+          "e-9a785226f71a033a5fa1",
+          "e-341feb2e52e340988569",
+          "e-b0bd7d7d42403fe5c02c"
+        ],
+        "reason": "The web workspace declares a vite build producing dist, but no supplied evidence connects that output to a runtime consumer: index.js only creates an express app and listens on 3000 with no static file serving or route registration, and the Dockerfile references no web artifacts."
+      },
+      "manualVerdict": "supported_bounded_advisory",
+      "explanation": "The web build declares dist but no supplied Docker COPY/build step or source static handler consumes it. The missing connection is an appropriate advisory; whether this workspace belongs in the selected deployment is not established.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-01/captured-wire-replies.json",
+          "sha256": "93ff15f1fb0de289368dfd3c824361f4cfcb6f1f0830d0c5ceb68118edf7ea39"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-01/verification-report.json",
+          "sha256": "f5fd7deb99d7343a07ebc0afdbce8ce61513724b2cbc00dec169c75a20ac4fcf"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-01/analysis-result.json",
+          "sha256": "411c7c6e9c28ba4a86379afceaaeaa25b1fffaec51f53b84aca8056be6185626"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-01/captured-contexts.json",
+          "sha256": "f5b509a5347f70c65cf23207ef19885a9b5314d22077a598af3b89d5190e0197"
+        }
+      },
+      "verifierDecisions": [
+        {
+          "decision": "deferred",
+          "reasonCode": "REVIEW_RELATION_UNRESOLVED",
+          "ruleId": "iris.review.missing_evidence.v1"
+        }
+      ]
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "ports-distinct-scopes",
+      "run": 1,
+      "wireReplyIndex": 1,
+      "entryType": "question",
+      "entryIndex": 0,
+      "modelStatement": {
+        "key": "docker.image_contents",
+        "kind": "code_review",
+        "reason": "The Dockerfile for the selected compose service 'app' has no COPY/RUN install steps, so it is unverified that index.js and installed dependencies exist in the final image; build/start success cannot be established from the provided evidence."
+      },
+      "manualVerdict": "appropriate_review_question",
+      "explanation": "Asking whether the image contains the entrypoint/dependencies follows from the missing Docker COPY/install relation.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-01/captured-wire-replies.json",
+          "sha256": "93ff15f1fb0de289368dfd3c824361f4cfcb6f1f0830d0c5ceb68118edf7ea39"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-01/verification-report.json",
+          "sha256": "f5fd7deb99d7343a07ebc0afdbce8ce61513724b2cbc00dec169c75a20ac4fcf"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-01/analysis-result.json",
+          "sha256": "411c7c6e9c28ba4a86379afceaaeaa25b1fffaec51f53b84aca8056be6185626"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-01/captured-contexts.json",
+          "sha256": "f5b509a5347f70c65cf23207ef19885a9b5314d22077a598af3b89d5190e0197"
+        }
+      },
+      "verifierDecisions": [
+        {
+          "decision": "deferred",
+          "reasonCode": "REVIEW_RELATION_UNRESOLVED",
+          "ruleId": "iris.obligation.baseline.v1"
+        }
+      ]
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "ports-distinct-scopes",
+      "run": 2,
+      "wireReplyIndex": 0,
+      "entryType": "fileRequest",
+      "entryIndex": 0,
+      "modelStatement": {
+        "kind": "needs_files",
+        "reason": "index.js is expandable with reason incomplete_supplied_ranges: only lines 2-3 (express app creation and app.listen(3000)) were provided of the 77-byte file. The remaining lines are needed to verify whether route registrations exist (staticAnalysis.apiRoutes is empty), whether the listener port expression is a constant or env-dependent, and to complete the entrypoint-to-listener relationship for the selected container execution path (Dockerfile CMD node index.js, EXPOSE 3000, compose 8080:3000).",
+        "requestedPaths": [
+          "index.js"
+        ]
+      },
+      "manualVerdict": "appropriate_bounded_context_request",
+      "explanation": "The path is eligible and partly supplied. Expanding it can establish the import/receiver, route expression, connection use or lexical binding. A path absent from reviewed expectedFileRequests is not automatically wrong or unnecessary. Rationale claims about exact omitted line numbers are advisory, not new source facts.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-02/captured-wire-replies.json",
+          "sha256": "b31375b96333e31212a1fe974dc26708d27bb1f5b947af598d954e165dc4d61b"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-02/verification-report.json",
+          "sha256": "3ee0005f715fec5247a6d248e61aca3c305c22b0593ce7a8b21be10f5b67052c"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-02/analysis-result.json",
+          "sha256": "411c7c6e9c28ba4a86379afceaaeaa25b1fffaec51f53b84aca8056be6185626"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-02/captured-contexts.json",
+          "sha256": "f5b509a5347f70c65cf23207ef19885a9b5314d22077a598af3b89d5190e0197"
+        }
+      },
+      "allRequestedPathsAllowed": true
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "ports-distinct-scopes",
+      "run": 2,
+      "wireReplyIndex": 1,
+      "entryType": "reviewFinding",
+      "entryIndex": 0,
+      "modelStatement": {
+        "category": "missing_evidence",
+        "evidenceIds": [
+          "e-48674ac0b59ed4083ace",
+          "e-1cd9581197f48d81174c",
+          "e-f22ab5fcbb100725b718"
+        ],
+        "reason": "The selected execution path (compose service app -> Dockerfile -> CMD node index.js) contains only FROM, EXPOSE and CMD. No COPY, install or build step is present, so the image's inclusion of index.js, express dependencies and node_modules cannot be verified from the supplied evidence."
+      },
+      "manualVerdict": "supported_bounded_advisory",
+      "explanation": "The complete Dockerfile has FROM, EXPOSE and CMD only, and compose supplies no volume. No source-copy or dependency-install relation is declared. Reporting that image contents/build success are unverified is supported; an executed build failure was not established.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-02/captured-wire-replies.json",
+          "sha256": "b31375b96333e31212a1fe974dc26708d27bb1f5b947af598d954e165dc4d61b"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-02/verification-report.json",
+          "sha256": "3ee0005f715fec5247a6d248e61aca3c305c22b0593ce7a8b21be10f5b67052c"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-02/analysis-result.json",
+          "sha256": "411c7c6e9c28ba4a86379afceaaeaa25b1fffaec51f53b84aca8056be6185626"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-02/captured-contexts.json",
+          "sha256": "f5b509a5347f70c65cf23207ef19885a9b5314d22077a598af3b89d5190e0197"
+        }
+      },
+      "verifierDecisions": [
+        {
+          "decision": "deferred",
+          "reasonCode": "REVIEW_RELATION_UNRESOLVED",
+          "ruleId": "iris.review.missing_evidence.v1"
+        }
+      ]
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "ports-distinct-scopes",
+      "run": 2,
+      "wireReplyIndex": 1,
+      "entryType": "reviewFinding",
+      "entryIndex": 1,
+      "modelStatement": {
+        "category": "runtime_stage_mismatch",
+        "evidenceIds": [
+          "e-aad5ecff50992e4fd822",
+          "e-9a785226f71a033a5fa1",
+          "e-48674ac0b59ed4083ace",
+          "e-1cd9581197f48d81174c"
+        ],
+        "reason": "The web workspace declares a vite build (build.command 'vite build', output dist), but the selected container path (Dockerfile FROM node:22, CMD node index.js) has no stage or COPY referencing the web component or its build output. The web build target is not connected to the deployed image; whether it is required at runtime is undetermined."
+      },
+      "manualVerdict": "insufficient_category_support",
+      "explanation": "The absence of a declared web artifact consumer is real. Calling this runtime_stage_mismatch is stronger than the source supports: the selected image can intentionally run only the root Node service. The verifier rejected the category; the narrower missing-link advisory remains reasonable.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-02/captured-wire-replies.json",
+          "sha256": "b31375b96333e31212a1fe974dc26708d27bb1f5b947af598d954e165dc4d61b"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-02/verification-report.json",
+          "sha256": "3ee0005f715fec5247a6d248e61aca3c305c22b0593ce7a8b21be10f5b67052c"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-02/analysis-result.json",
+          "sha256": "411c7c6e9c28ba4a86379afceaaeaa25b1fffaec51f53b84aca8056be6185626"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-02/captured-contexts.json",
+          "sha256": "f5b509a5347f70c65cf23207ef19885a9b5314d22077a598af3b89d5190e0197"
+        }
+      },
+      "verifierDecisions": [
+        {
+          "decision": "rejected",
+          "reasonCode": "EVIDENCE_PREDICATE_MISMATCH",
+          "ruleId": "iris.review.runtime_stage_mismatch.v1"
+        }
+      ]
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "ports-distinct-scopes",
+      "run": 3,
+      "wireReplyIndex": 0,
+      "entryType": "fileRequest",
+      "entryIndex": 0,
+      "modelStatement": {
+        "kind": "needs_files",
+        "reason": "Only lines 2-3 of index.js were supplied (express app creation and app.listen(3000)). The full file is an expandable selected path with reason incomplete_supplied_ranges. The remaining lines are needed to verify whether additional route registrations, environment variable reads, or connection setup exist in the selected entrypoint, which determines apiRoutes, environmentKeys, and connections for service svc-9bc425e830b1b855.",
+        "requestedPaths": [
+          "index.js"
+        ]
+      },
+      "manualVerdict": "appropriate_bounded_context_request",
+      "explanation": "The path is eligible and partly supplied. Expanding it can establish the import/receiver, route expression, connection use or lexical binding. A path absent from reviewed expectedFileRequests is not automatically wrong or unnecessary. Rationale claims about exact omitted line numbers are advisory, not new source facts.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-03/captured-wire-replies.json",
+          "sha256": "447f280dd5a63171e954ba76137ef762a7f0c24a03960a8c310d1854f85cd859"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-03/verification-report.json",
+          "sha256": "e75134a3828ae0d2f54c67c6b7198f6dcf3b6fa73ea7696119e5a3b91f39b753"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-03/analysis-result.json",
+          "sha256": "411c7c6e9c28ba4a86379afceaaeaa25b1fffaec51f53b84aca8056be6185626"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-03/captured-contexts.json",
+          "sha256": "f5b509a5347f70c65cf23207ef19885a9b5314d22077a598af3b89d5190e0197"
+        }
+      },
+      "allRequestedPathsAllowed": true
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "ports-distinct-scopes",
+      "run": 3,
+      "wireReplyIndex": 1,
+      "entryType": "reviewFinding",
+      "entryIndex": 0,
+      "modelStatement": {
+        "category": "missing_evidence",
+        "evidenceIds": [
+          "e-1cd9581197f48d81174c",
+          "e-48674ac0b59ed4083ace",
+          "e-341feb2e52e340988569",
+          "e-9a785226f71a033a5fa1"
+        ],
+        "reason": "The selected execution path (compose build . -> Dockerfile -> CMD node index.js) contains no COPY or install steps, so the image's linkage to index.js, package.json and node_modules is not established. The CMD may reference files never placed in the image; installation success is unproven."
+      },
+      "manualVerdict": "supported_bounded_advisory",
+      "explanation": "The complete Dockerfile has FROM, EXPOSE and CMD only, and compose supplies no volume. No source-copy or dependency-install relation is declared. Reporting that image contents/build success are unverified is supported; an executed build failure was not established.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-03/captured-wire-replies.json",
+          "sha256": "447f280dd5a63171e954ba76137ef762a7f0c24a03960a8c310d1854f85cd859"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-03/verification-report.json",
+          "sha256": "e75134a3828ae0d2f54c67c6b7198f6dcf3b6fa73ea7696119e5a3b91f39b753"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-03/analysis-result.json",
+          "sha256": "411c7c6e9c28ba4a86379afceaaeaa25b1fffaec51f53b84aca8056be6185626"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-03/captured-contexts.json",
+          "sha256": "f5b509a5347f70c65cf23207ef19885a9b5314d22077a598af3b89d5190e0197"
+        }
+      },
+      "verifierDecisions": [
+        {
+          "decision": "deferred",
+          "reasonCode": "REVIEW_RELATION_UNRESOLVED",
+          "ruleId": "iris.review.missing_evidence.v1"
+        }
+      ]
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "ports-distinct-scopes",
+      "run": 3,
+      "wireReplyIndex": 1,
+      "entryType": "reviewFinding",
+      "entryIndex": 1,
+      "modelStatement": {
+        "category": "runtime_stage_mismatch",
+        "evidenceIds": [
+          "e-aad5ecff50992e4fd822",
+          "e-1cd9581197f48d81174c",
+          "e-658501af2013c924bb95"
+        ],
+        "reason": "The web workspace declares a vite production build (output dist), but the only container definition builds the root context with a Node runtime serving index.js and never builds or copies web/dist. The relationship between the web build output and the selected image is unverified."
+      },
+      "manualVerdict": "insufficient_category_support",
+      "explanation": "The absence of a declared web artifact consumer is real. Calling this runtime_stage_mismatch is stronger than the source supports: the selected image can intentionally run only the root Node service. The verifier rejected the category; the narrower missing-link advisory remains reasonable.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-03/captured-wire-replies.json",
+          "sha256": "447f280dd5a63171e954ba76137ef762a7f0c24a03960a8c310d1854f85cd859"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-03/verification-report.json",
+          "sha256": "e75134a3828ae0d2f54c67c6b7198f6dcf3b6fa73ea7696119e5a3b91f39b753"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-03/analysis-result.json",
+          "sha256": "411c7c6e9c28ba4a86379afceaaeaa25b1fffaec51f53b84aca8056be6185626"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-03/captured-contexts.json",
+          "sha256": "f5b509a5347f70c65cf23207ef19885a9b5314d22077a598af3b89d5190e0197"
+        }
+      },
+      "verifierDecisions": [
+        {
+          "decision": "rejected",
+          "reasonCode": "EVIDENCE_PREDICATE_MISMATCH",
+          "ruleId": "iris.review.runtime_stage_mismatch.v1"
+        }
+      ]
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "ports-distinct-scopes",
+      "run": 3,
+      "wireReplyIndex": 1,
+      "entryType": "question",
+      "entryIndex": 0,
+      "modelStatement": {
+        "key": "deployment.components",
+        "kind": "code_review",
+        "reason": "The compose service 'app' builds the shared root context containing both the root Express entrypoint and the web workspace; which component the Dockerfile intends to serve cannot be confirmed from the supplied steps."
+      },
+      "manualVerdict": "overbroad_abstention",
+      "explanation": "The selected Docker CMD explicitly names the root index.js entrypoint; claiming that the intended executable component cannot be determined is too broad. The legitimate uncertainty is whether web/dist should also be deployed. The question is deferred and does not add a canonical blocker.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-03/captured-wire-replies.json",
+          "sha256": "447f280dd5a63171e954ba76137ef762a7f0c24a03960a8c310d1854f85cd859"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-03/verification-report.json",
+          "sha256": "e75134a3828ae0d2f54c67c6b7198f6dcf3b6fa73ea7696119e5a3b91f39b753"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-03/analysis-result.json",
+          "sha256": "411c7c6e9c28ba4a86379afceaaeaa25b1fffaec51f53b84aca8056be6185626"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-03/captured-contexts.json",
+          "sha256": "f5b509a5347f70c65cf23207ef19885a9b5314d22077a598af3b89d5190e0197"
+        }
+      },
+      "verifierDecisions": [
+        {
+          "decision": "supported",
+          "reasonCode": "BASELINE_OBLIGATION_PRESERVED",
+          "ruleId": "iris.obligation.baseline.v1"
+        }
+      ]
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "same-scope-listener-expose",
+      "run": 1,
+      "wireReplyIndex": 0,
+      "entryType": "change",
+      "entryIndex": 0,
+      "modelStatement": {
+        "field": {
+          "evidenceIds": [
+            "e-a1a9b6c07426a5c372ce",
+            "e-b0bd7d7d42403fe5c02c",
+            "e-f2b14b1cf181035ebf31"
+          ],
+          "reason": "The selected container entrypoint CMD [\"node\", \"index.js\"] executes index.js, whose express app calls app.listen(3000). The listener in the executed entry file supports 3000 as the container port; EXPOSE 4000 is not confirmed by any listener in the selected execution path.",
+          "scope": "container",
+          "status": "suggested",
+          "value": 3000
+        },
+        "serviceId": "svc-96c49d08c231282a",
+        "target": "services.ports"
+      },
+      "manualVerdict": "valid_duplicate_source_claim",
+      "explanation": "The declared app.listen(3000) is real, but already present in the static baseline. EXPOSE 4000 and the baseline conflict remain in the final result; this is not a new model discovery or a runtime measurement.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/same-scope-listener-expose/run-01/captured-wire-replies.json",
+          "sha256": "e69bdc1ca2e458f317ed15cfb6712e4110f913aebfb9fc41e6db6461faedf701"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/same-scope-listener-expose/run-01/verification-report.json",
+          "sha256": "1b4fb4b66590739e9507763ef01a651a2dad297e03bb09227ba26ed116a9de29"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/same-scope-listener-expose/run-01/analysis-result.json",
+          "sha256": "ae0e9ded1cac1ae18e8e83e2cdf4b0f2b4947593e028967e90612e712589a5a2"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/same-scope-listener-expose/run-01/captured-contexts.json",
+          "sha256": "f010a6b8caac4fb772eb96afb30bd23ce12b62d1b527f2a825ffbf4a47054cbe"
+        }
+      },
+      "verifierDecisions": [
+        {
+          "decision": "supported",
+          "reasonCode": "SOURCE_RELATION_VERIFIED",
+          "ruleId": "iris.express.listener.v1"
+        }
+      ],
+      "atomicClaim": {
+        "target": "services.ports",
+        "component": ".",
+        "scope": "container",
+        "value": 3000,
+        "serviceId": "svc-96c49d08c231282a"
+      },
+      "novelAgainstInitialBaseline": false,
+      "presentInMergedResult": true
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "same-scope-listener-expose",
+      "run": 1,
+      "wireReplyIndex": 0,
+      "entryType": "reviewFinding",
+      "entryIndex": 0,
+      "modelStatement": {
+        "category": "source_conflict",
+        "evidenceIds": [
+          "e-a1a9b6c07426a5c372ce",
+          "e-a5a921e761c56452c05d",
+          "e-f2b14b1cf181035ebf31"
+        ],
+        "reason": "The Dockerfile EXPOSE 4000 conflicts with the listener app.listen(3000) in index.js. The selected CMD [\"node\", \"index.js\"] runs index.js in the same image, so both declarations belong to one execution path and the exposed port does not match the actual listener."
+      },
+      "manualVerdict": "supported_duplicate_finding",
+      "explanation": "Container EXPOSE 4000 and source listen(3000) differ for the selected CMD. The existing static blocker already expresses this; no AI novelty credit. Actual network execution remains untested.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/same-scope-listener-expose/run-01/captured-wire-replies.json",
+          "sha256": "e69bdc1ca2e458f317ed15cfb6712e4110f913aebfb9fc41e6db6461faedf701"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/same-scope-listener-expose/run-01/verification-report.json",
+          "sha256": "1b4fb4b66590739e9507763ef01a651a2dad297e03bb09227ba26ed116a9de29"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/same-scope-listener-expose/run-01/analysis-result.json",
+          "sha256": "ae0e9ded1cac1ae18e8e83e2cdf4b0f2b4947593e028967e90612e712589a5a2"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/same-scope-listener-expose/run-01/captured-contexts.json",
+          "sha256": "f010a6b8caac4fb772eb96afb30bd23ce12b62d1b527f2a825ffbf4a47054cbe"
+        }
+      },
+      "verifierDecisions": [
+        {
+          "decision": "rejected",
+          "reasonCode": "EVIDENCE_PREDICATE_MISMATCH",
+          "ruleId": "iris.review.source_conflict.v1"
+        }
+      ]
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "same-scope-listener-expose",
+      "run": 2,
+      "wireReplyIndex": 0,
+      "entryType": "change",
+      "entryIndex": 0,
+      "modelStatement": {
+        "field": {
+          "evidenceIds": [
+            "e-f2b14b1cf181035ebf31",
+            "e-a1a9b6c07426a5c372ce"
+          ],
+          "reason": "The selected execution path is CMD node index.js, and index.js calls app.listen(3000), so 3000 is the actual container listener. EXPOSE 4000 is not supported by any listener in this path; 3000 is suggested pending confirmation that no other listener or PORT override exists in the unshown parts of index.js.",
+          "scope": "container",
+          "status": "suggested",
+          "value": 3000
+        },
+        "serviceId": "svc-96c49d08c231282a",
+        "target": "services.ports"
+      },
+      "manualVerdict": "valid_duplicate_source_claim",
+      "explanation": "The declared app.listen(3000) is real, but already present in the static baseline. EXPOSE 4000 and the baseline conflict remain in the final result; this is not a new model discovery or a runtime measurement.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/same-scope-listener-expose/run-02/captured-wire-replies.json",
+          "sha256": "cf836ddcea4755676ba8c5958f6f8f657067b34320d6b2d01c0572b897c312ce"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/same-scope-listener-expose/run-02/verification-report.json",
+          "sha256": "568ffe04946ded70d5c692fa0fe161df32cc0830a53141b961ad6161de11891b"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/same-scope-listener-expose/run-02/analysis-result.json",
+          "sha256": "bf7a77d8ccfcd751f7704ce9817b4f288c5fe9262119dc7d9e3434f07896480c"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/same-scope-listener-expose/run-02/captured-contexts.json",
+          "sha256": "f010a6b8caac4fb772eb96afb30bd23ce12b62d1b527f2a825ffbf4a47054cbe"
+        }
+      },
+      "verifierDecisions": [
+        {
+          "decision": "deferred",
+          "reasonCode": "SEMANTIC_RULE_UNRESOLVED",
+          "ruleId": "iris.fact-match.v1"
+        }
+      ],
+      "atomicClaim": {
+        "target": "services.ports",
+        "component": ".",
+        "scope": "container",
+        "value": 3000,
+        "serviceId": "svc-96c49d08c231282a"
+      },
+      "novelAgainstInitialBaseline": false,
+      "presentInMergedResult": true
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "same-scope-listener-expose",
+      "run": 2,
+      "wireReplyIndex": 0,
+      "entryType": "reviewFinding",
+      "entryIndex": 0,
+      "modelStatement": {
+        "category": "source_conflict",
+        "evidenceIds": [
+          "e-f2b14b1cf181035ebf31",
+          "e-a1a9b6c07426a5c372ce",
+          "e-a5a921e761c56452c05d"
+        ],
+        "reason": "The Dockerfile CMD runs index.js, whose app.listen(3000) is the container listener, but the same image declares EXPOSE 4000. Both belong to the single selected execution path, so the EXPOSE value conflicts with the actual listener. No host mapping or PORT environment override is present to reconcile them."
+      },
+      "manualVerdict": "supported_duplicate_finding",
+      "explanation": "Container EXPOSE 4000 and source listen(3000) differ for the selected CMD. The existing static blocker already expresses this; no AI novelty credit. Actual network execution remains untested.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/same-scope-listener-expose/run-02/captured-wire-replies.json",
+          "sha256": "cf836ddcea4755676ba8c5958f6f8f657067b34320d6b2d01c0572b897c312ce"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/same-scope-listener-expose/run-02/verification-report.json",
+          "sha256": "568ffe04946ded70d5c692fa0fe161df32cc0830a53141b961ad6161de11891b"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/same-scope-listener-expose/run-02/analysis-result.json",
+          "sha256": "bf7a77d8ccfcd751f7704ce9817b4f288c5fe9262119dc7d9e3434f07896480c"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/same-scope-listener-expose/run-02/captured-contexts.json",
+          "sha256": "f010a6b8caac4fb772eb96afb30bd23ce12b62d1b527f2a825ffbf4a47054cbe"
+        }
+      },
+      "verifierDecisions": [
+        {
+          "decision": "rejected",
+          "reasonCode": "EVIDENCE_PREDICATE_MISMATCH",
+          "ruleId": "iris.review.source_conflict.v1"
+        }
+      ]
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "same-scope-listener-expose",
+      "run": 3,
+      "wireReplyIndex": 0,
+      "entryType": "change",
+      "entryIndex": 0,
+      "modelStatement": {
+        "field": {
+          "evidenceIds": [
+            "e-a1a9b6c07426a5c372ce",
+            "e-b0bd7d7d42403fe5c02c",
+            "e-f2b14b1cf181035ebf31"
+          ],
+          "reason": "The selected CMD (node index.js) runs index.js, whose express app calls app.listen(3000). The listener in the executed entrypoint is 3000; EXPOSE 4000 is a declaration, not a listener test. Suggested, not verified by runtime execution.",
+          "scope": "container",
+          "status": "suggested",
+          "value": 3000
+        },
+        "serviceId": "svc-96c49d08c231282a",
+        "target": "services.ports"
+      },
+      "manualVerdict": "valid_duplicate_source_claim",
+      "explanation": "The declared app.listen(3000) is real, but already present in the static baseline. EXPOSE 4000 and the baseline conflict remain in the final result; this is not a new model discovery or a runtime measurement.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/same-scope-listener-expose/run-03/captured-wire-replies.json",
+          "sha256": "ce50f12d386249cf12be1b9bde1d043a6b9a7beff7d20ffa2657e82dc81e6eb5"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/same-scope-listener-expose/run-03/verification-report.json",
+          "sha256": "e01740041d4fe26902bebdac87c7d2f0550b446476922fddf6f2135c671d12e1"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/same-scope-listener-expose/run-03/analysis-result.json",
+          "sha256": "ae0e9ded1cac1ae18e8e83e2cdf4b0f2b4947593e028967e90612e712589a5a2"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/same-scope-listener-expose/run-03/captured-contexts.json",
+          "sha256": "f010a6b8caac4fb772eb96afb30bd23ce12b62d1b527f2a825ffbf4a47054cbe"
+        }
+      },
+      "verifierDecisions": [
+        {
+          "decision": "supported",
+          "reasonCode": "SOURCE_RELATION_VERIFIED",
+          "ruleId": "iris.express.listener.v1"
+        }
+      ],
+      "atomicClaim": {
+        "target": "services.ports",
+        "component": ".",
+        "scope": "container",
+        "value": 3000,
+        "serviceId": "svc-96c49d08c231282a"
+      },
+      "novelAgainstInitialBaseline": false,
+      "presentInMergedResult": true
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "same-scope-listener-expose",
+      "run": 3,
+      "wireReplyIndex": 0,
+      "entryType": "reviewFinding",
+      "entryIndex": 0,
+      "modelStatement": {
+        "category": "source_conflict",
+        "evidenceIds": [
+          "e-f2b14b1cf181035ebf31",
+          "e-a1a9b6c07426a5c372ce",
+          "e-a5a921e761c56452c05d"
+        ],
+        "reason": "The selected execution path (CMD node index.js -> index.js -> app.listen(3000)) establishes listener port 3000, while the same image declares EXPOSE 4000. Both belong to the single Dockerfile execution path, so the container declaration and the actual listener disagree; which value external mapping should use needs review."
+      },
+      "manualVerdict": "supported_duplicate_finding",
+      "explanation": "Container EXPOSE 4000 and source listen(3000) differ for the selected CMD. The existing static blocker already expresses this; no AI novelty credit. Actual network execution remains untested.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/same-scope-listener-expose/run-03/captured-wire-replies.json",
+          "sha256": "ce50f12d386249cf12be1b9bde1d043a6b9a7beff7d20ffa2657e82dc81e6eb5"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/same-scope-listener-expose/run-03/verification-report.json",
+          "sha256": "e01740041d4fe26902bebdac87c7d2f0550b446476922fddf6f2135c671d12e1"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/same-scope-listener-expose/run-03/analysis-result.json",
+          "sha256": "ae0e9ded1cac1ae18e8e83e2cdf4b0f2b4947593e028967e90612e712589a5a2"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/same-scope-listener-expose/run-03/captured-contexts.json",
+          "sha256": "f010a6b8caac4fb772eb96afb30bd23ce12b62d1b527f2a825ffbf4a47054cbe"
+        }
+      },
+      "verifierDecisions": [
+        {
+          "decision": "rejected",
+          "reasonCode": "EVIDENCE_PREDICATE_MISMATCH",
+          "ruleId": "iris.review.source_conflict.v1"
+        }
+      ]
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "available-config-needs-files",
+      "run": 1,
+      "wireReplyIndex": 0,
+      "entryType": "fileRequest",
+      "entryIndex": 0,
+      "modelStatement": {
+        "kind": "needs_files",
+        "reason": "index.js calls app.listen(settings.port) (e-9b9be299c289ba10f5b7), so the listener port is bound to the settings module. release-settings.json is listed in availablePaths but its contents were not supplied; it is the minimal file needed to resolve the settings.port value and confirm the container port for svc-96c49d08c231282a instead of leaving it as an unresolved user question.",
+        "requestedPaths": [
+          "release-settings.json"
+        ]
+      },
+      "manualVerdict": "appropriate_but_incomplete_batch",
+      "explanation": "The JSON file is eligible and relevant. However, index.js is also only partly supplied, and its settings initializer is omitted. Requesting only the JSON consumes the single expansion budget and leaves the relationship unresolved.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/run-01/captured-wire-replies.json",
+          "sha256": "a94e7f5dbb3084ffbd8d02249680451f6f7ff7c18eeff9893d6ff3e4d38fa7df"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/run-01/verification-report.json",
+          "sha256": "c5cb29916a0ee3b77aa66a6fd8485e12a99069c98069142b04175bd27d1b0714"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/run-01/analysis-result.json",
+          "sha256": "1fac5dad1ef77959bad0dc78ee436c1099d753989b7009aa3eafbc6cea2b0d15"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/run-01/captured-contexts.json",
+          "sha256": "7bdd13131ed412a1cd74bd4b4fe5d240b265286e2e4218747f51b5cc08411e01"
+        }
+      },
+      "allRequestedPathsAllowed": true
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "available-config-needs-files",
+      "run": 1,
+      "wireReplyIndex": 1,
+      "entryType": "change",
+      "entryIndex": 0,
+      "modelStatement": {
+        "field": {
+          "evidenceIds": [
+            "e-9b9be299c289ba10f5b7",
+            "e-b9a7b5e65f8a54cb5baf"
+          ],
+          "reason": "index.js calls app.listen(settings.port), and release-settings.json contains {\"port\":3000}, but the supplied index.js ranges omit the import/binding of settings, so the link between the settings object and release-settings.json is unconfirmed. The port value cannot be suggested without that relationship.",
+          "scope": "source",
+          "status": "unknown",
+          "value": null
+        },
+        "serviceId": "svc-96c49d08c231282a",
+        "target": "services.ports"
+      },
+      "manualVerdict": "appropriate_bounded_abstention",
+      "explanation": "The delivered snippets omit the settings initializer at index.js:4. After requesting only release-settings.json, the model correctly declines to bind its port to the listener. The null value is not a factual proposal.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/run-01/captured-wire-replies.json",
+          "sha256": "a94e7f5dbb3084ffbd8d02249680451f6f7ff7c18eeff9893d6ff3e4d38fa7df"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/run-01/verification-report.json",
+          "sha256": "c5cb29916a0ee3b77aa66a6fd8485e12a99069c98069142b04175bd27d1b0714"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/run-01/analysis-result.json",
+          "sha256": "1fac5dad1ef77959bad0dc78ee436c1099d753989b7009aa3eafbc6cea2b0d15"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/run-01/captured-contexts.json",
+          "sha256": "7bdd13131ed412a1cd74bd4b4fe5d240b265286e2e4218747f51b5cc08411e01"
+        }
+      },
+      "verifierDecisions": [
+        {
+          "decision": "deferred",
+          "reasonCode": "UNVERIFIED_COLLECTION_OBLIGATION",
+          "ruleId": "iris.obligation.baseline.v1"
+        }
+      ]
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "available-config-needs-files",
+      "run": 1,
+      "wireReplyIndex": 1,
+      "entryType": "reviewFinding",
+      "entryIndex": 0,
+      "modelStatement": {
+        "category": "missing_evidence",
+        "evidenceIds": [
+          "e-9b9be299c289ba10f5b7",
+          "e-b9a7b5e65f8a54cb5baf"
+        ],
+        "reason": "app.listen(settings.port) in index.js cannot be tied to release-settings.json's {\"port\":3000} because the provided index.js ranges (lines 3 and 5 only) omit the settings import/require. The port relationship remains unverified."
+      },
+      "manualVerdict": "supported_bounded_advisory",
+      "explanation": "The available JSON value alone does not establish the settings variable binding because index.js:4 was not supplied. The issue is correctly scoped to supplied context.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/run-01/captured-wire-replies.json",
+          "sha256": "a94e7f5dbb3084ffbd8d02249680451f6f7ff7c18eeff9893d6ff3e4d38fa7df"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/run-01/verification-report.json",
+          "sha256": "c5cb29916a0ee3b77aa66a6fd8485e12a99069c98069142b04175bd27d1b0714"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/run-01/analysis-result.json",
+          "sha256": "1fac5dad1ef77959bad0dc78ee436c1099d753989b7009aa3eafbc6cea2b0d15"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/run-01/captured-contexts.json",
+          "sha256": "7bdd13131ed412a1cd74bd4b4fe5d240b265286e2e4218747f51b5cc08411e01"
+        }
+      },
+      "verifierDecisions": [
+        {
+          "decision": "rejected",
+          "reasonCode": "EVIDENCE_PREDICATE_MISMATCH",
+          "ruleId": "iris.review.missing_evidence.v1"
+        }
+      ]
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "available-config-needs-files",
+      "run": 1,
+      "wireReplyIndex": 1,
+      "entryType": "question",
+      "entryIndex": 0,
+      "modelStatement": {
+        "key": "svc-96c49d08c231282a.ports",
+        "kind": "user_configuration",
+        "reason": "The listener uses settings.port and release-settings.json declares 3000, but the settings import in index.js was not supplied and the expansion budget is exhausted, so the binding cannot be verified from source. Confirm the container port to use."
+      },
+      "manualVerdict": "premature_user_configuration_request",
+      "explanation": "The model exhausted its one expansion without requesting the missing entrypoint binding. Asking the user to confirm a port is a conservative fallback, but the fixture already contains the answer in source. A request for both index.js and release-settings.json would avoid this request.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/run-01/captured-wire-replies.json",
+          "sha256": "a94e7f5dbb3084ffbd8d02249680451f6f7ff7c18eeff9893d6ff3e4d38fa7df"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/run-01/verification-report.json",
+          "sha256": "c5cb29916a0ee3b77aa66a6fd8485e12a99069c98069142b04175bd27d1b0714"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/run-01/analysis-result.json",
+          "sha256": "1fac5dad1ef77959bad0dc78ee436c1099d753989b7009aa3eafbc6cea2b0d15"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/run-01/captured-contexts.json",
+          "sha256": "7bdd13131ed412a1cd74bd4b4fe5d240b265286e2e4218747f51b5cc08411e01"
+        }
+      },
+      "verifierDecisions": [
+        {
+          "decision": "supported",
+          "reasonCode": "BASELINE_OBLIGATION_PRESERVED",
+          "ruleId": "iris.obligation.baseline.v1"
+        }
+      ]
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "available-config-needs-files",
+      "run": 2,
+      "wireReplyIndex": 0,
+      "entryType": "fileRequest",
+      "entryIndex": 0,
+      "modelStatement": {
+        "kind": "needs_files",
+        "reason": "index.js calls app.listen(settings.port) (e-9b9be299c289ba10f5b7), so the listener port is bound to a settings object sourced from release-settings.json, which is listed in availablePaths but not supplied. Providing it would let the container port for svc-96c49d08c231282a be resolved from the actual declaration instead of a guessed value.",
+        "requestedPaths": [
+          "release-settings.json"
+        ]
+      },
+      "manualVerdict": "appropriate_but_incomplete_batch",
+      "explanation": "The JSON file is eligible and relevant. However, index.js is also only partly supplied, and its settings initializer is omitted. Requesting only the JSON consumes the single expansion budget and leaves the relationship unresolved.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/run-02/captured-wire-replies.json",
+          "sha256": "7ea16169625779aa59b629af8bd57c8789ff344809f60ab8a48f384aba860ca8"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/run-02/verification-report.json",
+          "sha256": "3a707a8328af15962550cbbee8604a74f160b2dfb2c2abfd402a1d46a954c1c9"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/run-02/analysis-result.json",
+          "sha256": "1fac5dad1ef77959bad0dc78ee436c1099d753989b7009aa3eafbc6cea2b0d15"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/run-02/captured-contexts.json",
+          "sha256": "7bdd13131ed412a1cd74bd4b4fe5d240b265286e2e4218747f51b5cc08411e01"
+        }
+      },
+      "allRequestedPathsAllowed": true
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "available-config-needs-files",
+      "run": 2,
+      "wireReplyIndex": 1,
+      "entryType": "change",
+      "entryIndex": 0,
+      "modelStatement": {
+        "field": {
+          "evidenceIds": [
+            "e-9b9be299c289ba10f5b7",
+            "e-b9a7b5e65f8a54cb5baf"
+          ],
+          "reason": "app.listen(settings.port) shows the listener binds to a settings object, and release-settings.json contains {\"port\":3000}, but the supplied index.js ranges omit the import/loading of settings, so the binding between the settings identifier and release-settings.json is not evidenced. The value stays unknown rather than guessing 3000.",
+          "scope": "source",
+          "status": "unknown",
+          "value": null
+        },
+        "serviceId": "svc-96c49d08c231282a",
+        "target": "services.ports"
+      },
+      "manualVerdict": "appropriate_bounded_abstention",
+      "explanation": "The delivered snippets omit the settings initializer at index.js:4. After requesting only release-settings.json, the model correctly declines to bind its port to the listener. The null value is not a factual proposal.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/run-02/captured-wire-replies.json",
+          "sha256": "7ea16169625779aa59b629af8bd57c8789ff344809f60ab8a48f384aba860ca8"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/run-02/verification-report.json",
+          "sha256": "3a707a8328af15962550cbbee8604a74f160b2dfb2c2abfd402a1d46a954c1c9"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/run-02/analysis-result.json",
+          "sha256": "1fac5dad1ef77959bad0dc78ee436c1099d753989b7009aa3eafbc6cea2b0d15"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/run-02/captured-contexts.json",
+          "sha256": "7bdd13131ed412a1cd74bd4b4fe5d240b265286e2e4218747f51b5cc08411e01"
+        }
+      },
+      "verifierDecisions": [
+        {
+          "decision": "deferred",
+          "reasonCode": "UNVERIFIED_COLLECTION_OBLIGATION",
+          "ruleId": "iris.obligation.baseline.v1"
+        }
+      ]
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "available-config-needs-files",
+      "run": 2,
+      "wireReplyIndex": 1,
+      "entryType": "reviewFinding",
+      "entryIndex": 0,
+      "modelStatement": {
+        "category": "missing_evidence",
+        "evidenceIds": [
+          "e-9b9be299c289ba10f5b7",
+          "e-b9a7b5e65f8a54cb5baf"
+        ],
+        "reason": "The listener call app.listen(settings.port) cannot be traced to a concrete configuration key: the supplied index.js ranges (lines 3 and 5 only) omit the settings import/initialization, so the link from settings.port to release-settings.json's {\"port\":3000} is unverified. The container/source port therefore remains unresolved."
+      },
+      "manualVerdict": "supported_bounded_advisory",
+      "explanation": "The available JSON value alone does not establish the settings variable binding because index.js:4 was not supplied. The issue is correctly scoped to supplied context.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/run-02/captured-wire-replies.json",
+          "sha256": "7ea16169625779aa59b629af8bd57c8789ff344809f60ab8a48f384aba860ca8"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/run-02/verification-report.json",
+          "sha256": "3a707a8328af15962550cbbee8604a74f160b2dfb2c2abfd402a1d46a954c1c9"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/run-02/analysis-result.json",
+          "sha256": "1fac5dad1ef77959bad0dc78ee436c1099d753989b7009aa3eafbc6cea2b0d15"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/run-02/captured-contexts.json",
+          "sha256": "7bdd13131ed412a1cd74bd4b4fe5d240b265286e2e4218747f51b5cc08411e01"
+        }
+      },
+      "verifierDecisions": [
+        {
+          "decision": "rejected",
+          "reasonCode": "EVIDENCE_PREDICATE_MISMATCH",
+          "ruleId": "iris.review.missing_evidence.v1"
+        }
+      ]
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "available-config-needs-files",
+      "run": 3,
+      "wireReplyIndex": 0,
+      "entryType": "fileRequest",
+      "entryIndex": 0,
+      "modelStatement": {
+        "kind": "needs_files",
+        "reason": "index.js line 5 calls app.listen(settings.port) (e-9b9be299c289ba10f5b7), so the listener port is bound to the settings import. release-settings.json is listed in availablePaths but its contents were not supplied; providing it would let the port value be traced from the settings declaration to the express listener and resolve the open svc-96c49d08c231282a.ports question from source instead of user configuration.",
+        "requestedPaths": [
+          "release-settings.json"
+        ]
+      },
+      "manualVerdict": "appropriate_but_incomplete_batch",
+      "explanation": "The JSON file is eligible and relevant. However, index.js is also only partly supplied, and its settings initializer is omitted. Requesting only the JSON consumes the single expansion budget and leaves the relationship unresolved.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/run-03/captured-wire-replies.json",
+          "sha256": "dcc1993adefaf33ef6f231515338ebf669deedd1a735d20f67eb4eeade9e2fdc"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/run-03/verification-report.json",
+          "sha256": "2adbe6948176e251a060e0d797c66b36cd7f89615c92605b8c7437e494831dff"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/run-03/analysis-result.json",
+          "sha256": "1fac5dad1ef77959bad0dc78ee436c1099d753989b7009aa3eafbc6cea2b0d15"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/run-03/captured-contexts.json",
+          "sha256": "7bdd13131ed412a1cd74bd4b4fe5d240b265286e2e4218747f51b5cc08411e01"
+        }
+      },
+      "allRequestedPathsAllowed": true
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "available-config-needs-files",
+      "run": 3,
+      "wireReplyIndex": 1,
+      "entryType": "reviewFinding",
+      "entryIndex": 0,
+      "modelStatement": {
+        "category": "missing_evidence",
+        "evidenceIds": [
+          "e-9b9be299c289ba10f5b7",
+          "e-b9a7b5e65f8a54cb5baf"
+        ],
+        "reason": "app.listen(settings.port) references a settings object whose declaration is not in the supplied index.js ranges (lines 1-2 omitted). release-settings.json declares port 3000, but no evidence links settings to that file, so the port value cannot be attributed to the selected execution path."
+      },
+      "manualVerdict": "supported_with_locator_caveat",
+      "explanation": "The binding is genuinely missing from the model view, but the prose mentions omitted lines 1-2 instead of identifying the decisive initializer at index.js:4. Full fixture source establishes the binding; this is context insufficiency, not absence from the repository.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/run-03/captured-wire-replies.json",
+          "sha256": "dcc1993adefaf33ef6f231515338ebf669deedd1a735d20f67eb4eeade9e2fdc"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/run-03/verification-report.json",
+          "sha256": "2adbe6948176e251a060e0d797c66b36cd7f89615c92605b8c7437e494831dff"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/run-03/analysis-result.json",
+          "sha256": "1fac5dad1ef77959bad0dc78ee436c1099d753989b7009aa3eafbc6cea2b0d15"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/run-03/captured-contexts.json",
+          "sha256": "7bdd13131ed412a1cd74bd4b4fe5d240b265286e2e4218747f51b5cc08411e01"
+        }
+      },
+      "verifierDecisions": [
+        {
+          "decision": "rejected",
+          "reasonCode": "EVIDENCE_PREDICATE_MISMATCH",
+          "ruleId": "iris.review.missing_evidence.v1"
+        }
+      ]
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "available-config-needs-files",
+      "run": 3,
+      "wireReplyIndex": 1,
+      "entryType": "question",
+      "entryIndex": 0,
+      "modelStatement": {
+        "key": "svc-96c49d08c231282a.ports",
+        "kind": "code_review",
+        "reason": "index.js line 5 reads settings.port, but the supplied ranges omit the import/require that binds settings to release-settings.json (port 3000). The listener-to-config relationship cannot be completed from the provided evidence, so the container/source port cannot be confirmed or suggested."
+      },
+      "manualVerdict": "appropriate_bounded_abstention",
+      "explanation": "A code-review question accurately states that the supplied ranges do not show the settings-to-file binding. It does not invent 3000; context recovery remains preferable to a permanent manual question.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/run-03/captured-wire-replies.json",
+          "sha256": "dcc1993adefaf33ef6f231515338ebf669deedd1a735d20f67eb4eeade9e2fdc"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/run-03/verification-report.json",
+          "sha256": "2adbe6948176e251a060e0d797c66b36cd7f89615c92605b8c7437e494831dff"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/run-03/analysis-result.json",
+          "sha256": "1fac5dad1ef77959bad0dc78ee436c1099d753989b7009aa3eafbc6cea2b0d15"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/run-03/captured-contexts.json",
+          "sha256": "7bdd13131ed412a1cd74bd4b4fe5d240b265286e2e4218747f51b5cc08411e01"
+        }
+      },
+      "verifierDecisions": [
+        {
+          "decision": "deferred",
+          "reasonCode": "REVIEW_RELATION_UNRESOLVED",
+          "ruleId": "iris.obligation.baseline.v1"
+        }
+      ]
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "runtime-input-absent",
+      "run": 1,
+      "wireReplyIndex": 0,
+      "entryType": "fileRequest",
+      "entryIndex": 0,
+      "modelStatement": {
+        "kind": "needs_files",
+        "reason": "index.js is supplied only at lines 2-3 (express app creation and app.listen). The full 97-byte file is an expandableSelectedPath; the missing lines are needed to verify whether any routes are registered on the express receiver (e-af7678f8f6e1546934de) before concluding apiRoutes is empty for service svc-96c49d08c231282a.",
+        "requestedPaths": [
+          "index.js"
+        ]
+      },
+      "manualVerdict": "appropriate_bounded_context_request",
+      "explanation": "The path is eligible and partly supplied. Expanding it can establish the import/receiver, route expression, connection use or lexical binding. A path absent from reviewed expectedFileRequests is not automatically wrong or unnecessary. Rationale claims about exact omitted line numbers are advisory, not new source facts.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/runtime-input-absent/run-01/captured-wire-replies.json",
+          "sha256": "c7ed966306c66fd91b5822c91daad76d5a4d8f53e65c40051a253415b584d86d"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/runtime-input-absent/run-01/verification-report.json",
+          "sha256": "72904a2b628842e636b9b5b17ece44be2c39dee9a82a12d9175f37173e07aaef"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/runtime-input-absent/run-01/analysis-result.json",
+          "sha256": "eda9795f8e8d2bc74d49ea80406c22258fa5ece30aa33aab91bcf582ee0265b5"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/runtime-input-absent/run-01/captured-contexts.json",
+          "sha256": "1ff5cbd75d6722a686393cd8ad05353fbebd36804dbe5ba727ffd1d40ff38cae"
+        }
+      },
+      "allRequestedPathsAllowed": true
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "runtime-input-absent",
+      "run": 1,
+      "wireReplyIndex": 1,
+      "entryType": "reviewFinding",
+      "entryIndex": 0,
+      "modelStatement": {
+        "category": "missing_evidence",
+        "evidenceIds": [
+          "e-e464eb50549a7484a7e2"
+        ],
+        "reason": "API_TOKEN appears only in .env.example with no consumer in the supplied index.js or package.json. Its runtime phase, requiredness, and consuming code path cannot be established from available evidence; it remains an example-only declaration, not a confirmed runtime requirement."
+      },
+      "manualVerdict": "supported_bounded_advisory",
+      "explanation": "API_TOKEN is an example-only key with no consumer in the provided fixture. Its existence cannot establish requiredness or runtime ownership.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/runtime-input-absent/run-01/captured-wire-replies.json",
+          "sha256": "c7ed966306c66fd91b5822c91daad76d5a4d8f53e65c40051a253415b584d86d"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/runtime-input-absent/run-01/verification-report.json",
+          "sha256": "72904a2b628842e636b9b5b17ece44be2c39dee9a82a12d9175f37173e07aaef"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/runtime-input-absent/run-01/analysis-result.json",
+          "sha256": "eda9795f8e8d2bc74d49ea80406c22258fa5ece30aa33aab91bcf582ee0265b5"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/runtime-input-absent/run-01/captured-contexts.json",
+          "sha256": "1ff5cbd75d6722a686393cd8ad05353fbebd36804dbe5ba727ffd1d40ff38cae"
+        }
+      },
+      "verifierDecisions": [
+        {
+          "decision": "rejected",
+          "reasonCode": "EVIDENCE_PREDICATE_MISMATCH",
+          "ruleId": "iris.review.missing_evidence.v1"
+        }
+      ]
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "runtime-input-absent",
+      "run": 1,
+      "wireReplyIndex": 1,
+      "entryType": "question",
+      "entryIndex": 0,
+      "modelStatement": {
+        "key": "svc-96c49d08c231282a.ports",
+        "kind": "user_configuration",
+        "reason": "index.js listens on Number(process.env.PORT) (e-5a006a5762fe9e5c4d20) and .env.example declares PORT (e-fa68b08b868d63332873), but the actual value is masked and no container/host mapping exists. The external port binding must be supplied as a configuration choice; it cannot be inferred from source."
+      },
+      "manualVerdict": "supported_with_wording_caveat",
+      "explanation": "The external numeric PORT binding is genuinely absent and should be supplied as configuration. However, actual value is masked overstates the evidence: the source is an empty .env.example entry, not an observed deployment value.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/runtime-input-absent/run-01/captured-wire-replies.json",
+          "sha256": "c7ed966306c66fd91b5822c91daad76d5a4d8f53e65c40051a253415b584d86d"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/runtime-input-absent/run-01/verification-report.json",
+          "sha256": "72904a2b628842e636b9b5b17ece44be2c39dee9a82a12d9175f37173e07aaef"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/runtime-input-absent/run-01/analysis-result.json",
+          "sha256": "eda9795f8e8d2bc74d49ea80406c22258fa5ece30aa33aab91bcf582ee0265b5"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/runtime-input-absent/run-01/captured-contexts.json",
+          "sha256": "1ff5cbd75d6722a686393cd8ad05353fbebd36804dbe5ba727ffd1d40ff38cae"
+        }
+      },
+      "verifierDecisions": [
+        {
+          "decision": "supported",
+          "reasonCode": "BASELINE_OBLIGATION_PRESERVED",
+          "ruleId": "iris.obligation.baseline.v1"
+        }
+      ]
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "runtime-input-absent",
+      "run": 2,
+      "wireReplyIndex": 0,
+      "entryType": "fileRequest",
+      "entryIndex": 0,
+      "modelStatement": {
+        "kind": "needs_files",
+        "reason": "index.js is supplied only at lines 2-3 (express app creation and app.listen). The file is 97 bytes, so unprovided ranges may contain route registrations (e.g., app.get) or additional configuration needed to verify apiRoutes and the selected execution path. The manifest confirms the file is eligible and the bundle permits expansion.",
+        "requestedPaths": [
+          "index.js"
+        ]
+      },
+      "manualVerdict": "appropriate_bounded_context_request",
+      "explanation": "The path is eligible and partly supplied. Expanding it can establish the import/receiver, route expression, connection use or lexical binding. A path absent from reviewed expectedFileRequests is not automatically wrong or unnecessary. Rationale claims about exact omitted line numbers are advisory, not new source facts.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/runtime-input-absent/run-02/captured-wire-replies.json",
+          "sha256": "70e3860120d7dd443e4f061fc2701f53bc0d7bdf3de0136735dcabda67b1a332"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/runtime-input-absent/run-02/verification-report.json",
+          "sha256": "5ad711b77cc580a2ee778228724c6d2d66c8b7f869e18114c16285a73598fa3c"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/runtime-input-absent/run-02/analysis-result.json",
+          "sha256": "eda9795f8e8d2bc74d49ea80406c22258fa5ece30aa33aab91bcf582ee0265b5"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/runtime-input-absent/run-02/captured-contexts.json",
+          "sha256": "1ff5cbd75d6722a686393cd8ad05353fbebd36804dbe5ba727ffd1d40ff38cae"
+        }
+      },
+      "allRequestedPathsAllowed": true
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "runtime-input-absent",
+      "run": 3,
+      "wireReplyIndex": 0,
+      "entryType": "fileRequest",
+      "entryIndex": 0,
+      "modelStatement": {
+        "kind": "needs_files",
+        "reason": "index.js was supplied only at lines 2-3 (express app creation and app.listen with process.env.PORT). The environment key API_TOKEN (e-e464eb50549a7484a7e2, .env.example) has no traced consumer: its phase and required guard are unknown, and no code in the supplied ranges reads it. The full index.js is an expandableSelectedPaths source file and is the minimum path needed to verify whether API_TOKEN is consumed at runtime or is an unused example key, and to confirm no additional listeners or route registrations exist beyond the observed app.listen.",
+        "requestedPaths": [
+          "index.js"
+        ]
+      },
+      "manualVerdict": "appropriate_bounded_context_request",
+      "explanation": "The path is eligible and partly supplied. Expanding it can establish the import/receiver, route expression, connection use or lexical binding. A path absent from reviewed expectedFileRequests is not automatically wrong or unnecessary. Rationale claims about exact omitted line numbers are advisory, not new source facts.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/runtime-input-absent/run-03/captured-wire-replies.json",
+          "sha256": "a09d7ca3e3a230faba6bb924d3b340adbf7e7040deafa84df3501c9182624329"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/runtime-input-absent/run-03/verification-report.json",
+          "sha256": "5ad711b77cc580a2ee778228724c6d2d66c8b7f869e18114c16285a73598fa3c"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/runtime-input-absent/run-03/analysis-result.json",
+          "sha256": "eda9795f8e8d2bc74d49ea80406c22258fa5ece30aa33aab91bcf582ee0265b5"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/runtime-input-absent/run-03/captured-contexts.json",
+          "sha256": "1ff5cbd75d6722a686393cd8ad05353fbebd36804dbe5ba727ffd1d40ff38cae"
+        }
+      },
+      "allRequestedPathsAllowed": true
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "node-build-nginx-runtime",
+      "run": 3,
+      "wireReplyIndex": 0,
+      "entryType": "reviewFinding",
+      "entryIndex": 0,
+      "modelStatement": {
+        "category": "source_conflict",
+        "evidenceIds": [
+          "e-2e7bfe891d7e7b1c94b2",
+          "e-f174de8f5c3aff3e0db6",
+          "e-ff8e22540161f39aa44d"
+        ],
+        "reason": "The selected build path runs 'npm ci' in the Docker build stage, but the provided package-lock.json is an empty object ({}), which does not pin vite or any dependency declared in package.json. npm ci requires a lockfile in sync with the manifest, so the install step may fail at build time. This is a static consistency observation; no build execution was performed."
+      },
+      "manualVerdict": "supported_bounded_advisory",
+      "explanation": "The model identifies a separate lockfile hazard: Dockerfile runs npm ci, package.json declares vite, package-lock.json is {}. npm documents that ci requires matching lock metadata. The model says may fail and explicitly does not claim an executed build failure. Current source_conflict rules reject this useful advisory because this relation is not implemented.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/node-build-nginx-runtime/run-03/captured-wire-replies.json",
+          "sha256": "1c560fd50626ad40f07f7394a69d9647cd027c42330a69450efdd7deaf27d657"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/node-build-nginx-runtime/run-03/verification-report.json",
+          "sha256": "e0d1c537e4dad25edafc69cdb73ee56b3fef9244b0ab4c1dc9cdb9e1b6e7e112"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/node-build-nginx-runtime/run-03/analysis-result.json",
+          "sha256": "b2bbbc6f8d80d86f0b54b88bc19182df5043a3613486256bbb8a10478d13b9bd"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/node-build-nginx-runtime/run-03/captured-contexts.json",
+          "sha256": "0438009ddc274e53284c817760de1915eeb98bad73ce2f3e120621cbf12f3eb2"
+        }
+      },
+      "verifierDecisions": [
+        {
+          "decision": "rejected",
+          "reasonCode": "EVIDENCE_PREDICATE_MISMATCH",
+          "ruleId": "iris.review.source_conflict.v1"
+        }
+      ]
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "db-import-not-connection",
+      "run": 1,
+      "wireReplyIndex": 0,
+      "entryType": "fileRequest",
+      "entryIndex": 0,
+      "modelStatement": {
+        "kind": "needs_files",
+        "reason": "package.json declares the pg dependency (e-57ba135becdc85b7a8a6) but no connection, configuration key, or route is traced; index.js is expandable with reason incomplete_supplied_ranges (only lines 3-4 supplied). The remaining lines are needed to verify whether a pg client/connect call binds to a configuration target and whether any express routes are registered on the app created at line 3.",
+        "requestedPaths": [
+          "index.js"
+        ]
+      },
+      "manualVerdict": "appropriate_bounded_context_request",
+      "explanation": "The path is eligible and partly supplied. Expanding it can establish the import/receiver, route expression, connection use or lexical binding. A path absent from reviewed expectedFileRequests is not automatically wrong or unnecessary. Rationale claims about exact omitted line numbers are advisory, not new source facts.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/db-import-not-connection/run-01/captured-wire-replies.json",
+          "sha256": "ab511c5953e21caf57b963eb3470c01530423bdc1fc20b6e162d9d0c1a9aa5a3"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/db-import-not-connection/run-01/verification-report.json",
+          "sha256": "a8fbafc95215c65a7a6875f96c1d6e0bbe0ff46a768da17fb257e850f09a5ee8"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/db-import-not-connection/run-01/analysis-result.json",
+          "sha256": "89c544673ff1aff0375d698d2f1311162ccd0fe88602a8a424cb75e6153a44b9"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/db-import-not-connection/run-01/captured-contexts.json",
+          "sha256": "5d6a7b693683d31e36994cb9a486c852c43b9ed4b36137b4fb6092c108038caa"
+        }
+      },
+      "allRequestedPathsAllowed": true
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "db-import-not-connection",
+      "run": 3,
+      "wireReplyIndex": 0,
+      "entryType": "fileRequest",
+      "entryIndex": 0,
+      "modelStatement": {
+        "kind": "needs_files",
+        "reason": "package.json declares a pg (postgresql) dependency, but the supplied index.js ranges (lines 3-4 only) show only express app creation and app.listen(3000). The full index.js is an expandableSelectedPath with reason incomplete_supplied_ranges. Expanding it is the minimum needed to verify whether pg is actually used (client/connect call and configuration key) or is an unused declaration, and to check for route registrations between app creation and listen.",
+        "requestedPaths": [
+          "index.js"
+        ]
+      },
+      "manualVerdict": "appropriate_bounded_context_request",
+      "explanation": "The path is eligible and partly supplied. Expanding it can establish the import/receiver, route expression, connection use or lexical binding. A path absent from reviewed expectedFileRequests is not automatically wrong or unnecessary. Rationale claims about exact omitted line numbers are advisory, not new source facts.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/db-import-not-connection/run-03/captured-wire-replies.json",
+          "sha256": "728bef97237c491a7b5488a67c0a46f62dac21540a9781f071a459a187bad1ee"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/db-import-not-connection/run-03/verification-report.json",
+          "sha256": "133d3c7dfa4368a7b3f7820394e07e5a5037cd8e092b05ef4ae408f6a5df1868"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/db-import-not-connection/run-03/analysis-result.json",
+          "sha256": "89c544673ff1aff0375d698d2f1311162ccd0fe88602a8a424cb75e6153a44b9"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/db-import-not-connection/run-03/captured-contexts.json",
+          "sha256": "5d6a7b693683d31e36994cb9a486c852c43b9ed4b36137b4fb6092c108038caa"
+        }
+      },
+      "allRequestedPathsAllowed": true
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "db-import-not-connection",
+      "run": 3,
+      "wireReplyIndex": 1,
+      "entryType": "reviewFinding",
+      "entryIndex": 0,
+      "modelStatement": {
+        "category": "missing_evidence",
+        "evidenceIds": [
+          "e-57ba135becdc85b7a8a6",
+          "e-b5e063d6bbf9aaffa240"
+        ],
+        "reason": "The pg dependency declaration and require('pg') establish only a declaration; no Pool instantiation, connection string reference, or environment key appears in the provided index.js range, so the dependency.database fact cannot be linked to an actual connection target."
+      },
+      "manualVerdict": "supported_bounded_advisory",
+      "explanation": "pg dependency and Pool import are present, while the complete fixture contains no Pool constructor, connect call, endpoint or binding. Narrow dependency presence remains valid; database deployment/connectivity is unestablished.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/db-import-not-connection/run-03/captured-wire-replies.json",
+          "sha256": "728bef97237c491a7b5488a67c0a46f62dac21540a9781f071a459a187bad1ee"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/db-import-not-connection/run-03/verification-report.json",
+          "sha256": "133d3c7dfa4368a7b3f7820394e07e5a5037cd8e092b05ef4ae408f6a5df1868"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/db-import-not-connection/run-03/analysis-result.json",
+          "sha256": "89c544673ff1aff0375d698d2f1311162ccd0fe88602a8a424cb75e6153a44b9"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/db-import-not-connection/run-03/captured-contexts.json",
+          "sha256": "5d6a7b693683d31e36994cb9a486c852c43b9ed4b36137b4fb6092c108038caa"
+        }
+      },
+      "verifierDecisions": [
+        {
+          "decision": "rejected",
+          "reasonCode": "EVIDENCE_PREDICATE_MISMATCH",
+          "ruleId": "iris.review.missing_evidence.v1"
+        }
+      ]
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "db-import-not-connection",
+      "run": 3,
+      "wireReplyIndex": 1,
+      "entryType": "question",
+      "entryIndex": 0,
+      "modelStatement": {
+        "key": "database.connection",
+        "kind": "code_review",
+        "reason": "package.json declares pg 8.13.0 and index.js requires Pool, but the provided source shows no Pool instantiation, connection config key, or connect call. Whether a database connection is actually required at runtime, and its target host/port/database, cannot be determined from the supplied evidence."
+      },
+      "manualVerdict": "appropriate_bounded_abstention",
+      "explanation": "Package/import presence does not establish a live or required DB connection, host or credentials. The question requests relationship review rather than secret values.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/db-import-not-connection/run-03/captured-wire-replies.json",
+          "sha256": "728bef97237c491a7b5488a67c0a46f62dac21540a9781f071a459a187bad1ee"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/db-import-not-connection/run-03/verification-report.json",
+          "sha256": "133d3c7dfa4368a7b3f7820394e07e5a5037cd8e092b05ef4ae408f6a5df1868"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/db-import-not-connection/run-03/analysis-result.json",
+          "sha256": "89c544673ff1aff0375d698d2f1311162ccd0fe88602a8a424cb75e6153a44b9"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/db-import-not-connection/run-03/captured-contexts.json",
+          "sha256": "5d6a7b693683d31e36994cb9a486c852c43b9ed4b36137b4fb6092c108038caa"
+        }
+      },
+      "verifierDecisions": [
+        {
+          "decision": "deferred",
+          "reasonCode": "REVIEW_RELATION_UNRESOLVED",
+          "ruleId": "iris.obligation.baseline.v1"
+        }
+      ]
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "literal-expression-new-route",
+      "run": 1,
+      "wireReplyIndex": 0,
+      "entryType": "fileRequest",
+      "entryIndex": 0,
+      "modelStatement": {
+        "kind": "needs_files",
+        "reason": "The unresolved Express route uses the variable healthPath (e-f46a79dbaa91b36ad598), but its constant declaration is outside the supplied ranges of index.js (only lines 2, 4, 5 provided). index.js is listed in expandableSelectedPaths as incomplete_supplied_ranges; expanding it should reveal the healthPath declaration needed to resolve the route path and complete the apiRoutes review.",
+        "requestedPaths": [
+          "index.js"
+        ]
+      },
+      "manualVerdict": "appropriate_bounded_context_request",
+      "explanation": "The path is eligible and partly supplied. Expanding it can establish the import/receiver, route expression, connection use or lexical binding. A path absent from reviewed expectedFileRequests is not automatically wrong or unnecessary. Rationale claims about exact omitted line numbers are advisory, not new source facts.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/literal-expression-new-route/run-01/captured-wire-replies.json",
+          "sha256": "f3e2c92a618a2b1f962ab70f657c6e72333ba4591ae6334bfce60cfd49423c0b"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/literal-expression-new-route/run-01/verification-report.json",
+          "sha256": "437e8555b13ea366c586859b022171d1d17b4ccdac5694287f322f9bc41fb064"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/literal-expression-new-route/run-01/analysis-result.json",
+          "sha256": "b31bd4937a3e75faa7d52e497c359ca7717e970ee76f966b8789ac7320f4c5ff"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/literal-expression-new-route/run-01/captured-contexts.json",
+          "sha256": "8c43af4166958ab032d9ff7adb550bf7ad6e454ad6279bf325711e53b1a1c53c"
+        }
+      },
+      "allRequestedPathsAllowed": true
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "literal-expression-new-route",
+      "run": 1,
+      "wireReplyIndex": 1,
+      "entryType": "change",
+      "entryIndex": 0,
+      "modelStatement": {
+        "field": {
+          "evidenceIds": [
+            "e-36efb31d3e7f13872218",
+            "e-3efac1540cdb98f2b49d",
+            "e-f46a79dbaa91b36ad598"
+          ],
+          "reason": "healthPath is an immutable concatenation '/health/' + 'ready' resolving to /health/ready, registered via app.get on the express app created in the same file. Runtime success of the handler is not confirmed.",
+          "scope": "source",
+          "status": "suggested",
+          "value": {
+            "component": ".",
+            "method": "GET",
+            "path": "/health/ready"
+          }
+        },
+        "serviceId": null,
+        "target": "apiRoutes"
+      },
+      "manualVerdict": "valid_novel_source_claim",
+      "explanation": "The immutable literal concatenation reaches the direct Express route registration in this fixture. Source scope and component are correct; runtime success/readiness is not claimed.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/literal-expression-new-route/run-01/captured-wire-replies.json",
+          "sha256": "f3e2c92a618a2b1f962ab70f657c6e72333ba4591ae6334bfce60cfd49423c0b"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/literal-expression-new-route/run-01/verification-report.json",
+          "sha256": "437e8555b13ea366c586859b022171d1d17b4ccdac5694287f322f9bc41fb064"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/literal-expression-new-route/run-01/analysis-result.json",
+          "sha256": "b31bd4937a3e75faa7d52e497c359ca7717e970ee76f966b8789ac7320f4c5ff"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/literal-expression-new-route/run-01/captured-contexts.json",
+          "sha256": "8c43af4166958ab032d9ff7adb550bf7ad6e454ad6279bf325711e53b1a1c53c"
+        }
+      },
+      "verifierDecisions": [
+        {
+          "decision": "supported",
+          "reasonCode": "SOURCE_RELATION_VERIFIED",
+          "ruleId": "iris.express.const-route.v1"
+        }
+      ],
+      "atomicClaim": {
+        "target": "apiRoutes",
+        "component": ".",
+        "scope": "source",
+        "value": {
+          "method": "GET",
+          "path": "/health/ready"
+        }
+      },
+      "novelAgainstInitialBaseline": true,
+      "presentInMergedResult": true
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "literal-expression-new-route",
+      "run": 2,
+      "wireReplyIndex": 0,
+      "entryType": "fileRequest",
+      "entryIndex": 0,
+      "modelStatement": {
+        "kind": "needs_files",
+        "reason": "The unresolved Express route runtime.httpRoutes depends on the healthPath variable declared in index.js, which was not included in the supplied ranges (lines 1, 3, 6+ omitted). Expanding index.js should reveal the healthPath constant declaration, allowing the route path to be resolved and a suggested apiRoutes entry to be proposed for service svc-96c49d08c231282a.",
+        "requestedPaths": [
+          "index.js"
+        ]
+      },
+      "manualVerdict": "appropriate_bounded_context_request",
+      "explanation": "The path is eligible and partly supplied. Expanding it can establish the import/receiver, route expression, connection use or lexical binding. A path absent from reviewed expectedFileRequests is not automatically wrong or unnecessary. Rationale claims about exact omitted line numbers are advisory, not new source facts.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/literal-expression-new-route/run-02/captured-wire-replies.json",
+          "sha256": "1423ceaafc5d7df9d33282d9a083adf406398329303588af0a99642dd8de4de3"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/literal-expression-new-route/run-02/verification-report.json",
+          "sha256": "102cce5f2338f2c8a17e52f63940b20e25d2cfe5fae9ec75b055c44bd27ccd56"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/literal-expression-new-route/run-02/analysis-result.json",
+          "sha256": "b31bd4937a3e75faa7d52e497c359ca7717e970ee76f966b8789ac7320f4c5ff"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/literal-expression-new-route/run-02/captured-contexts.json",
+          "sha256": "8c43af4166958ab032d9ff7adb550bf7ad6e454ad6279bf325711e53b1a1c53c"
+        }
+      },
+      "allRequestedPathsAllowed": true
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "literal-expression-new-route",
+      "run": 2,
+      "wireReplyIndex": 1,
+      "entryType": "change",
+      "entryIndex": 0,
+      "modelStatement": {
+        "field": {
+          "evidenceIds": [
+            "e-36efb31d3e7f13872218",
+            "e-3efac1540cdb98f2b49d",
+            "e-f46a79dbaa91b36ad598"
+          ],
+          "reason": "healthPath is a constant concatenation '/health/' + 'ready' resolving immutably to /health/ready, registered via app.get on the express app created in index.js. Component is the componentRoots entry '.'. Runtime success of the handler is not confirmed.",
+          "scope": "source",
+          "status": "suggested",
+          "value": {
+            "component": ".",
+            "method": "GET",
+            "path": "/health/ready"
+          }
+        },
+        "serviceId": null,
+        "target": "apiRoutes"
+      },
+      "manualVerdict": "valid_novel_source_claim",
+      "explanation": "The immutable literal concatenation reaches the direct Express route registration in this fixture. Source scope and component are correct; runtime success/readiness is not claimed.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/literal-expression-new-route/run-02/captured-wire-replies.json",
+          "sha256": "1423ceaafc5d7df9d33282d9a083adf406398329303588af0a99642dd8de4de3"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/literal-expression-new-route/run-02/verification-report.json",
+          "sha256": "102cce5f2338f2c8a17e52f63940b20e25d2cfe5fae9ec75b055c44bd27ccd56"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/literal-expression-new-route/run-02/analysis-result.json",
+          "sha256": "b31bd4937a3e75faa7d52e497c359ca7717e970ee76f966b8789ac7320f4c5ff"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/literal-expression-new-route/run-02/captured-contexts.json",
+          "sha256": "8c43af4166958ab032d9ff7adb550bf7ad6e454ad6279bf325711e53b1a1c53c"
+        }
+      },
+      "verifierDecisions": [
+        {
+          "decision": "supported",
+          "reasonCode": "SOURCE_RELATION_VERIFIED",
+          "ruleId": "iris.express.const-route.v1"
+        }
+      ],
+      "atomicClaim": {
+        "target": "apiRoutes",
+        "component": ".",
+        "scope": "source",
+        "value": {
+          "method": "GET",
+          "path": "/health/ready"
+        }
+      },
+      "novelAgainstInitialBaseline": true,
+      "presentInMergedResult": true
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "literal-expression-new-route",
+      "run": 3,
+      "wireReplyIndex": 0,
+      "entryType": "fileRequest",
+      "entryIndex": 0,
+      "modelStatement": {
+        "kind": "needs_files",
+        "reason": "The unresolved route runtime.httpRoutes depends on the healthPath constant used in app.get(healthPath, ...) (e-f46a79dbaa91b36ad598), but its declaration is outside the supplied ranges of index.js. Expanding index.js should let the path expression be resolved and the route proposed.",
+        "requestedPaths": [
+          "index.js"
+        ]
+      },
+      "manualVerdict": "appropriate_bounded_context_request",
+      "explanation": "The path is eligible and partly supplied. Expanding it can establish the import/receiver, route expression, connection use or lexical binding. A path absent from reviewed expectedFileRequests is not automatically wrong or unnecessary. Rationale claims about exact omitted line numbers are advisory, not new source facts.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/literal-expression-new-route/run-03/captured-wire-replies.json",
+          "sha256": "0600bf89b53444e50a09ef41a17d5117006d4b170057cf59292f5a1053524941"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/literal-expression-new-route/run-03/verification-report.json",
+          "sha256": "18214bf89f9c8ae087728264dfd36a6ac1ca7fa6523413308da122b3612ef830"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/literal-expression-new-route/run-03/analysis-result.json",
+          "sha256": "b31bd4937a3e75faa7d52e497c359ca7717e970ee76f966b8789ac7320f4c5ff"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/literal-expression-new-route/run-03/captured-contexts.json",
+          "sha256": "8c43af4166958ab032d9ff7adb550bf7ad6e454ad6279bf325711e53b1a1c53c"
+        }
+      },
+      "allRequestedPathsAllowed": true
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "literal-expression-new-route",
+      "run": 3,
+      "wireReplyIndex": 1,
+      "entryType": "change",
+      "entryIndex": 0,
+      "modelStatement": {
+        "field": {
+          "evidenceIds": [
+            "e-36efb31d3e7f13872218",
+            "e-3efac1540cdb98f2b49d",
+            "e-f46a79dbaa91b36ad598"
+          ],
+          "reason": "healthPath is an immutable concatenation of two literals ('/health/' + 'ready') resolving to /health/ready, registered via app.get on the express app created in index.js. Readiness is not proven; only the route registration is supported.",
+          "scope": "source",
+          "status": "suggested",
+          "value": {
+            "component": ".",
+            "method": "GET",
+            "path": "/health/ready"
+          }
+        },
+        "serviceId": null,
+        "target": "apiRoutes"
+      },
+      "manualVerdict": "valid_novel_source_claim",
+      "explanation": "The immutable literal concatenation reaches the direct Express route registration in this fixture. Source scope and component are correct; runtime success/readiness is not claimed.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/literal-expression-new-route/run-03/captured-wire-replies.json",
+          "sha256": "0600bf89b53444e50a09ef41a17d5117006d4b170057cf59292f5a1053524941"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/literal-expression-new-route/run-03/verification-report.json",
+          "sha256": "18214bf89f9c8ae087728264dfd36a6ac1ca7fa6523413308da122b3612ef830"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/literal-expression-new-route/run-03/analysis-result.json",
+          "sha256": "b31bd4937a3e75faa7d52e497c359ca7717e970ee76f966b8789ac7320f4c5ff"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/literal-expression-new-route/run-03/captured-contexts.json",
+          "sha256": "8c43af4166958ab032d9ff7adb550bf7ad6e454ad6279bf325711e53b1a1c53c"
+        }
+      },
+      "verifierDecisions": [
+        {
+          "decision": "supported",
+          "reasonCode": "SOURCE_RELATION_VERIFIED",
+          "ruleId": "iris.express.const-route.v1"
+        }
+      ],
+      "atomicClaim": {
+        "target": "apiRoutes",
+        "component": ".",
+        "scope": "source",
+        "value": {
+          "method": "GET",
+          "path": "/health/ready"
+        }
+      },
+      "novelAgainstInitialBaseline": true,
+      "presentInMergedResult": true
+    },
+    {
+      "suite": "hive-v21-holdout",
+      "caseId": "holdout-composed-route",
+      "run": 1,
+      "wireReplyIndex": 0,
+      "entryType": "fileRequest",
+      "entryIndex": 0,
+      "modelStatement": {
+        "kind": "needs_files",
+        "reason": "The unresolved route registration gateway.get(diagnostic, ...) at gateway.cjs line 4 cites a variable 'diagnostic' whose declaration is not in the supplied ranges (only lines 2, 4, 5 were provided). The full gateway.cjs file is listed in expandableSelectedPaths as incomplete_supplied_ranges; expanding it should reveal the constant declaration needed to resolve the route path expression and confirm the listener context for service svc-96c49d08c231282a.",
+        "requestedPaths": [
+          "gateway.cjs"
+        ]
+      },
+      "manualVerdict": "appropriate_bounded_context_request",
+      "explanation": "The path is eligible and partly supplied. Expanding it can establish the import/receiver, route expression, connection use or lexical binding. A path absent from reviewed expectedFileRequests is not automatically wrong or unnecessary. Rationale claims about exact omitted line numbers are advisory, not new source facts.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-composed-route/run-01/captured-wire-replies.json",
+          "sha256": "caa9f52618789923d565bcd991a44a3ff72bd717a77e77b10a470cc23f641fea"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-composed-route/run-01/verification-report.json",
+          "sha256": "ee8aaaf9e3ad5428d3c59bf2e7a0b3dc37ba15505745f14ac5096cfd994173e6"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-composed-route/run-01/analysis-result.json",
+          "sha256": "390fd119f15a6c171c145c0afc6703fbd209a79df5f39994c253b2755f1abd04"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-composed-route/run-01/captured-contexts.json",
+          "sha256": "40cedea806e86bef86dc8789f7a04f2b4da54b61a8b7731dcafed2f9853e87c0"
+        }
+      },
+      "allRequestedPathsAllowed": true
+    },
+    {
+      "suite": "hive-v21-holdout",
+      "caseId": "holdout-composed-route",
+      "run": 1,
+      "wireReplyIndex": 1,
+      "entryType": "change",
+      "entryIndex": 0,
+      "modelStatement": {
+        "field": {
+          "evidenceIds": [
+            "e-3bbd682ba451eee9b367",
+            "e-e9f50f11e218a94b475a",
+            "e-38202feb0e432141cd66"
+          ],
+          "reason": "Express receiver 'gateway' is created from createWeb() and the route is registered via gateway.get(diagnostic, ...). The path expression is an immutable concatenation of two string literals, '/ops/' + 'alive', which safely resolves to /ops/alive. Runtime success is not confirmed.",
+          "scope": "source",
+          "status": "suggested",
+          "value": {
+            "component": ".",
+            "method": "GET",
+            "path": "/ops/alive"
+          }
+        },
+        "serviceId": null,
+        "target": "apiRoutes"
+      },
+      "manualVerdict": "valid_novel_source_claim",
+      "explanation": "The immutable literal concatenation reaches the direct Express route registration in this fixture. Source scope and component are correct; runtime success/readiness is not claimed.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-composed-route/run-01/captured-wire-replies.json",
+          "sha256": "caa9f52618789923d565bcd991a44a3ff72bd717a77e77b10a470cc23f641fea"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-composed-route/run-01/verification-report.json",
+          "sha256": "ee8aaaf9e3ad5428d3c59bf2e7a0b3dc37ba15505745f14ac5096cfd994173e6"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-composed-route/run-01/analysis-result.json",
+          "sha256": "390fd119f15a6c171c145c0afc6703fbd209a79df5f39994c253b2755f1abd04"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-composed-route/run-01/captured-contexts.json",
+          "sha256": "40cedea806e86bef86dc8789f7a04f2b4da54b61a8b7731dcafed2f9853e87c0"
+        }
+      },
+      "verifierDecisions": [
+        {
+          "decision": "supported",
+          "reasonCode": "SOURCE_RELATION_VERIFIED",
+          "ruleId": "iris.express.const-route.v1"
+        }
+      ],
+      "atomicClaim": {
+        "target": "apiRoutes",
+        "component": ".",
+        "scope": "source",
+        "value": {
+          "method": "GET",
+          "path": "/ops/alive"
+        }
+      },
+      "novelAgainstInitialBaseline": true,
+      "presentInMergedResult": true
+    },
+    {
+      "suite": "hive-v21-holdout",
+      "caseId": "holdout-composed-route",
+      "run": 2,
+      "wireReplyIndex": 0,
+      "entryType": "fileRequest",
+      "entryIndex": 0,
+      "modelStatement": {
+        "kind": "needs_files",
+        "reason": "The unresolved route registration gateway.get(diagnostic, ...) cites a variable whose declaration is not in the supplied ranges of gateway.cjs (only lines 2, 4, 5 provided). The file is expandable as incomplete_supplied_ranges; expanding it should reveal the constant declaration that resolves the route path, allowing a suggested apiRoutes entry instead of leaving runtime.httpRoutes unresolved.",
+        "requestedPaths": [
+          "gateway.cjs"
+        ]
+      },
+      "manualVerdict": "appropriate_bounded_context_request",
+      "explanation": "The path is eligible and partly supplied. Expanding it can establish the import/receiver, route expression, connection use or lexical binding. A path absent from reviewed expectedFileRequests is not automatically wrong or unnecessary. Rationale claims about exact omitted line numbers are advisory, not new source facts.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-composed-route/run-02/captured-wire-replies.json",
+          "sha256": "887d16e5b5717a924dfce425fde78cfc48e1e5f33184fcf7842408ddb8faa7f4"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-composed-route/run-02/verification-report.json",
+          "sha256": "6e254bdbb9798561a4f37f1b6a5f772fcdaf3776223fca794109acf3a58981b9"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-composed-route/run-02/analysis-result.json",
+          "sha256": "d72dbf34d6ec9f456df785f22c802e29cd92f615049d7f8a92e670bedae4fbc7"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-composed-route/run-02/captured-contexts.json",
+          "sha256": "40cedea806e86bef86dc8789f7a04f2b4da54b61a8b7731dcafed2f9853e87c0"
+        }
+      },
+      "allRequestedPathsAllowed": true
+    },
+    {
+      "suite": "hive-v21-holdout",
+      "caseId": "holdout-composed-route",
+      "run": 2,
+      "wireReplyIndex": 1,
+      "entryType": "change",
+      "entryIndex": 0,
+      "modelStatement": {
+        "field": {
+          "evidenceIds": [
+            "e-e9f50f11e218a94b475a",
+            "e-3bbd682ba451eee9b367",
+            "e-38202feb0e432141cd66"
+          ],
+          "reason": "Express receiver is created (createWeb()) and gateway.get(diagnostic, ...) registers the route; diagnostic is an immutable concatenation of literals '/ops/' + 'alive', statically resolvable to /ops/alive. Component is the componentRoots entry '.'. Runtime success is not confirmed.",
+          "scope": "source",
+          "status": "suggested",
+          "value": {
+            "component": ".",
+            "method": "GET",
+            "path": "/ops/alive"
+          }
+        },
+        "serviceId": null,
+        "target": "apiRoutes"
+      },
+      "manualVerdict": "valid_novel_source_claim",
+      "explanation": "The immutable literal concatenation reaches the direct Express route registration in this fixture. Source scope and component are correct; runtime success/readiness is not claimed.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-composed-route/run-02/captured-wire-replies.json",
+          "sha256": "887d16e5b5717a924dfce425fde78cfc48e1e5f33184fcf7842408ddb8faa7f4"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-composed-route/run-02/verification-report.json",
+          "sha256": "6e254bdbb9798561a4f37f1b6a5f772fcdaf3776223fca794109acf3a58981b9"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-composed-route/run-02/analysis-result.json",
+          "sha256": "d72dbf34d6ec9f456df785f22c802e29cd92f615049d7f8a92e670bedae4fbc7"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-composed-route/run-02/captured-contexts.json",
+          "sha256": "40cedea806e86bef86dc8789f7a04f2b4da54b61a8b7731dcafed2f9853e87c0"
+        }
+      },
+      "verifierDecisions": [
+        {
+          "decision": "supported",
+          "reasonCode": "SOURCE_RELATION_VERIFIED",
+          "ruleId": "iris.express.const-route.v1"
+        }
+      ],
+      "atomicClaim": {
+        "target": "apiRoutes",
+        "component": ".",
+        "scope": "source",
+        "value": {
+          "method": "GET",
+          "path": "/ops/alive"
+        }
+      },
+      "novelAgainstInitialBaseline": true,
+      "presentInMergedResult": true
+    },
+    {
+      "suite": "hive-v21-holdout",
+      "caseId": "holdout-composed-route",
+      "run": 3,
+      "wireReplyIndex": 0,
+      "entryType": "fileRequest",
+      "entryIndex": 0,
+      "modelStatement": {
+        "kind": "needs_files",
+        "reason": "The unresolved route runtime.httpRoutes depends on the identifier `diagnostic` passed to gateway.get (e-38202feb0e432141cd66), but its declaration is outside the supplied ranges of gateway.cjs. The file is listed in expandableSelectedPaths as incomplete_supplied_ranges; expanding it should reveal the constant declaration so the route path can be resolved or confirmed unresolvable.",
+        "requestedPaths": [
+          "gateway.cjs"
+        ]
+      },
+      "manualVerdict": "appropriate_bounded_context_request",
+      "explanation": "The path is eligible and partly supplied. Expanding it can establish the import/receiver, route expression, connection use or lexical binding. A path absent from reviewed expectedFileRequests is not automatically wrong or unnecessary. Rationale claims about exact omitted line numbers are advisory, not new source facts.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-composed-route/run-03/captured-wire-replies.json",
+          "sha256": "cf3d2e91a2690ca4d84fae03cab9a419bc8662535fa9088a2377f2e4527bb148"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-composed-route/run-03/verification-report.json",
+          "sha256": "a2616c063a52bbde0dbc526fbd036063e7dac3656890591ea05a605dd7406293"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-composed-route/run-03/analysis-result.json",
+          "sha256": "d72dbf34d6ec9f456df785f22c802e29cd92f615049d7f8a92e670bedae4fbc7"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-composed-route/run-03/captured-contexts.json",
+          "sha256": "40cedea806e86bef86dc8789f7a04f2b4da54b61a8b7731dcafed2f9853e87c0"
+        }
+      },
+      "allRequestedPathsAllowed": true
+    },
+    {
+      "suite": "hive-v21-holdout",
+      "caseId": "holdout-composed-route",
+      "run": 3,
+      "wireReplyIndex": 1,
+      "entryType": "change",
+      "entryIndex": 0,
+      "modelStatement": {
+        "field": {
+          "evidenceIds": [
+            "e-e9f50f11e218a94b475a",
+            "e-3bbd682ba451eee9b367",
+            "e-38202feb0e432141cd66"
+          ],
+          "reason": "Express receiver is created (createWeb()) and the route is registered on it with the immutable constant expression '/ops/' + 'alive', which safely resolves to /ops/alive. No runtime execution was performed; readiness is not implied.",
+          "scope": "source",
+          "status": "suggested",
+          "value": {
+            "component": ".",
+            "method": "GET",
+            "path": "/ops/alive"
+          }
+        },
+        "serviceId": null,
+        "target": "apiRoutes"
+      },
+      "manualVerdict": "valid_novel_source_claim",
+      "explanation": "The immutable literal concatenation reaches the direct Express route registration in this fixture. Source scope and component are correct; runtime success/readiness is not claimed.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-composed-route/run-03/captured-wire-replies.json",
+          "sha256": "cf3d2e91a2690ca4d84fae03cab9a419bc8662535fa9088a2377f2e4527bb148"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-composed-route/run-03/verification-report.json",
+          "sha256": "a2616c063a52bbde0dbc526fbd036063e7dac3656890591ea05a605dd7406293"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-composed-route/run-03/analysis-result.json",
+          "sha256": "d72dbf34d6ec9f456df785f22c802e29cd92f615049d7f8a92e670bedae4fbc7"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-composed-route/run-03/captured-contexts.json",
+          "sha256": "40cedea806e86bef86dc8789f7a04f2b4da54b61a8b7731dcafed2f9853e87c0"
+        }
+      },
+      "verifierDecisions": [
+        {
+          "decision": "supported",
+          "reasonCode": "SOURCE_RELATION_VERIFIED",
+          "ruleId": "iris.express.const-route.v1"
+        }
+      ],
+      "atomicClaim": {
+        "target": "apiRoutes",
+        "component": ".",
+        "scope": "source",
+        "value": {
+          "method": "GET",
+          "path": "/ops/alive"
+        }
+      },
+      "novelAgainstInitialBaseline": true,
+      "presentInMergedResult": true
+    },
+    {
+      "suite": "hive-v21-holdout",
+      "caseId": "holdout-reassigned-route",
+      "run": 1,
+      "wireReplyIndex": 0,
+      "entryType": "question",
+      "entryIndex": 0,
+      "modelStatement": {
+        "key": "runtime.httpRoutes",
+        "kind": "user_configuration",
+        "reason": "The only route path in gateway.cjs is read from the runtime environment variable PROBE_ROUTE (e-bb054c882af9982833bc, e-2a0f54b6fed189c40bfa), so the served path cannot be derived from source. Supply the value/binding for PROBE_ROUTE in the deployment environment; do not send secret values."
+      },
+      "manualVerdict": "appropriate_bounded_abstention",
+      "explanation": "PROBE_ROUTE is the external binding driving registration; requesting its deployment binding and avoiding secret values is appropriate. No constant route is inferred from the unrelated literal.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-reassigned-route/run-01/captured-wire-replies.json",
+          "sha256": "38020e3b21d0f6c2b3be8a8084ed95e272ccf122b219115678669a2986043fce"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-reassigned-route/run-01/verification-report.json",
+          "sha256": "eb1d1f452ee908e4db4397998bc443be438fac4f55338483a2807c310a1475d3"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-reassigned-route/run-01/analysis-result.json",
+          "sha256": "5818065f14d4e42fb8ac8d65e194b1f9ca4875c3f3922ec80a7a1ca108d05dee"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-reassigned-route/run-01/captured-contexts.json",
+          "sha256": "3f1547426e581ca96848cf211add63b39c64624b3fe399e2b8ec1441c252c0d5"
+        }
+      },
+      "verifierDecisions": [
+        {
+          "decision": "deferred",
+          "reasonCode": "REVIEW_RELATION_UNRESOLVED",
+          "ruleId": "iris.obligation.baseline.v1"
+        }
+      ]
+    },
+    {
+      "suite": "hive-v21-holdout",
+      "caseId": "holdout-reassigned-route",
+      "run": 3,
+      "wireReplyIndex": 0,
+      "entryType": "fileRequest",
+      "entryIndex": 0,
+      "modelStatement": {
+        "kind": "needs_files",
+        "reason": "The unresolved route path is bound to process.env.PROBE_ROUTE at gateway.cjs line 4, but line 3 (between receiver creation at line 2 and the env read) is not supplied and may declare a fallback default path or conditional that resolves the route expression. The full file is an eligible expandableSelectedPaths entry with reason incomplete_supplied_ranges; supplying it would determine whether the GET route path is statically resolvable or requires a user_configuration question for the PROBE_ROUTE binding.",
+        "requestedPaths": [
+          "gateway.cjs"
+        ]
+      },
+      "manualVerdict": "appropriate_bounded_context_request",
+      "explanation": "The path is eligible and partly supplied. Expanding it can establish the import/receiver, route expression, connection use or lexical binding. A path absent from reviewed expectedFileRequests is not automatically wrong or unnecessary. Rationale claims about exact omitted line numbers are advisory, not new source facts.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-reassigned-route/run-03/captured-wire-replies.json",
+          "sha256": "f4d3ae99945decb44d75a0f5ef7d311bd87b0c63abae40b12be120753e9f6d8f"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-reassigned-route/run-03/verification-report.json",
+          "sha256": "8db5c629ec4a90839c2fd46aa3c542a81d44bacece4a91a3badf28ed5af97c25"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-reassigned-route/run-03/analysis-result.json",
+          "sha256": "cc637c80bbadc9da6ef60fc44c9b48ff630c9950541039b3a8c249ff1cf1ae7b"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-reassigned-route/run-03/captured-contexts.json",
+          "sha256": "64ab0609a7d3f6a78ab5c70534e35b4d4dd8a91f8bc010cf61c24bf88236076f"
+        }
+      },
+      "allRequestedPathsAllowed": true
+    },
+    {
+      "suite": "hive-v21-holdout",
+      "caseId": "holdout-reassigned-route",
+      "run": 3,
+      "wireReplyIndex": 1,
+      "entryType": "reviewFinding",
+      "entryIndex": 0,
+      "modelStatement": {
+        "category": "missing_evidence",
+        "evidenceIds": [
+          "e-2a0f54b6fed189c40bfa",
+          "e-bb054c882af9982833bc",
+          "e-040491f5c61d3c943f39"
+        ],
+        "reason": "The only Express route registration uses a path assigned from process.env.PROBE_ROUTE, overwriting the literal '/ops/alive'. The route path and any healthcheck target depend on an external runtime value that cannot be resolved from the supplied source, so the route and healthcheck remain unknown."
+      },
+      "manualVerdict": "supported_bounded_advisory",
+      "explanation": "The literal route variable is overwritten by PROBE_ROUTE before registration. The supplied source does not establish a constant route or healthcheck target.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-reassigned-route/run-03/captured-wire-replies.json",
+          "sha256": "f4d3ae99945decb44d75a0f5ef7d311bd87b0c63abae40b12be120753e9f6d8f"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-reassigned-route/run-03/verification-report.json",
+          "sha256": "8db5c629ec4a90839c2fd46aa3c542a81d44bacece4a91a3badf28ed5af97c25"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-reassigned-route/run-03/analysis-result.json",
+          "sha256": "cc637c80bbadc9da6ef60fc44c9b48ff630c9950541039b3a8c249ff1cf1ae7b"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-reassigned-route/run-03/captured-contexts.json",
+          "sha256": "64ab0609a7d3f6a78ab5c70534e35b4d4dd8a91f8bc010cf61c24bf88236076f"
+        }
+      },
+      "verifierDecisions": [
+        {
+          "decision": "supported",
+          "reasonCode": "SOURCE_OBLIGATION_IDENTIFIED",
+          "ruleId": "iris.review.missing_evidence.v1"
+        }
+      ]
+    },
+    {
+      "suite": "hive-v21-holdout",
+      "caseId": "holdout-shadowed-route",
+      "run": 1,
+      "wireReplyIndex": 0,
+      "entryType": "fileRequest",
+      "entryIndex": 0,
+      "modelStatement": {
+        "kind": "needs_files",
+        "reason": "The unresolved Express route at gateway.cjs line 5 uses the identifier `diagnostic` as its path expression, and the receiver `gateway` is created at line 2 via createWeb(). The declaration of `diagnostic` (and any mount/base-path logic in createWeb) falls in the unsupplied lines 1-9 gap of gateway.cjs, which is listed in expandableSelectedPaths with reason incomplete_supplied_ranges. Supplying the full file would let the route path be resolved from its constant declaration and registration, resolving runtime.httpRoutes.",
+        "requestedPaths": [
+          "gateway.cjs"
+        ]
+      },
+      "manualVerdict": "appropriate_bounded_context_request",
+      "explanation": "The path is eligible and partly supplied. Expanding it can establish the import/receiver, route expression, connection use or lexical binding. A path absent from reviewed expectedFileRequests is not automatically wrong or unnecessary. Rationale claims about exact omitted line numbers are advisory, not new source facts.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/run-01/captured-wire-replies.json",
+          "sha256": "a9ab5440c00f3338d112b3ae333c201c13888aac6caa1ea72d8d86232e0b532a"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/run-01/verification-report.json",
+          "sha256": "737d4c4fe7b31f0876caba6ec78c01c0adbd1f2f808c517fc1118bd793c407e8"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/run-01/analysis-result.json",
+          "sha256": "d6e53702e8832c5399aeb00bcdf27c5139a9d1ae3f08580b38ff2fbc18d7969c"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/run-01/captured-contexts.json",
+          "sha256": "045600d407d3bfc005ef7d03ce95aa028d6a39c84a7dbacdbcfc40d98783c8d5"
+        }
+      },
+      "allRequestedPathsAllowed": true
+    },
+    {
+      "suite": "hive-v21-holdout",
+      "caseId": "holdout-shadowed-route",
+      "run": 1,
+      "wireReplyIndex": 1,
+      "entryType": "reviewFinding",
+      "entryIndex": 0,
+      "modelStatement": {
+        "category": "missing_evidence",
+        "evidenceIds": [
+          "e-4e8120599d21d1819c21",
+          "e-8055864128c72a338904",
+          "e-f1e896824b4a020c0106"
+        ],
+        "reason": "The route registration call register(process.env.PROBE_ROUTE) uses the environment variable, not the locally computed constant '/ops/alive'. The receiver (e-88116e4be4c6ea9819e7) and handler (e-f1e896824b4a020c0106) are confirmed, but the actual path expression cannot be completed from supplied source, so no route suggestion is evidence-backed."
+      },
+      "manualVerdict": "supported_bounded_advisory",
+      "explanation": "The function parameter shadows the top-level literal and its call site passes PROBE_ROUTE. Withholding a constant route is correct. The full function body and call site support this conclusion.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/run-01/captured-wire-replies.json",
+          "sha256": "a9ab5440c00f3338d112b3ae333c201c13888aac6caa1ea72d8d86232e0b532a"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/run-01/verification-report.json",
+          "sha256": "737d4c4fe7b31f0876caba6ec78c01c0adbd1f2f808c517fc1118bd793c407e8"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/run-01/analysis-result.json",
+          "sha256": "d6e53702e8832c5399aeb00bcdf27c5139a9d1ae3f08580b38ff2fbc18d7969c"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/run-01/captured-contexts.json",
+          "sha256": "045600d407d3bfc005ef7d03ce95aa028d6a39c84a7dbacdbcfc40d98783c8d5"
+        }
+      },
+      "verifierDecisions": [
+        {
+          "decision": "supported",
+          "reasonCode": "SOURCE_OBLIGATION_IDENTIFIED",
+          "ruleId": "iris.review.missing_evidence.v1"
+        }
+      ]
+    },
+    {
+      "suite": "hive-v21-holdout",
+      "caseId": "holdout-shadowed-route",
+      "run": 1,
+      "wireReplyIndex": 1,
+      "entryType": "question",
+      "entryIndex": 0,
+      "modelStatement": {
+        "key": "PROBE_ROUTE",
+        "kind": "user_configuration",
+        "reason": "gateway.cjs registers the Express route with process.env.PROBE_ROUTE (e-8055864128c72a338904), so the served path depends on an external runtime value. The literal '/ops/alive' built at e-4e8120599d21d1819c21 is never passed to register() and cannot be assumed. Provide the binding/selection for PROBE_ROUTE in the deployment environment (not the value here)."
+      },
+      "manualVerdict": "appropriate_bounded_abstention",
+      "explanation": "PROBE_ROUTE is the external binding driving registration; requesting its deployment binding and avoiding secret values is appropriate. No constant route is inferred from the unrelated literal.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/run-01/captured-wire-replies.json",
+          "sha256": "a9ab5440c00f3338d112b3ae333c201c13888aac6caa1ea72d8d86232e0b532a"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/run-01/verification-report.json",
+          "sha256": "737d4c4fe7b31f0876caba6ec78c01c0adbd1f2f808c517fc1118bd793c407e8"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/run-01/analysis-result.json",
+          "sha256": "d6e53702e8832c5399aeb00bcdf27c5139a9d1ae3f08580b38ff2fbc18d7969c"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/run-01/captured-contexts.json",
+          "sha256": "045600d407d3bfc005ef7d03ce95aa028d6a39c84a7dbacdbcfc40d98783c8d5"
+        }
+      },
+      "verifierDecisions": [
+        {
+          "decision": "deferred",
+          "reasonCode": "REVIEW_RELATION_UNRESOLVED",
+          "ruleId": "iris.obligation.baseline.v1"
+        }
+      ]
+    },
+    {
+      "suite": "hive-v21-holdout",
+      "caseId": "holdout-shadowed-route",
+      "run": 2,
+      "wireReplyIndex": 0,
+      "entryType": "fileRequest",
+      "entryIndex": 0,
+      "modelStatement": {
+        "kind": "needs_files",
+        "reason": "The unresolved Express route at gateway.cjs line 5 uses the identifier `diagnostic` as its path expression, but the declaration of `diagnostic` falls in the unsupplied lines 3-4 of gateway.cjs (file is expandableSelectedPaths with reason incomplete_supplied_ranges). Expanding gateway.cjs would let the route path be resolved from its constant declaration, confirming or refuting the static unresolved route.",
+        "requestedPaths": [
+          "gateway.cjs"
+        ]
+      },
+      "manualVerdict": "appropriate_bounded_context_request",
+      "explanation": "The path is eligible and partly supplied. Expanding it can establish the import/receiver, route expression, connection use or lexical binding. A path absent from reviewed expectedFileRequests is not automatically wrong or unnecessary. Rationale claims about exact omitted line numbers are advisory, not new source facts.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/run-02/captured-wire-replies.json",
+          "sha256": "e03d90e83e0f731186448372d3dde0364e6b9c15cd02aa3a2ee9d2ee293c2ae2"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/run-02/verification-report.json",
+          "sha256": "cd453904b8d78a0a8eb2479755b624a749a26443a5d16f2ebdac7901124041e7"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/run-02/analysis-result.json",
+          "sha256": "d6e53702e8832c5399aeb00bcdf27c5139a9d1ae3f08580b38ff2fbc18d7969c"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/run-02/captured-contexts.json",
+          "sha256": "045600d407d3bfc005ef7d03ce95aa028d6a39c84a7dbacdbcfc40d98783c8d5"
+        }
+      },
+      "allRequestedPathsAllowed": true
+    },
+    {
+      "suite": "hive-v21-holdout",
+      "caseId": "holdout-shadowed-route",
+      "run": 2,
+      "wireReplyIndex": 1,
+      "entryType": "change",
+      "entryIndex": 0,
+      "modelStatement": {
+        "field": {
+          "evidenceIds": [
+            "e-4e8120599d21d1819c21",
+            "e-88116e4be4c6ea9819e7",
+            "e-f1e896824b4a020c0106"
+          ],
+          "reason": "The path expression '/ops/' + 'alive' is an immutable concatenation resolving to /ops/alive, registered via gateway.get on the express app created in gateway.cjs. Registration occurs at runtime with process.env.PROBE_ROUTE as the argument, so the effective route depends on that environment value being the same constant; no runtime execution was performed.",
+          "scope": "source",
+          "status": "suggested",
+          "value": {
+            "component": ".",
+            "method": "GET",
+            "path": "/ops/alive"
+          }
+        },
+        "serviceId": null,
+        "target": "apiRoutes"
+      },
+      "manualVerdict": "invalid_source_inference",
+      "explanation": "The register(diagnostic) parameter shadows the top-level constant. register(process.env.PROBE_ROUTE) supplies the real argument. Conditional equality to /ops/alive cannot justify an unconditional source route field. This does not prove the endpoint could never exist at runtime.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/run-02/captured-wire-replies.json",
+          "sha256": "e03d90e83e0f731186448372d3dde0364e6b9c15cd02aa3a2ee9d2ee293c2ae2"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/run-02/verification-report.json",
+          "sha256": "cd453904b8d78a0a8eb2479755b624a749a26443a5d16f2ebdac7901124041e7"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/run-02/analysis-result.json",
+          "sha256": "d6e53702e8832c5399aeb00bcdf27c5139a9d1ae3f08580b38ff2fbc18d7969c"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/run-02/captured-contexts.json",
+          "sha256": "045600d407d3bfc005ef7d03ce95aa028d6a39c84a7dbacdbcfc40d98783c8d5"
+        }
+      },
+      "verifierDecisions": [
+        {
+          "decision": "deferred",
+          "reasonCode": "LEXICAL_RELATION_UNRESOLVED",
+          "ruleId": "iris.express.const-route.v1"
+        }
+      ],
+      "atomicClaim": {
+        "target": "apiRoutes",
+        "component": ".",
+        "scope": "source",
+        "value": {
+          "method": "GET",
+          "path": "/ops/alive"
+        }
+      },
+      "novelAgainstInitialBaseline": true,
+      "presentInMergedResult": false
+    },
+    {
+      "suite": "hive-v21-holdout",
+      "caseId": "holdout-shadowed-route",
+      "run": 3,
+      "wireReplyIndex": 0,
+      "entryType": "fileRequest",
+      "entryIndex": 0,
+      "modelStatement": {
+        "kind": "needs_files",
+        "reason": "The unresolved Express route at gateway.cjs line 5 uses the identifier `diagnostic` as its path expression, but the constant declaration (lines 3-4) was not included in the supplied ranges. Expanding gateway.cjs would let the route path be resolved from its own declaration rather than guessed, completing runtime.httpRoutes for service svc-96c49d08c231282a.",
+        "requestedPaths": [
+          "gateway.cjs"
+        ]
+      },
+      "manualVerdict": "appropriate_bounded_context_request",
+      "explanation": "The path is eligible and partly supplied. Expanding it can establish the import/receiver, route expression, connection use or lexical binding. A path absent from reviewed expectedFileRequests is not automatically wrong or unnecessary. Rationale claims about exact omitted line numbers are advisory, not new source facts.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/run-03/captured-wire-replies.json",
+          "sha256": "d63a6eedf4463fbc8349a297dec9071c0256d67a6c96e66baf0d84e9f96928b7"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/run-03/verification-report.json",
+          "sha256": "db2587a7eff26eda76fb2d6cab098564beb858ab6f7c6f5d0b10c51b28bc13cc"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/run-03/analysis-result.json",
+          "sha256": "d6e53702e8832c5399aeb00bcdf27c5139a9d1ae3f08580b38ff2fbc18d7969c"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/run-03/captured-contexts.json",
+          "sha256": "045600d407d3bfc005ef7d03ce95aa028d6a39c84a7dbacdbcfc40d98783c8d5"
+        }
+      },
+      "allRequestedPathsAllowed": true
+    },
+    {
+      "suite": "hive-v21-holdout",
+      "caseId": "holdout-shadowed-route",
+      "run": 3,
+      "wireReplyIndex": 1,
+      "entryType": "reviewFinding",
+      "entryIndex": 0,
+      "modelStatement": {
+        "category": "missing_evidence",
+        "evidenceIds": [
+          "e-4e8120599d21d1819c21",
+          "e-8055864128c72a338904",
+          "e-f1e896824b4a020c0106"
+        ],
+        "reason": "The constant '/ops/alive' (e-4e8120599d21d1819c21) is not the registered route: the register() parameter named 'diagnostic' shadows it, and the call site passes process.env.PROBE_ROUTE. The unresolved route path depends on an external environment value with no default, so no route can be suggested from source."
+      },
+      "manualVerdict": "supported_bounded_advisory",
+      "explanation": "The function parameter shadows the top-level literal and its call site passes PROBE_ROUTE. Withholding a constant route is correct. The full function body and call site support this conclusion.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/run-03/captured-wire-replies.json",
+          "sha256": "d63a6eedf4463fbc8349a297dec9071c0256d67a6c96e66baf0d84e9f96928b7"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/run-03/verification-report.json",
+          "sha256": "db2587a7eff26eda76fb2d6cab098564beb858ab6f7c6f5d0b10c51b28bc13cc"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/run-03/analysis-result.json",
+          "sha256": "d6e53702e8832c5399aeb00bcdf27c5139a9d1ae3f08580b38ff2fbc18d7969c"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/run-03/captured-contexts.json",
+          "sha256": "045600d407d3bfc005ef7d03ce95aa028d6a39c84a7dbacdbcfc40d98783c8d5"
+        }
+      },
+      "verifierDecisions": [
+        {
+          "decision": "supported",
+          "reasonCode": "SOURCE_OBLIGATION_IDENTIFIED",
+          "ruleId": "iris.review.missing_evidence.v1"
+        }
+      ]
+    },
+    {
+      "suite": "hive-v21-holdout",
+      "caseId": "holdout-shadowed-route",
+      "run": 3,
+      "wireReplyIndex": 1,
+      "entryType": "question",
+      "entryIndex": 0,
+      "modelStatement": {
+        "key": "runtime.httpRoutes",
+        "kind": "code_review",
+        "reason": "The register() parameter 'diagnostic' shadows the constant '/ops/alive', so the route path is actually process.env.PROBE_ROUTE (e-8055864128c72a338904, e-f1e896824b4a020c0106). The path is externally supplied and cannot be resolved from source; the constant is dead code and must not be used as the route."
+      },
+      "manualVerdict": "appropriate_bounded_abstention",
+      "explanation": "PROBE_ROUTE is the external binding driving registration; requesting its deployment binding and avoiding secret values is appropriate. No constant route is inferred from the unrelated literal.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/run-03/captured-wire-replies.json",
+          "sha256": "d63a6eedf4463fbc8349a297dec9071c0256d67a6c96e66baf0d84e9f96928b7"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/run-03/verification-report.json",
+          "sha256": "db2587a7eff26eda76fb2d6cab098564beb858ab6f7c6f5d0b10c51b28bc13cc"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/run-03/analysis-result.json",
+          "sha256": "d6e53702e8832c5399aeb00bcdf27c5139a9d1ae3f08580b38ff2fbc18d7969c"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/run-03/captured-contexts.json",
+          "sha256": "045600d407d3bfc005ef7d03ce95aa028d6a39c84a7dbacdbcfc40d98783c8d5"
+        }
+      },
+      "verifierDecisions": [
+        {
+          "decision": "supported",
+          "reasonCode": "BASELINE_OBLIGATION_PRESERVED",
+          "ruleId": "iris.obligation.baseline.v1"
+        }
+      ]
+    },
+    {
+      "suite": "hive-v21-holdout",
+      "caseId": "holdout-shadowed-route",
+      "run": 3,
+      "wireReplyIndex": 1,
+      "entryType": "question",
+      "entryIndex": 1,
+      "modelStatement": {
+        "key": "environment.PROBE_ROUTE.binding",
+        "kind": "user_configuration",
+        "reason": "PROBE_ROUTE is consumed at runtime as the Express route path (e-8055864128c72a338904) with no default and no required guard in source. Its value must be supplied as an external execution setting; provide the binding/selection, not the secret value in the reply."
+      },
+      "manualVerdict": "appropriate_bounded_abstention",
+      "explanation": "PROBE_ROUTE is the external binding driving registration; requesting its deployment binding and avoiding secret values is appropriate. No constant route is inferred from the unrelated literal.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/run-03/captured-wire-replies.json",
+          "sha256": "d63a6eedf4463fbc8349a297dec9071c0256d67a6c96e66baf0d84e9f96928b7"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/run-03/verification-report.json",
+          "sha256": "db2587a7eff26eda76fb2d6cab098564beb858ab6f7c6f5d0b10c51b28bc13cc"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/run-03/analysis-result.json",
+          "sha256": "d6e53702e8832c5399aeb00bcdf27c5139a9d1ae3f08580b38ff2fbc18d7969c"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/run-03/captured-contexts.json",
+          "sha256": "045600d407d3bfc005ef7d03ce95aa028d6a39c84a7dbacdbcfc40d98783c8d5"
+        }
+      },
+      "verifierDecisions": [
+        {
+          "decision": "deferred",
+          "reasonCode": "REVIEW_RELATION_UNRESOLVED",
+          "ruleId": "iris.obligation.baseline.v1"
+        }
+      ]
+    },
+    {
+      "suite": "hive-v21-holdout",
+      "caseId": "holdout-normal-noop",
+      "run": 2,
+      "wireReplyIndex": 0,
+      "entryType": "fileRequest",
+      "entryIndex": 0,
+      "modelStatement": {
+        "kind": "needs_files",
+        "reason": "gateway.cjs is expandable with incomplete supplied ranges: line 2 calls createWeb() with no import or definition in the provided lines, so the framework receiver, any route registrations, and the relationship between the express dependency and the selected entrypoint cannot be verified. The full 89-byte file is needed to confirm the listener at line 3 and whether any routes exist.",
+        "requestedPaths": [
+          "gateway.cjs"
+        ]
+      },
+      "manualVerdict": "appropriate_bounded_context_request",
+      "explanation": "The path is eligible and partly supplied. Expanding it can establish the import/receiver, route expression, connection use or lexical binding. A path absent from reviewed expectedFileRequests is not automatically wrong or unnecessary. Rationale claims about exact omitted line numbers are advisory, not new source facts.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-normal-noop/run-02/captured-wire-replies.json",
+          "sha256": "830f85e14168d4b5f85b7cafbefc20cd65cee62e1b5b9a236d8f680b61922bb7"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-normal-noop/run-02/verification-report.json",
+          "sha256": "93f6a7266f49c70e34ce68061682ae7ea50dee9368e238e42a9359f029fd92aa"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-normal-noop/run-02/analysis-result.json",
+          "sha256": "bd0af4e7e9e263a208ca7229f8c704021648fc2974a4b0925eaaeb987d0ecf16"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-normal-noop/run-02/captured-contexts.json",
+          "sha256": "d009c13bdcde57d18577ddd1f1cfa7833a12bd7d5028fa84c0b502b12f3b3832"
+        }
+      },
+      "allRequestedPathsAllowed": true
+    },
+    {
+      "suite": "hive-v21-holdout",
+      "caseId": "holdout-normal-noop",
+      "run": 3,
+      "wireReplyIndex": 0,
+      "entryType": "fileRequest",
+      "entryIndex": 0,
+      "modelStatement": {
+        "kind": "needs_files",
+        "reason": "gateway.cjs is expandable with incomplete supplied ranges: only lines 2-3 were provided, so the definition/import of createWeb() and any route registrations between the receiver creation (e-a888074fbe1a02f59630) and gateway.listen(4637) (e-ba59d2842077237e4e3b) are missing. The full file is needed to verify the Express receiver, resolve any route paths, and confirm the listener-to-entrypoint relationship for service svc-96c49d08c231282a.",
+        "requestedPaths": [
+          "gateway.cjs"
+        ]
+      },
+      "manualVerdict": "appropriate_bounded_context_request",
+      "explanation": "The path is eligible and partly supplied. Expanding it can establish the import/receiver, route expression, connection use or lexical binding. A path absent from reviewed expectedFileRequests is not automatically wrong or unnecessary. Rationale claims about exact omitted line numbers are advisory, not new source facts.",
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-normal-noop/run-03/captured-wire-replies.json",
+          "sha256": "f28dfdaa105f8f8e40a999af3667510b753ea78f91c1d029365ab5ddd56fbf20"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-normal-noop/run-03/verification-report.json",
+          "sha256": "93f6a7266f49c70e34ce68061682ae7ea50dee9368e238e42a9359f029fd92aa"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-normal-noop/run-03/analysis-result.json",
+          "sha256": "bd0af4e7e9e263a208ca7229f8c704021648fc2974a4b0925eaaeb987d0ecf16"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-normal-noop/run-03/captured-contexts.json",
+          "sha256": "d009c13bdcde57d18577ddd1f1cfa7833a12bd7d5028fa84c0b502b12f3b3832"
+        }
+      },
+      "allRequestedPathsAllowed": true
+    }
+  ],
+  "rawNovelProposals": [
+    {
+      "suite": "hive-v21-final",
+      "caseId": "literal-expression-new-route",
+      "run": 1,
+      "atomicClaim": {
+        "target": "apiRoutes",
+        "component": ".",
+        "scope": "source",
+        "value": {
+          "method": "GET",
+          "path": "/health/ready"
+        }
+      },
+      "manualVerdict": "valid_novel_source_claim",
+      "presentInMergedResult": true,
+      "verifierDecisions": [
+        {
+          "decision": "supported",
+          "reasonCode": "SOURCE_RELATION_VERIFIED",
+          "ruleId": "iris.express.const-route.v1"
+        }
+      ],
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/literal-expression-new-route/run-01/captured-wire-replies.json",
+          "sha256": "f3e2c92a618a2b1f962ab70f657c6e72333ba4591ae6334bfce60cfd49423c0b"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/literal-expression-new-route/run-01/verification-report.json",
+          "sha256": "437e8555b13ea366c586859b022171d1d17b4ccdac5694287f322f9bc41fb064"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/literal-expression-new-route/run-01/analysis-result.json",
+          "sha256": "b31bd4937a3e75faa7d52e497c359ca7717e970ee76f966b8789ac7320f4c5ff"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/literal-expression-new-route/run-01/captured-contexts.json",
+          "sha256": "8c43af4166958ab032d9ff7adb550bf7ad6e454ad6279bf325711e53b1a1c53c"
+        }
+      }
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "literal-expression-new-route",
+      "run": 2,
+      "atomicClaim": {
+        "target": "apiRoutes",
+        "component": ".",
+        "scope": "source",
+        "value": {
+          "method": "GET",
+          "path": "/health/ready"
+        }
+      },
+      "manualVerdict": "valid_novel_source_claim",
+      "presentInMergedResult": true,
+      "verifierDecisions": [
+        {
+          "decision": "supported",
+          "reasonCode": "SOURCE_RELATION_VERIFIED",
+          "ruleId": "iris.express.const-route.v1"
+        }
+      ],
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/literal-expression-new-route/run-02/captured-wire-replies.json",
+          "sha256": "1423ceaafc5d7df9d33282d9a083adf406398329303588af0a99642dd8de4de3"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/literal-expression-new-route/run-02/verification-report.json",
+          "sha256": "102cce5f2338f2c8a17e52f63940b20e25d2cfe5fae9ec75b055c44bd27ccd56"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/literal-expression-new-route/run-02/analysis-result.json",
+          "sha256": "b31bd4937a3e75faa7d52e497c359ca7717e970ee76f966b8789ac7320f4c5ff"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/literal-expression-new-route/run-02/captured-contexts.json",
+          "sha256": "8c43af4166958ab032d9ff7adb550bf7ad6e454ad6279bf325711e53b1a1c53c"
+        }
+      }
+    },
+    {
+      "suite": "hive-v21-final",
+      "caseId": "literal-expression-new-route",
+      "run": 3,
+      "atomicClaim": {
+        "target": "apiRoutes",
+        "component": ".",
+        "scope": "source",
+        "value": {
+          "method": "GET",
+          "path": "/health/ready"
+        }
+      },
+      "manualVerdict": "valid_novel_source_claim",
+      "presentInMergedResult": true,
+      "verifierDecisions": [
+        {
+          "decision": "supported",
+          "reasonCode": "SOURCE_RELATION_VERIFIED",
+          "ruleId": "iris.express.const-route.v1"
+        }
+      ],
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-final/literal-expression-new-route/run-03/captured-wire-replies.json",
+          "sha256": "0600bf89b53444e50a09ef41a17d5117006d4b170057cf59292f5a1053524941"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-final/literal-expression-new-route/run-03/verification-report.json",
+          "sha256": "18214bf89f9c8ae087728264dfd36a6ac1ca7fa6523413308da122b3612ef830"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-final/literal-expression-new-route/run-03/analysis-result.json",
+          "sha256": "b31bd4937a3e75faa7d52e497c359ca7717e970ee76f966b8789ac7320f4c5ff"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-final/literal-expression-new-route/run-03/captured-contexts.json",
+          "sha256": "8c43af4166958ab032d9ff7adb550bf7ad6e454ad6279bf325711e53b1a1c53c"
+        }
+      }
+    },
+    {
+      "suite": "hive-v21-holdout",
+      "caseId": "holdout-composed-route",
+      "run": 1,
+      "atomicClaim": {
+        "target": "apiRoutes",
+        "component": ".",
+        "scope": "source",
+        "value": {
+          "method": "GET",
+          "path": "/ops/alive"
+        }
+      },
+      "manualVerdict": "valid_novel_source_claim",
+      "presentInMergedResult": true,
+      "verifierDecisions": [
+        {
+          "decision": "supported",
+          "reasonCode": "SOURCE_RELATION_VERIFIED",
+          "ruleId": "iris.express.const-route.v1"
+        }
+      ],
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-composed-route/run-01/captured-wire-replies.json",
+          "sha256": "caa9f52618789923d565bcd991a44a3ff72bd717a77e77b10a470cc23f641fea"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-composed-route/run-01/verification-report.json",
+          "sha256": "ee8aaaf9e3ad5428d3c59bf2e7a0b3dc37ba15505745f14ac5096cfd994173e6"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-composed-route/run-01/analysis-result.json",
+          "sha256": "390fd119f15a6c171c145c0afc6703fbd209a79df5f39994c253b2755f1abd04"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-composed-route/run-01/captured-contexts.json",
+          "sha256": "40cedea806e86bef86dc8789f7a04f2b4da54b61a8b7731dcafed2f9853e87c0"
+        }
+      }
+    },
+    {
+      "suite": "hive-v21-holdout",
+      "caseId": "holdout-composed-route",
+      "run": 2,
+      "atomicClaim": {
+        "target": "apiRoutes",
+        "component": ".",
+        "scope": "source",
+        "value": {
+          "method": "GET",
+          "path": "/ops/alive"
+        }
+      },
+      "manualVerdict": "valid_novel_source_claim",
+      "presentInMergedResult": true,
+      "verifierDecisions": [
+        {
+          "decision": "supported",
+          "reasonCode": "SOURCE_RELATION_VERIFIED",
+          "ruleId": "iris.express.const-route.v1"
+        }
+      ],
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-composed-route/run-02/captured-wire-replies.json",
+          "sha256": "887d16e5b5717a924dfce425fde78cfc48e1e5f33184fcf7842408ddb8faa7f4"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-composed-route/run-02/verification-report.json",
+          "sha256": "6e254bdbb9798561a4f37f1b6a5f772fcdaf3776223fca794109acf3a58981b9"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-composed-route/run-02/analysis-result.json",
+          "sha256": "d72dbf34d6ec9f456df785f22c802e29cd92f615049d7f8a92e670bedae4fbc7"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-composed-route/run-02/captured-contexts.json",
+          "sha256": "40cedea806e86bef86dc8789f7a04f2b4da54b61a8b7731dcafed2f9853e87c0"
+        }
+      }
+    },
+    {
+      "suite": "hive-v21-holdout",
+      "caseId": "holdout-composed-route",
+      "run": 3,
+      "atomicClaim": {
+        "target": "apiRoutes",
+        "component": ".",
+        "scope": "source",
+        "value": {
+          "method": "GET",
+          "path": "/ops/alive"
+        }
+      },
+      "manualVerdict": "valid_novel_source_claim",
+      "presentInMergedResult": true,
+      "verifierDecisions": [
+        {
+          "decision": "supported",
+          "reasonCode": "SOURCE_RELATION_VERIFIED",
+          "ruleId": "iris.express.const-route.v1"
+        }
+      ],
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-composed-route/run-03/captured-wire-replies.json",
+          "sha256": "cf3d2e91a2690ca4d84fae03cab9a419bc8662535fa9088a2377f2e4527bb148"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-composed-route/run-03/verification-report.json",
+          "sha256": "a2616c063a52bbde0dbc526fbd036063e7dac3656890591ea05a605dd7406293"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-composed-route/run-03/analysis-result.json",
+          "sha256": "d72dbf34d6ec9f456df785f22c802e29cd92f615049d7f8a92e670bedae4fbc7"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-composed-route/run-03/captured-contexts.json",
+          "sha256": "40cedea806e86bef86dc8789f7a04f2b4da54b61a8b7731dcafed2f9853e87c0"
+        }
+      }
+    },
+    {
+      "suite": "hive-v21-holdout",
+      "caseId": "holdout-shadowed-route",
+      "run": 2,
+      "atomicClaim": {
+        "target": "apiRoutes",
+        "component": ".",
+        "scope": "source",
+        "value": {
+          "method": "GET",
+          "path": "/ops/alive"
+        }
+      },
+      "manualVerdict": "invalid_source_inference",
+      "presentInMergedResult": false,
+      "verifierDecisions": [
+        {
+          "decision": "deferred",
+          "reasonCode": "LEXICAL_RELATION_UNRESOLVED",
+          "ruleId": "iris.express.const-route.v1"
+        }
+      ],
+      "artifactRefs": {
+        "rawWire": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/run-02/captured-wire-replies.json",
+          "sha256": "e03d90e83e0f731186448372d3dde0364e6b9c15cd02aa3a2ee9d2ee293c2ae2"
+        },
+        "verification": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/run-02/verification-report.json",
+          "sha256": "cd453904b8d78a0a8eb2479755b624a749a26443a5d16f2ebdac7901124041e7"
+        },
+        "merged": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/run-02/analysis-result.json",
+          "sha256": "d6e53702e8832c5399aeb00bcdf27c5139a9d1ae3f08580b38ff2fbc18d7969c"
+        },
+        "contexts": {
+          "path": "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/run-02/captured-contexts.json",
+          "sha256": "045600d407d3bfc005ef7d03ce95aa028d6a39c84a7dbacdbcfc40d98783c8d5"
+        }
+      }
+    }
+  ],
+  "summary": {
+    "completedRuns": 45,
+    "coreRuns": 30,
+    "holdoutRuns": 15,
+    "modelAuthoredChangeEntries": 12,
+    "suggestedValueEntries": 10,
+    "unknownNullAbstentionEntries": 2,
+    "allSuggestedVerifierDecisions": {
+      "supported": 8,
+      "rejected": 0,
+      "deferred": 2
+    },
+    "rawNovelValueProposals": 7,
+    "novelVerifierDecisions": {
+      "supported": 6,
+      "rejected": 0,
+      "deferred": 1
+    },
+    "manuallyValidNovelProposals": 6,
+    "manuallyInvalidNovelProposals": 1,
+    "invalidNovelProposalsAdmitted": 0,
+    "duplicateStaticValueSuggestions": 3,
+    "freeProseFindingEntries": 21,
+    "questionEntries": 10,
+    "fileRequestEntries": 23,
+    "manualVerdictCounts": {
+      "supported_scoped_finding": 3,
+      "appropriate_bounded_context_request": 20,
+      "supported_bounded_advisory": 12,
+      "appropriate_review_question": 1,
+      "insufficient_category_support": 2,
+      "overbroad_abstention": 1,
+      "valid_duplicate_source_claim": 3,
+      "supported_duplicate_finding": 3,
+      "appropriate_but_incomplete_batch": 3,
+      "appropriate_bounded_abstention": 8,
+      "premature_user_configuration_request": 1,
+      "supported_with_locator_caveat": 1,
+      "supported_with_wording_caveat": 1,
+      "valid_novel_source_claim": 6,
+      "invalid_source_inference": 1
+    },
+    "freeProseFindingManualSummary": {
+      "supportedNarrowerClaim": 19,
+      "ofWhichStaticDuplicate": 3,
+      "ofWhichLocatorCaveat": 1,
+      "insufficientCategorySupport": 2
+    },
+    "fileRequestManualSummary": {
+      "withinAvailableOrExpandablePaths": 23,
+      "appropriateButIncompleteBatch": 3,
+      "automaticallyWrongBecauseNotInGold": 0
+    }
+  },
+  "findingsAndLimits": [
+    {
+      "id": "shadowing_error_blocked",
+      "priority": "high",
+      "finding": "One real novel route proposal is invalid source inference, despite an automated rejected-only count of zero. It was deferred and excluded.",
+      "artifacts": [
+        "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/run-02/captured-wire-replies.json",
+        "artifacts/ai-judgment/hive-v21-holdout/holdout-shadowed-route/run-02/verification-report.json"
+      ]
+    },
+    {
+      "id": "good_lockfile_advisory_not_admitted",
+      "priority": "medium",
+      "finding": "The empty package-lock.json plus npm ci advisory is supported as a static risk, but current source_conflict verification rejects it. This is a verifier coverage limitation, not proof the model invented the issue. No actual install was run.",
+      "artifacts": [
+        "artifacts/ai-judgment/hive-v21-final/node-build-nginx-runtime/run-03/captured-wire-replies.json",
+        "artifacts/ai-judgment/hive-v21-final/node-build-nginx-runtime/run-03/verification-report.json"
+      ]
+    },
+    {
+      "id": "configuration_batch_incomplete",
+      "priority": "medium",
+      "finding": "All 3 config-file runs meet the initial-only gold request yet still cannot bind settings.port after the one expansion. The model requested the JSON but not the partly supplied consumer. Context selection/request planning remains incomplete; source contains the binding.",
+      "artifacts": [
+        "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/run-01/captured-contexts.json",
+        "artifacts/ai-judgment/hive-v21-final/available-config-needs-files/fixture/index.js"
+      ]
+    },
+    {
+      "id": "category_overstatement_blocked",
+      "priority": "medium",
+      "finding": "Two ports-distinct-scopes runs use runtime_stage_mismatch for a web artifact linkage that is merely unspecified. The narrower missing-link concern is useful; the stronger category is unproved and rejected.",
+      "artifacts": [
+        "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-02/verification-report.json",
+        "artifacts/ai-judgment/hive-v21-final/ports-distinct-scopes/run-03/verification-report.json"
+      ]
+    },
+    {
+      "id": "duplicate_port_citation_gap",
+      "priority": "low",
+      "finding": "The 3000 port restatement in same-scope run02 is correct but deferred with missing receiver support. It was already a baseline fact, remains in final output and is not a lost novel finding.",
+      "artifacts": [
+        "artifacts/ai-judgment/hive-v21-final/same-scope-listener-expose/run-02/verification-report.json"
+      ]
+    },
+    {
+      "id": "nginx_already_static",
+      "priority": "context",
+      "finding": "The v21 static extractor already reports nginx/container in every run. Missing final-runtime model findings are correct no-op behavior, not false negatives. Earlier v1.6 assumptions must not be carried into this review.",
+      "artifacts": [
+        "artifacts/ai-judgment/hive-v21-final/node-build-nginx-runtime/baseline.json"
+      ]
+    }
+  ]
+}
