@@ -1,0 +1,7 @@
+{
+  "schemaVersion": "iris.organization-request.v1",
+  "organization": "demo-org",
+  "purpose": "Build the shop frontend and catalog API as one demonstration system; reuse the infrastructure configuration.",
+  "environment": "preview",
+  "target": {"kind":"existing_kubernetes","context":"organization-demo","namespace":"iris-organization-demo","architecture":"amd64"}
+}

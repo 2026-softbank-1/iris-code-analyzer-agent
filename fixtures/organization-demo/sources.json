@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "iris.organization-sources.v1",
+  "organization": "demo-org",
+  "repositories": [
+    {"repositoryId":"101","fullName":"demo-org/catalog-api","commitSha":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","sourceRoot":"catalog-api"},
+    {"repositoryId":"102","fullName":"demo-org/shop-web","commitSha":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","sourceRoot":"shop-web"},
+    {"repositoryId":"103","fullName":"demo-org/platform-infra","commitSha":"cccccccccccccccccccccccccccccccccccccccc","sourceRoot":"platform-infra"}
+  ]
+}

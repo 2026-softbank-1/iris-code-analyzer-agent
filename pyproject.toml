@@ -24,6 +24,7 @@ iris-review-demo = "iris_analyzer.demo.app:main"
 iris-deployment = "iris_analyzer.deployment.cli:main"
 iris-measure = "iris_analyzer.deployment.measure:main"
 iris-build-prepare = "iris_analyzer.build.cli:main"
+iris-organization = "iris_analyzer.organization.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

@@ -2,7 +2,9 @@
 
 Iris의 전처리와 코드 분석 worker용 Python 패키지입니다. 저장소를 고정한 스냅샷으로 읽고 배포에 필요한 파일·관측값·줄 단위 근거를 구성한 다음 OpenCode를 통해 Hive 또는 OpenAI 모델에 전달합니다. 결과는 JSON Schema와 원본 근거 및 정적 관측값으로 다시 검증합니다.
 
-Node.js workspace, Vite, Express, Dockerfile, Compose를 지원합니다. 분석 대상의 소스·설정·스크립트를 실행하지 않습니다. FastAPI Job 접수, PostgreSQL 저장, 실제 빌드·배포는 플랫폼 담당 모듈에서 연결합니다.
+Node.js workspace, Vite, Express, Dockerfile, Compose를 지원합니다. 분석 단계는 대상의 소스·설정·스크립트를 실행하지 않습니다. FastAPI Job 접수와 PostgreSQL 저장은 플랫폼 담당 모듈에서 연결합니다.
+
+**Organization 입력**은 `iris-organization` 독립 CLI로 지원합니다. 레포별 커밋을 고정해 분석하고 전체 시스템 그래프·질문·계획·Helm/Kubernetes 실행 번들을 생성합니다. 별도 executor는 승인한 기존 Kubernetes 환경에서 여러 이미지의 빌드·배포를 수행합니다. WAS 변경은 없습니다. 사용법과 정확한 지원 범위는 [1002 Organization 구현 문서](docs/1002-organization-system.md)에 정리했습니다.
 
 ## 설치
 
