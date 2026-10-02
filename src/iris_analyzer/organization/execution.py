@@ -24,7 +24,7 @@ import httpx
 import yaml
 
 from iris_analyzer.build.source import safe_relative, verify_source
-from iris_analyzer.contracts import AnalyzerError, canonical_bytes, digest
+from iris_analyzer.contracts import AnalyzerError, digest
 
 from .planner import validate_system_plan
 

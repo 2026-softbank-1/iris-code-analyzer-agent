@@ -1,0 +1,247 @@
+{
+  "schemaVersion": "iris.organization-local-evaluation.v1",
+  "observedDate": "2026-10-02",
+  "testedModel": "qwen3.8-27b-uncensored-mlx",
+  "serverEngine": "MLX",
+  "testInput": "fixtures/organization-demo (synthetic commits, frontend/API/Terraform fixtures)",
+  "unitTests": {
+    "passed": 760,
+    "skipped": 2,
+    "durationSeconds": 18.06,
+    "organizationTestsIncluded": 85,
+    "skippedReasons": [
+      "Pinned real OpenCode executable integration not configured",
+      "Unpaid native OpenCode inference integration not configured"
+    ]
+  },
+  "lint": {
+    "changedScope": "passed"
+  },
+  "experiments": [
+    {
+      "name": "native_json_schema_org_pipeline",
+      "outputMode": "schema",
+      "status": "rejected",
+      "calls": [
+        {
+          "elapsedSeconds": 1.526,
+          "error": "LOCAL_HTTP_ERROR",
+          "httpStatus": 400,
+          "id": 1,
+          "inputBytes": 40957,
+          "inputDigest": "c24ac49af2d49e583fecb7982fe67927829f9fc8fb8e800861c247cd12a83322",
+          "model": "qwen3.8-27b-uncensored-mlx",
+          "outputMode": "schema",
+          "promptVersion": "deployment_v2.1",
+          "provider": "local",
+          "status": "failed",
+          "transport": "chat_completions"
+        },
+        {
+          "elapsedSeconds": 0.056,
+          "error": "LOCAL_HTTP_ERROR",
+          "httpStatus": 400,
+          "id": 2,
+          "inputBytes": 35968,
+          "inputDigest": "1a46d513510e2d2e0d6b8b31e5929d71c4da3bbb881144419a97eea94e9a624d",
+          "model": "qwen3.8-27b-uncensored-mlx",
+          "outputMode": "schema",
+          "promptVersion": "deployment_v2.1",
+          "provider": "local",
+          "status": "failed",
+          "transport": "chat_completions"
+        },
+        {
+          "elapsedSeconds": 0.056,
+          "error": "LOCAL_HTTP_ERROR",
+          "httpStatus": 400,
+          "id": 3,
+          "inputBytes": 28888,
+          "inputDigest": "2b5fd09d88d4d9605700ef1c28db723e9b14c3770b1be1a73eb94a57de0fa316",
+          "model": "qwen3.8-27b-uncensored-mlx",
+          "outputMode": "schema",
+          "promptVersion": "deployment_v2.1",
+          "provider": "local",
+          "status": "failed",
+          "transport": "chat_completions"
+        },
+        {
+          "elapsedSeconds": 0.026,
+          "error": "LOCAL_HTTP_ERROR",
+          "httpStatus": 400,
+          "id": 4,
+          "inputBytes": 5921,
+          "inputDigest": "b6098ec6ac2f8cfb6ba0d2b21f1ccecdaa5031c2c3ce3d0d803d3527afc952a5",
+          "model": "qwen3.8-27b-uncensored-mlx",
+          "outputMode": "schema",
+          "promptVersion": "organization_system_advisor_v1",
+          "provider": "local",
+          "status": "failed",
+          "transport": "chat_completions"
+        }
+      ],
+      "errorDetail": "HTTP 400: ValueError: Unimplemented keys: [\"uniqueItems\"]"
+    },
+    {
+      "name": "plain_json_org_pipeline",
+      "outputMode": "plain",
+      "repositoryAnalysisMode": "local_ai",
+      "status": "not_completed",
+      "calls": [
+        {
+          "elapsedSeconds": 180.009,
+          "error": "ReadTimeout",
+          "id": 1,
+          "inputBytes": 32282,
+          "inputDigest": "ccaca28d55b04450d103264f0575961980eb2b7c16f6ec2284600ce8f906c7c3",
+          "model": "qwen3.8-27b-uncensored-mlx",
+          "outputMode": "plain",
+          "promptVersion": "deployment_v2.1",
+          "provider": "local",
+          "remoteCompletion": "unknown",
+          "status": "failed",
+          "transport": "chat_completions"
+        },
+        {
+          "id": 2,
+          "model": "qwen3.8-27b-uncensored-mlx",
+          "status": "interrupted",
+          "remoteCompletion": "unknown",
+          "reason": "Stopped after preceding inference exceeded timeout; no automatic retry"
+        }
+      ]
+    },
+    {
+      "name": "minimal_chat_smoke",
+      "status": "passed",
+      "input": "Return exactly {\"ok\":true}.",
+      "output": {
+        "ok": true
+      },
+      "finishReason": "stop",
+      "usage": {
+        "prompt_tokens": 67,
+        "completion_tokens": 25,
+        "total_tokens": 92,
+        "completion_tokens_details": {
+          "reasoning_tokens": 17
+        }
+      }
+    },
+    {
+      "name": "native_reasoning_off_smoke",
+      "status": "rejected",
+      "errorDetail": "Model does not expose reasoning configuration"
+    },
+    {
+      "name": "system_advisor_only",
+      "repositoryAnalysisMode": "static",
+      "status": "failed",
+      "calls": [
+        {
+          "elapsedSeconds": 120.013,
+          "error": "ReadTimeout",
+          "id": 1,
+          "inputBytes": 9195,
+          "inputDigest": "315640210a74569fb9c43775e12bdc91d4ad824815fceba3fbaa9a2906d71433",
+          "model": "qwen3.8-27b-uncensored-mlx",
+          "outputMode": "plain",
+          "promptVersion": "organization_system_advisor_v1",
+          "provider": "local",
+          "remoteCompletion": "unknown",
+          "status": "failed",
+          "transport": "chat_completions"
+        }
+      ],
+      "repositories": [
+        {
+          "name": "demo-org/catalog-api",
+          "status": "analyzed"
+        },
+        {
+          "name": "demo-org/shop-web",
+          "status": "analyzed"
+        },
+        {
+          "name": "demo-org/platform-infra",
+          "status": "analyzed"
+        }
+      ],
+      "components": [
+        {
+          "id": "repo-101--svc-96c49d08c231282a",
+          "kind": "service",
+          "selected": true
+        },
+        {
+          "id": "repo-102--svc-96c49d08c231282a",
+          "kind": "service",
+          "selected": true
+        },
+        {
+          "id": "repository-103",
+          "kind": "infrastructure",
+          "selected": false
+        }
+      ],
+      "questions": [
+        {
+          "key": "imageBuilds.repo-101--svc-96c49d08c231282a.imageRepository",
+          "reason": "Select the registry repository to receive this image; cluster availability requires a registry push.",
+          "requiredForExecution": true,
+          "serviceId": "repo-101--svc-96c49d08c231282a"
+        },
+        {
+          "key": "components.repo-102--svc-96c49d08c231282a.port",
+          "reason": "Choose the container listening port; source does not identify a unique port.",
+          "requiredForExecution": true,
+          "serviceId": "repo-102--svc-96c49d08c231282a"
+        },
+        {
+          "key": "imageBuilds.repo-102--svc-96c49d08c231282a.imageRepository",
+          "reason": "Select the registry repository to receive this image; cluster availability requires a registry push.",
+          "requiredForExecution": true,
+          "serviceId": "repo-102--svc-96c49d08c231282a"
+        },
+        {
+          "key": "environment:repo-102--svc-96c49d08c231282a:build:VITE_CATALOG_URL",
+          "reason": "Bind required build environment key VITE_CATALOG_URL; build inputs require a source image build and cannot be supplied by runtime bindings.",
+          "requiredForExecution": true,
+          "serviceId": "repo-102--svc-96c49d08c231282a"
+        },
+        {
+          "key": "repo-102-frontend.connection",
+          "reason": "Frontend request URL cannot be resolved statically",
+          "requiredForExecution": false,
+          "serviceId": null
+        },
+        {
+          "key": "repo-103-deployment.support",
+          "reason": "No supported Node.js application execution candidate was observed",
+          "requiredForExecution": false,
+          "serviceId": null
+        },
+        {
+          "key": "systemAdvice",
+          "reason": "Requested AI system advice failed: LOCAL_CONNECTION_ERROR",
+          "requiredForExecution": true,
+          "serviceId": null
+        }
+      ]
+    }
+  ],
+  "conclusion": {
+    "localModelOrganizationAnalysis": "not_validated",
+    "staticOrganizationAnalysis": "completed_for_three_fixtures",
+    "causeOfLongInference": "not_established",
+    "deploymentExecuted": false,
+    "paidProviderCalls": 0,
+    "liveGitHubCollection": false
+  },
+  "limitations": [
+    "A minimal JSON smoke test is not architecture-quality evidence.",
+    "These local calls use production prompts/schemas/validators via a direct Chat Completions test transport, not the pinned OpenCode server protocol.",
+    "Interrupted remote completion is unknown; the test runner now blocks subsequent calls after unknown completion.",
+    "The measured timeouts establish only that the configured deadline was exceeded, not that a given runtime or thinking setting caused it."
+  ]
+}

@@ -187,3 +187,7 @@ CLI는 manifest의 상대 sourceRoot를 manifest 위치 기준으로 해석한�
 | `organization/planner.py` | 다중 앱 바인딩·source/image lock·실행 DAG·기존 dossier |
 | `organization/execution.py` | 고정 compiler·별도 실행·결과 확인·재개 |
 | `organization/contracts.py`, `cli.py` | JSON 요청 계약·독립 CLI |
+
+## 후속 로컬 모델 검증 — 2026-10-02
+
+이후 사용자의 요청으로 로컬 서버 테스트를 실행했다. 전체 테스트 760개 통과/2개 skipped이고, 최소 JSON 응답은 받았지만 MLX JSON Schema의 uniqueItems 거절 및 레포 분석/시스템 제안 timeout으로 전체 AI Organization 성공은 확인하지 못했다. 상세 결과와 재현 명령은 [로컬 모델 1002 보고서](../reports/organization-local-model-1002.md)를 참고한다. 실제 배포는 실행하지 않았다.
