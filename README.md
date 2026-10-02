@@ -169,3 +169,5 @@ uv run python scripts/evaluate_ai_judgment.py --live --env-file ../.env \
 ### 검증된 문제의 로그 기반 개선 인계
 
 실패 로그·원본 식별자·검증 기록을 묶어 원인 미확정은 진단 전용, 검증된 코드 하자는 수정안 제안으로 넘기는 [개선 인계 설계](docs/remediation-handoff.md)를 추가했습니다. [draft 계약](contracts/remediation-handoff.v1.schema.json)은 형식 초안이며 실제 오류 에이전트·WAS 큐 연결은 아직 구현하지 않았습니다. Dockerfile 부재·설정 누락·인프라 장애는 코드 하자로 자동 분류하지 않습니다.
+
+1002 분석기·WAS·프론트 연동 변경 및 현재 설계: [docs/1002-integration-design.md](docs/1002-integration-design.md).
