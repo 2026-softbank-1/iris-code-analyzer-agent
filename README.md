@@ -102,6 +102,7 @@ uv run iris-analyzer analyze --repo /path/to/repo --env-file .env --out artifact
 - 라이브러리: `analyze_with_report(repo, on_event=...)` → `AnalysisResult` v1. 이벤트 `queued → preprocessing → analyzing → validating → succeeded`(+ expanding, needs_input, unsupported, failed).
 - 스키마: `src/iris_analyzer/schemas/`, 공유 타입: `contracts/*.ts`.
 - 빌드 인계 v2: 기존 Dockerfile 보존, 없으면 Railpack 경로 추천 → [build-preparation.md](docs/build-preparation.md)
+- Analysis Gate: 단일 Dockerfile/Railpack 레포는 분석 생략(skip), 멀티 이미지 레포만 배포 단위·의존성 정적 추출(`iris-analysis-gate`) → [analysis-gate.md](docs/analysis-gate.md)
 - 로그 기반 개선 인계: draft 계약만 있음 → [remediation-handoff.md](docs/remediation-handoff.md)
 
 상세: [공통 계약](docs/implementation-contract.md), [WAS 연결 준비](docs/control-plane-readiness.md)
