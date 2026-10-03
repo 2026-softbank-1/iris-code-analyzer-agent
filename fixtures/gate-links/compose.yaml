@@ -1,0 +1,39 @@
+services:
+  web:
+    build: ./web
+    ports: ["8080:80"]
+    depends_on: [api]
+  api:
+    build: ./api
+    environment:
+      PORT: "3000"
+      DATABASE_URL: postgres://app:hunter2-hardcoded@postgres:5432/shop
+      REDIS_URL: redis://cache:6379
+      MONGODB_URI: mongodb://mongo:27017/audit
+    depends_on: [postgres, cache]
+  worker:
+    build: ./worker
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=app
+      - API_URL=http://api:3000
+      - REDIS_URL=${REDIS_URL}
+      - SENTRY_DSN=https://example.invalid/1
+  reporter:
+    build: ./reporter
+    environment:
+      DATABASE_URL: postgres://reports.example.com:5432/prod
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: s3cr3t-pg-pass
+      POSTGRES_DB: shop
+  cache:
+    image: redis:7-alpine
+    command: ["redis-server", "--requirepass", "redis-secret-xyz"]
+  mongo:
+    image: mongo:7
+    environment:
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:?set it}

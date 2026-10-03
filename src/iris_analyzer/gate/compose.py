@@ -15,6 +15,7 @@ import yaml
 
 from ..preprocess.extractors.docker import _command, _compose_port, _yaml_lines, _yaml_mapping
 from ..preprocess.extractors.execution import safe_repository_path
+from .links import line_of_key
 from .scan import RepositoryScan, parent
 from .sources import COMPOSE_STANDARD, env_required, image_name, port_number, url_engine, url_hosts
 
@@ -56,6 +57,10 @@ class ComposeService:
     ports: list[tuple[int, int]] = field(default_factory=list)
     env: list[dict] = field(default_factory=list)
     env_engines: dict[str, str] = field(default_factory=dict)
+    # Runtime environment values (key -> raw value) and their lines. Internal to the
+    # gate: used to find link targets, never serialized.
+    env_values: dict[str, str] = field(default_factory=dict)
+    env_lines: dict[str, int] = field(default_factory=dict)
     hosts: set[str] = field(default_factory=set)
     depends_on: list[str] = field(default_factory=list)
     command: str | None = None
@@ -163,7 +168,7 @@ def load_compose(scan: RepositoryScan, path: str) -> tuple[list[ComposeService],
                 port = port_number(str(value).split("/")[0])
                 if port is not None:
                     item.ports.append((port, line))
-        _environment(item, service, fields)
+        _environment(item, service, fields, text)
         dependencies = service.get("depends_on")
         if isinstance(dependencies, dict):
             item.depends_on = [str(key) for key in dependencies]
@@ -215,7 +220,7 @@ def _build(item: ComposeService, build: object, base: str, scan: RepositoryScan)
     item.dockerfile = normalized
 
 
-def _environment(item: ComposeService, service: dict, fields: dict) -> None:
+def _environment(item: ComposeService, service: dict, fields: dict, text: str) -> None:
     environment = service.get("environment")
     if isinstance(environment, list):
         environment = {
@@ -231,6 +236,9 @@ def _environment(item: ComposeService, service: dict, fields: dict) -> None:
         if env_port is not None:
             item.ports.append((env_port, line))
         item.env.append({"key": key, "stage": "runtime", "required": env_required(key, value)})
+        if value is not None:
+            item.env_values[key] = str(value)
+        item.env_lines[key] = line_of_key(text, line, key)
         engine = url_engine(value)
         if engine:
             item.env_engines[key] = engine

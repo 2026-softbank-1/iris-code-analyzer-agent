@@ -285,6 +285,67 @@
                 },
                 "required": {
                   "type": "boolean"
+                },
+                "binding": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "kind": {
+                          "enum": [
+                            "dependency",
+                            "unit"
+                          ]
+                        },
+                        "targetId": {
+                          "type": "string",
+                          "pattern": "^[a-z0-9]([a-z0-9-]{0,62}[a-z0-9])?$"
+                        },
+                        "property": {
+                          "enum": [
+                            "url",
+                            "host",
+                            "port",
+                            "user",
+                            "password",
+                            "database"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "targetId",
+                        "property"
+                      ],
+                      "allOf": [
+                        {
+                          "if": {
+                            "properties": {
+                              "kind": {
+                                "const": "unit"
+                              }
+                            }
+                          },
+                          "then": {
+                            "properties": {
+                              "property": {
+                                "enum": [
+                                  "url",
+                                  "host",
+                                  "port"
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "description": "Where the platform can source this variable from. Optional for results produced before Phase 2; null when unknown."
                 }
               },
               "required": [
@@ -299,6 +360,66 @@
             "items": {
               "type": "string",
               "minLength": 1
+            }
+          },
+          "hostAliases": {
+            "type": "array",
+            "description": "Hostnames (Compose service names) this unit uses to reach another unit or dependency. Optional for results produced before Phase 2.",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "host": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "port": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 65535
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "targetId": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9]([a-z0-9-]{0,62}[a-z0-9])?$"
+                },
+                "evidence": {
+                  "type": "array",
+                  "maxItems": 100,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "path": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 1024,
+                        "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$))[^\\\\\\u0000]*$"
+                      },
+                      "line": {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    },
+                    "required": [
+                      "path",
+                      "line"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "host",
+                "port",
+                "targetId",
+                "evidence"
+              ]
             }
           },
           "evidence": {
@@ -372,6 +493,44 @@
                 "type": "null"
               }
             ]
+          },
+          "port": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 65535
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "database": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "user": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "passwordInSource": {
+            "type": "boolean",
+            "description": "True when the source hardcodes a password; the value is never returned."
           },
           "evidence": {
             "type": "array",

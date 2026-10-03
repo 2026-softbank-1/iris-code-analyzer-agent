@@ -158,9 +158,19 @@ def test_compose_with_three_build_services_and_two_dependencies(tmp_path):
     assert found["api"]["dependsOn"] == ["postgres", "redis"]
     assert found["worker"]["dependsOn"] == ["redis"]
     api_env = {row["key"]: row for row in found["api"]["env"]}
-    assert api_env["DATABASE_URL"] == {"key": "DATABASE_URL", "stage": "runtime", "required": True}
+    assert api_env["DATABASE_URL"] == {
+        "key": "DATABASE_URL",
+        "stage": "runtime",
+        "required": True,
+        "binding": {"kind": "dependency", "targetId": "postgres", "property": "url"},
+    }
     assert api_env["REDIS_URL"]["required"] is True and api_env["NODE_ENV"]["required"] is False
-    assert {"key": "VITE_API_BASE_URL", "stage": "build", "required": False} in found["web"]["env"]
+    assert {
+        "key": "VITE_API_BASE_URL",
+        "stage": "build",
+        "required": False,
+        "binding": None,
+    } in found["web"]["env"]
     worker_env = {row["key"]: row["required"] for row in found["worker"]["env"]}
     assert worker_env == {"REDIS_URL": True, "SESSION_SECRET": True}
     dependencies = {row["id"]: row for row in result["dependencies"]}
@@ -207,6 +217,10 @@ def test_npm_workspaces_with_two_apps_analyze(tmp_path):
             "id": "postgres",
             "engine": "postgres",
             "image": None,
+            "port": 5432,
+            "database": None,
+            "user": "postgres",
+            "passwordInSource": False,
             "evidence": [{"path": "apps/api/package.json", "line": 1}],
         }
     ]
@@ -438,3 +452,110 @@ def test_cli_round_trip_and_error_exit_codes(tmp_path):
         assert str(repo) not in failed.stderr.decode()
     missing = run_cli(json.dumps({**request, "sourceRoot": str(tmp_path / "nope")}).encode())
     assert missing.returncode == 2 and json.loads(missing.stderr)["error"]["code"] == "GATE_SOURCE_NOT_FOUND"
+
+
+# -- Phase 2: env bindings, host aliases, dependency profiles -------------------
+
+LINKS = Path(__file__).resolve().parent.parent / "fixtures" / "gate-links"
+HARDCODED_SECRETS = ("s3cr3t-pg-pass", "hunter2-hardcoded", "redis-secret-xyz")
+
+
+def test_env_bindings_from_compose_values_siblings_and_key_names():
+    result = gate(LINKS)
+    found = units(result)
+    api = {row["key"]: row["binding"] for row in found["api"]["env"]}
+    assert api["DATABASE_URL"] == {"kind": "dependency", "targetId": "postgres", "property": "url"}
+    # Compose service name `cache` differs from the engine; the host decides the target.
+    assert api["REDIS_URL"] == {"kind": "dependency", "targetId": "cache", "property": "url"}
+    assert api["MONGODB_URI"] == {"kind": "dependency", "targetId": "mongo", "property": "url"}
+    assert api["PORT"] is None
+    worker = {row["key"]: row["binding"] for row in found["worker"]["env"]}
+    assert worker["DB_HOST"] == {"kind": "dependency", "targetId": "postgres", "property": "host"}
+    assert worker["DB_PORT"] == {"kind": "dependency", "targetId": "postgres", "property": "port"}
+    assert worker["DB_USER"] == {"kind": "dependency", "targetId": "postgres", "property": "user"}
+    assert worker["API_URL"] == {"kind": "unit", "targetId": "api", "property": "url"}
+    # `${REDIS_URL}` carries no host, so the key name picks the only redis dependency.
+    assert worker["REDIS_URL"] == {"kind": "dependency", "targetId": "cache", "property": "url"}
+    assert worker["SENTRY_DSN"] is None
+
+
+def test_external_database_url_is_not_bound_and_env_example_keys_use_heuristics():
+    found = units(gate(LINKS))
+    reporter = {row["key"]: row["binding"] for row in found["reporter"]["env"]}
+    assert reporter["DATABASE_URL"] is None  # points at an external host
+    assert reporter["REDIS_URL"] == {"kind": "dependency", "targetId": "cache", "property": "url"}
+    assert reporter["SESSION_SECRET"] is None
+    assert found["reporter"]["hostAliases"] == []
+
+
+def test_host_aliases_from_compose_nginx_and_source_literals():
+    found = units(gate(LINKS))
+    web = found["web"]["hostAliases"]
+    assert web == [
+        {
+            "host": "api",
+            "port": 3000,
+            "targetId": "api",
+            "evidence": [
+                {"path": "web/nginx/default.conf", "line": 2},
+                {"path": "web/nginx/default.conf", "line": 7},
+            ],
+        }
+    ]
+    api = {(row["host"], row["port"]): row for row in found["api"]["hostAliases"]}
+    assert set(api) == {("postgres", 5432), ("cache", 6379), ("mongo", 27017)}
+    assert api[("postgres", 5432)]["targetId"] == "postgres"
+    assert api[("postgres", 5432)]["evidence"] == [{"path": "compose.yaml", "line": 10}]
+    worker = {row["host"]: row for row in found["worker"]["hostAliases"]}
+    assert worker["api"]["port"] == 3000 and worker["api"]["targetId"] == "api"
+    assert {"path": "compose.yaml", "line": 20} in worker["api"]["evidence"]
+    assert {"path": "worker/src/index.js", "line": 1} in worker["api"]["evidence"]
+    assert worker["postgres"]["port"] == 5432
+    assert "localhost" not in worker and "unknown-host" not in {r["host"] for r in web}
+    assert "api" in found["worker"]["dependsOn"]
+
+
+def test_dependency_profile_and_password_flag():
+    result = gate(LINKS)
+    dependencies = {row["id"]: row for row in result["dependencies"]}
+    assert dependencies["postgres"] | {"evidence": None} == {
+        "id": "postgres",
+        "engine": "postgres",
+        "image": "postgres:16-alpine",
+        "port": 5432,
+        "database": "shop",
+        "user": "app",
+        "passwordInSource": True,
+        "evidence": None,
+    }
+    assert dependencies["cache"]["port"] == 6379 and dependencies["cache"]["passwordInSource"] is True
+    mongo = dependencies["mongo"]
+    assert (mongo["port"], mongo["passwordInSource"]) == (27017, False)
+    assert mongo["database"] == "audit" and mongo["user"] is None
+
+
+def test_hardcoded_passwords_never_leave_the_gate():
+    request = {"schemaVersion": "iris.analysis-gate-request.v1", "sourceRoot": str(LINKS)}
+    completed = run_cli(json.dumps(request).encode())
+    assert completed.returncode == 0
+    for secret in HARDCODED_SECRETS:
+        assert secret not in completed.stdout.decode() + completed.stderr.decode()
+
+
+def test_results_without_phase2_fields_still_validate():
+    result = gate(LINKS)
+    for unit in result["units"]:
+        unit.pop("hostAliases")
+        for row in unit["env"]:
+            row.pop("binding")
+    for dependency in result["dependencies"]:
+        for key in ("port", "database", "user", "passwordInSource"):
+            dependency.pop(key)
+    Draft202012Validator(RESULT_SCHEMA).validate(result)
+
+
+def test_unit_binding_cannot_use_database_properties():
+    result = gate(LINKS)
+    row = next(row for row in result["units"][0]["env"])
+    row["binding"] = {"kind": "unit", "targetId": "api", "property": "password"}
+    assert list(Draft202012Validator(RESULT_SCHEMA).iter_errors(result))

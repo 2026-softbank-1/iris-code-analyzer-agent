@@ -26,6 +26,20 @@ from .compose import (
     is_adjunct,
     load_compose,
 )
+from .links import (
+    DEFAULT_PORTS,
+    DEFAULT_USERS,
+    MAX_EVIDENCE,
+    config_aliases,
+    dependency_profile,
+    env_references,
+    heuristic_binding,
+    key_binding,
+    parse_url,
+    sibling_bindings,
+    source_aliases,
+    whole_url_host,
+)
 from .scan import RepositoryScan, join, parent, relative_to, scan_repository, within
 from .sources import (
     RUNTIME_MANIFESTS,
@@ -87,6 +101,8 @@ class _Unit:
     depends_on: list[str] = field(default_factory=list)
     evidence: list[dict] = field(default_factory=list)
     docker: Dockerfile | None = None
+    compose: ComposeService | None = None
+    aliases: list[dict] = field(default_factory=list)
 
     def contract(self) -> dict:
         return {
@@ -102,6 +118,7 @@ class _Unit:
             "public": self.role != "worker",
             "env": _unique_env(self.env),
             "dependsOn": sorted(set(self.depends_on)),
+            "hostAliases": self.aliases,
             "evidence": _unique_evidence(self.evidence),
         }
 
@@ -191,8 +208,14 @@ def _unique_env(rows: list[dict]) -> list[dict]:
         key = (row["key"], row["stage"])
         if key in seen:
             seen[key]["required"] = seen[key]["required"] or row["required"]
+            seen[key]["binding"] = seen[key]["binding"] or row.get("binding")
         else:
-            seen[key] = {"key": row["key"], "stage": row["stage"], "required": bool(row["required"])}
+            seen[key] = {
+                "key": row["key"],
+                "stage": row["stage"],
+                "required": bool(row["required"]),
+                "binding": row.get("binding"),
+            }
     return [seen[key] for key in sorted(seen, key=lambda item: (item[1] != "runtime", item[0]))]
 
 
@@ -219,6 +242,7 @@ class _Gate:
         self.units: list[_Unit] = []
         self.ids: set[str] = set()
         self.dockerfiles: dict[str, Dockerfile] = {}
+        self.service_ids: dict[str, str] = {}
 
     # -- inventory -------------------------------------------------------
     def _inventory(self) -> None:
@@ -516,18 +540,32 @@ class _Gate:
         self.ids.add(candidate)
         return candidate
 
-    def _dependency(self, name: str, engine: str, image: str | None, evidence: list[dict]) -> str:
+    def _dependency(
+        self,
+        name: str,
+        engine: str,
+        image: str | None,
+        evidence: list[dict],
+        service: ComposeService | None = None,
+    ) -> str:
+        profile = dependency_profile(engine, service) if service is not None else {}
         for key, row in self.dependencies.items():
             if row["engine"] == engine and engine != "other" and (image is None or row["image"] == image):
                 row["evidence"] = _unique_evidence(row["evidence"] + evidence)
+                _merge_profile(row, profile)
                 return key
         identifier = self._new_id(name)
         self.dependencies[identifier] = {
             "id": identifier,
             "engine": engine,
             "image": image,
+            "port": DEFAULT_PORTS.get(engine),
+            "database": None,
+            "user": None,
+            "passwordInSource": False,
             "evidence": _unique_evidence(evidence),
         }
+        _merge_profile(self.dependencies[identifier], profile, replace_port=True)
         return identifier
 
     def _extract_units(self) -> None:
@@ -540,7 +578,9 @@ class _Gate:
             engine = image_engine(service.image)
             evidence = [{"path": service.file, "line": service.line}]
             if engine is not None:
-                service_ids[service.name] = self._dependency(service.name, engine, service.image, evidence)
+                service_ids[service.name] = self._dependency(
+                    service.name, engine, service.image, evidence, service
+                )
             elif self.build_services:
                 self.questions.append(
                     _question(
@@ -578,7 +618,11 @@ class _Gate:
                 if docker is not None:
                     evidence.append({"path": path, "line": 1})
                 service_ids[service.name] = self._dependency(
-                    service.name, engine, (docker.final_image if docker else None) or service.image, evidence
+                    service.name,
+                    engine,
+                    (docker.final_image if docker else None) or service.image,
+                    evidence,
+                    service,
                 )
                 self.questions.append(
                     _question(
@@ -597,6 +641,7 @@ class _Gate:
                 env=list(service.env),
                 evidence=evidence,
                 docker=docker,
+                compose=service,
             )
             service_ids[service.name] = unit.id
             if docker is None:
@@ -702,11 +747,14 @@ class _Gate:
                         env=list(root_unit.env),
                         evidence=root_unit.evidence + [{"path": join(self.scope, "Procfile"), "line": line}],
                         docker=root_unit.docker,
+                        compose=root_unit.compose,
                     )
                     self.units.append(unit)
 
         for unit in self.units:
             self._enrich(unit)
+        self.service_ids = service_ids
+        self._link_units()
 
     def _base_name(self, directory: str) -> str:
         if directory == ".":
@@ -769,6 +817,115 @@ class _Gate:
                     unit.depends_on.append(row["id"])
                 return
         unit.depends_on.append(self._dependency(engine, engine, None, [{"path": path, "line": line}]))
+
+    # -- links: env bindings and host aliases ------------------------------
+    def _link_units(self) -> None:
+        kinds = {unit.id: "unit" for unit in self.units}
+        kinds.update({key: "dependency" for key in self.dependencies})
+        names = {identifier: identifier for identifier in kinds}
+        names.update({name: target for name, target in self.service_ids.items() if target in kinds})
+        engines = {key: row["engine"] for key, row in self.dependencies.items()}
+        by_engine: dict[str, list[str]] = {}
+        for key, engine in engines.items():
+            by_engine.setdefault(engine, []).append(key)
+        single = {engine: ids[0] if len(ids) == 1 else None for engine, ids in by_engine.items()}
+        ports = {unit.id: unit.port for unit in self.units}
+        ports.update({key: row["port"] for key, row in self.dependencies.items()})
+
+        def owners(path: str) -> list[_Unit]:
+            candidates = [unit for unit in self.units if within(path, unit.root)]
+            if not candidates:
+                return []
+            deepest = max(len(unit.root) if unit.root != "." else 0 for unit in candidates)
+            return [u for u in candidates if (len(u.root) if u.root != "." else 0) == deepest]
+
+        configured: dict[str, list[tuple]] = {}
+        for path, host, port, line in config_aliases(self.scan, names):
+            for unit in owners(path):
+                configured.setdefault(unit.id, []).append((host, port, path, line))
+
+        for unit in self.units:
+            found: list[tuple[str, int | None, str, int]] = list(configured.get(unit.id, []))
+            compose = unit.compose
+            rows: dict[str, dict | None] = {}
+            for row in unit.env:
+                if row["stage"] != "runtime":
+                    continue
+                key = row["key"]
+                value = compose.env_values.get(key) if compose else None
+                binding = key_binding(key, value, names, kinds) if value is not None else None
+                if binding and binding["targetId"] == unit.id:
+                    binding = None
+                rows[key] = binding
+            sibling_bindings(rows, kinds)
+            if compose:
+                for key, value in compose.env_values.items():
+                    line = compose.env_lines.get(key, compose.line)
+                    found.extend(
+                        (host, port, compose.file, line) for host, port in env_references(value, names)
+                    )
+                    parsed = whole_url_host(value)
+                    if parsed and parsed.host in names and names[parsed.host] in self.dependencies:
+                        self._learn(self.dependencies[names[parsed.host]], parsed)
+            for row in unit.env:
+                key = row["key"]
+                if row["stage"] != "runtime":
+                    continue
+                binding = rows.get(key)
+                if binding is None:
+                    value = compose.env_values.get(key) if compose else None
+                    parsed = parse_url(value) if value is not None else None
+                    if not (parsed and parsed.host):
+                        binding = heuristic_binding(key, unit.depends_on, engines, single)
+                row["binding"] = binding
+            paths = []
+            for path in self.scan.files():
+                if within(path, unit.root) and len(PurePosixPath(relative_to(path, unit.root)).parts) <= 5:
+                    if unit in owners(path):
+                        paths.append(path)
+            found.extend(
+                (host, port, path, line) for path, host, port, line in source_aliases(self.scan, names, paths)
+            )
+
+            merged: dict[tuple[str, int | None], dict] = {}
+            for host, port, path, line in found:
+                target = names[host]
+                if target == unit.id:
+                    continue
+                if port is None:
+                    port = ports.get(target)
+                entry = merged.setdefault(
+                    (host, port), {"host": host, "port": port, "targetId": target, "evidence": []}
+                )
+                entry["evidence"].append({"path": path, "line": line})
+            unit.aliases = []
+            for entry in sorted(merged.values(), key=lambda item: (item["host"], item["port"] or 0)):
+                entry["evidence"] = _unique_evidence(entry["evidence"])[:MAX_EVIDENCE]
+                unit.aliases.append(entry)
+                if entry["targetId"] not in unit.depends_on:
+                    unit.depends_on.append(entry["targetId"])
+        for row in self.dependencies.values():
+            if row["user"] is None:
+                row["user"] = DEFAULT_USERS.get(row["engine"])
+
+    @staticmethod
+    def _learn(row: dict, parsed) -> None:
+        """Non-secret connection facts from a URL that points at this dependency."""
+        if row["user"] is None and parsed.user:
+            row["user"] = parsed.user
+        if row["database"] is None and parsed.database:
+            row["database"] = parsed.database
+        if parsed.password_literal:
+            row["passwordInSource"] = True
+
+
+def _merge_profile(row: dict, profile: dict, replace_port: bool = False) -> None:
+    if profile.get("port") and (replace_port or row.get("port") is None):
+        row["port"] = profile["port"]
+    for key in ("database", "user"):
+        if row.get(key) is None and profile.get(key):
+            row[key] = profile[key]
+    row["passwordInSource"] = bool(row["passwordInSource"] or profile.get("passwordInSource"))
 
 
 def _compose_variant_ignored(name: str) -> bool:

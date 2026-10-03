@@ -58,6 +58,7 @@ python -m iris_analyzer.gate.cli --request-stdin
 - `env[]`는 키·단계(`runtime`/`build`)·필수 여부만 담고 **값은 내보내지 않는다**. 필수: 값이 비었거나 `${VAR}`/`${VAR:?}` 보간, 연결 URL 키(`DATABASE_URL`, `REDIS_URL`, `MONGO_URI` …), 비밀 키 이름(`SECRET`, `PASSWORD`, `TOKEN` …).
 - `dependencies[].image`는 Compose 이미지 또는 DB Dockerfile의 FROM, 코드 의존성으로만 추론한 경우 `null`.
 - `questions[].unitId`는 전역 질문이면 `null`.
+- Phase 2 추가 필드(스키마에서는 선택이지만 이 구현은 항상 출력): `units[].env[].binding`, `units[].hostAliases[]`, `dependencies[].port/database/user/passwordInSource`. 아래 "프로젝트 내부 통신" 참조.
 - `analysis = {"engine":"static","durationMs":…,"modelCalls":0}`, `executionAuthorized`는 항상 `false`.
 
 ## 판정 규칙
@@ -95,6 +96,20 @@ Railpack 인식 매니페스트: `package.json`, `requirements.txt`, `pyproject.
 - `env`: Compose `environment`(runtime), `build.args`(build), unit 루트의 `.env.example` 계열 키. 실제 `.env`는 읽지 않는다.
 - `role`: 이름(worker/queue/consumer/cron → `worker`), 최종 이미지 nginx/caddy/httpd → `web`, 이름(web/frontend/client → `web`, api/server/backend → `api`), 프레임워크 의존성 순. `public`은 worker가 아니면 `true`.
 - `startCommand`는 Compose `entrypoint`/`command` 또는 Procfile 명령일 때만 채운다. `buildCommand`는 채우지 않는다(빌더가 결정).
+
+## 프로젝트 내부 통신 (Phase 2 추가 필드)
+
+`iris.analysis-gate.v1`에 선택 필드만 추가했다(구버전 결과도 스키마 통과). 값은 절대 출력하지 않고 id·포트·속성명·`path:line`만 낸다.
+
+- `units[].env[].binding`: `{"kind":"dependency","targetId":"postgres","property":"url|host|port|user|password|database"}`, `{"kind":"unit","targetId":"api","property":"url|host|port"}` 또는 `null`(확인 못 함). runtime 변수만 대상이다(build arg는 `null`).
+  - 1순위 Compose `environment` 값: 전체가 URL이고 호스트가 Compose 서비스명이면 `url`(`postgres://…@postgres:5432/app` → postgres url, `http://api:3000` → unit api url). 값이 서비스명이면 `*_HOST`류 키는 `host`. 같은 접두어의 `*_HOST`가 바인딩돼 있으면 `*_PORT/*_USER/*_PASSWORD/*_DB`는 `port/user/password/database`(unit 대상은 `port`만).
+  - 2순위 키 이름: `DATABASE_URL/DB_URL`(unit이 의존하는 postgres, 없으면 mysql), `POSTGRES_URL`, `MONGO_URL/MONGODB_URI/MONGO_URI`, `REDIS_URL`, `MYSQL_URL`. 해당 엔진 의존성이 후보 1개로 정해질 때만 연결한다. Compose 값이 외부 호스트 URL이면 키 이름이 같아도 `null`로 둔다.
+- `units[].hostAliases[]`: `{"host","port","targetId","evidence":[{path,line}]}`. 다른 unit/dependency를 Compose 서비스명(또는 unit/dependency id)으로 부르는 곳을 모은다. `host`가 Compose에서 쓰는 이름, `targetId`는 결과의 unit/dependency id, `port`는 URL에 적힌 포트(없으면 대상의 포트, 모르면 `null`). 근거:
+  - Compose `environment` 값(URL 호스트, 값 전체가 서비스명, `host:port`) — 증거는 compose 파일의 해당 키 줄.
+  - nginx 계열 `*.conf`/`nginx*` 파일의 `proxy_pass`/`fastcgi_pass`/`grpc_pass`/`uwsgi_pass`와 `upstream { server host:port }`(상한 40개 파일; unit 루트가 가장 깊은 소유 unit에 귀속).
+  - 소스 문자열 리터럴 `"http://api:3000"`, `'redis://redis:6379'` 등(unit 소유 파일, 깊이 5 이하, 파일 120개 상한).
+  - `localhost`·외부 도메인·알 수 없는 호스트는 무시한다. 별칭 대상은 `dependsOn`에도 추가된다.
+- `dependencies[]`: `port`(Compose `ports/expose`의 컨테이너 포트, 없으면 엔진 기본 5432/6379/3306/27017, `other`는 `null`), `database`(`POSTGRES_DB`/`MYSQL_DATABASE`/`MONGO_INITDB_DATABASE`, 없으면 이 DB를 가리키는 URL의 경로), `user`(`POSTGRES_USER`/`MYSQL_USER`/`MONGO_INITDB_ROOT_USERNAME`, 없으면 URL의 사용자, 없으면 postgres=`postgres`·mysql=`root`·그 외 `null`), `passwordInSource`(Compose에 비밀번호가 하드코딩됐거나 `${VAR:-기본값}` 기본값·URL 리터럴 비밀번호가 있으면 `true`. 값은 출력하지 않는다).
 
 ## 질문 코드
 
