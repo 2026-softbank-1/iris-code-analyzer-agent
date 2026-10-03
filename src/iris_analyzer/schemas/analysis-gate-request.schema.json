@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://iris.example/contracts/analysis-gate-request.v1.schema.json",
+  "$comment": "Analysis gate request (stdin of iris-analysis-gate). sourceRoot must be an absolute, existing directory; rootDirectory is POSIX-relative to it.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": "iris.analysis-gate-request.v1"
+    },
+    "sourceRoot": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 4096,
+      "pattern": "^/"
+    },
+    "rootDirectory": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024
+    },
+    "sourceSha": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "mode": {
+      "enum": [
+        "auto",
+        "force"
+      ]
+    },
+    "ai": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "sourceRoot"
+  ]
+}

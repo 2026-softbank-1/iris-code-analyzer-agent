@@ -25,6 +25,7 @@ iris-deployment = "iris_analyzer.deployment.cli:main"
 iris-measure = "iris_analyzer.deployment.measure:main"
 iris-build-prepare = "iris_analyzer.build.cli:main"
 iris-organization = "iris_analyzer.organization.cli:main"
+iris-analysis-gate = "iris_analyzer.gate.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
