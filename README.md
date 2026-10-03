@@ -1,175 +1,125 @@
-# Iris Code Analyzer
+# iris-code-analyzer-agent
 
-Iris의 전처리와 코드 분석 worker용 Python 패키지입니다. 저장소를 고정한 스냅샷으로 읽고 배포에 필요한 파일·관측값·줄 단위 근거를 구성한 다음 OpenCode를 통해 Hive 또는 OpenAI 모델에 전달합니다. 결과는 JSON Schema와 원본 근거 및 정적 관측값으로 다시 검증합니다.
+Likelion에 배포할 저장소를 소스 근거로 분석해 서비스 구성·빌더·포트·실행 명령·환경변수를 제안하는 Python 분석 패키지다.
 
-Node.js workspace, Vite, Express, Dockerfile, Compose를 지원합니다. 분석 단계는 대상의 소스·설정·스크립트를 실행하지 않습니다. FastAPI Job 접수와 PostgreSQL 저장은 플랫폼 담당 모듈에서 연결합니다.
+[![Analyzer tests](https://github.com/2026-softbank-1/iris-code-analyzer-agent/actions/workflows/test.yml/badge.svg)](https://github.com/2026-softbank-1/iris-code-analyzer-agent/actions/workflows/test.yml)
+![Python](https://img.shields.io/badge/python-3.11%2B-3776AB)
+![OpenCode](https://img.shields.io/badge/OpenCode-1.18.33-555)
+![Status](https://img.shields.io/badge/status-개발%20중-orange)
 
-**Organization 입력**은 `iris-organization` 독립 CLI로 지원합니다. 레포별 커밋을 고정해 분석하고 전체 시스템 그래프·질문·계획·Helm/Kubernetes 실행 번들을 생성합니다. 별도 executor는 승인한 기존 Kubernetes 환경에서 여러 이미지의 빌드·배포를 수행합니다. WAS 변경은 없습니다. 사용법과 정확한 지원 범위는 [1002 Organization 구현 문서](docs/1002-organization-system.md)에 정리했습니다.
+> **상태: 개발 중 — Likelion 배포 흐름(iris-was)에는 아직 연동되지 않음.**
+> iris-was `main`에 분석기 호출 코드가 없고, iris-gitops-environments `platform/`과 iris-infra 플랫폼 values에 analyzer 항목이 없다(iris-infra Terraform에 ECR 저장소 `iris/code-analyzer-agent` 정의만 있다).
+> 진행 중인 연동: iris-was 브랜치 `feat/ai-analysis-integration`(분석기 wheel 호출, PR 없음)과 [iris-was PR #6](https://github.com/2026-softbank-1/iris-was/pull/6)(빌드 인계, draft). 이 레포의 [PR #1](https://github.com/2026-softbank-1/iris-code-analyzer-agent/pull/1)(근거 검증·AI 기여 평가·빌드 인계)은 draft로 열려 있으나 커밋은 이미 `main`에 포함돼 있다.
 
-## 설치
+## 시스템 내 위치
 
-Python 3.11 이상과 OpenCode **1.18.33**을 사용합니다.
+```mermaid
+flowchart LR
+  CLI[iris-cli] --> WAS
+  WEB[iris-web] --> WAS
+  WAS[iris-was<br/>Control API · Workers] -->|values 커밋| GITOPS[iris-gitops-environments]
+  GITOPS --> ARGO[Argo CD] -->|동기화| WL[Workload EKS<br/>*.likelion.uk]
+  WAS -->|실패 로그| ERR[iris-error-check-agent]
+  WAS -->|진단 결과| FIX[iris-code-fix-agent]
+  FIX -.핫픽스 PR·자동 머지.-> REPO[(사용자 레포)]
+  INFRA[iris-infra] -.프로비저닝.-> ARGO
+  ANA[iris-code-analyzer-agent<br/>개발 중 · 미연동]
+  style ANA fill:#f96,stroke:#333,stroke-width:2px
+```
+
+- 예정된 호출자: [iris-was](https://github.com/2026-softbank-1/iris-was)의 Analysis/Pipeline Worker가 이 패키지를 wheel로 고정해 호출한다([연동 설계](docs/1002-integration-design.md)).
+- 빌드 인계 대상: iris-was Build Worker(Railpack·CodeBuild). 분석기는 Dockerfile 생성·이미지 빌드·ECR push를 하지 않는다.
+
+## 지원 대상과 안전 원칙
+
+- 지원: **Node.js workspace, Vite, Express, Dockerfile, Compose**. 다른 언어·프레임워크는 extractor 확장이 필요하다.
+- **대상 저장소의 소스·설정·스크립트를 설치·빌드·실행하지 않는다.** 고정한 스냅샷을 자료로만 읽는다.
+- 실제 `.env`·키·비밀 파일·symlink는 모델에 넘기지 않고, 환경 예시는 키만 추출하며 알려진 자격 증명 패턴은 가린다.
+- OpenCode는 빈 임시 작업 디렉터리에서 탐색·셸 도구를 거절하고 구조화 응답만 허용한다(도구·설정 격리이며 OS 샌드박스는 아니다).
+
+## 동작 흐름
+
+```mermaid
+flowchart LR
+  S[고정 커밋 스냅샷] --> P[전처리<br/>파일 선정·정적 관측값·줄 단위 근거]
+  P --> M[LLM 추가 제안<br/>OpenCode → Hive / OpenAI]
+  M --> V[검증<br/>JSON Schema · 근거 digest · 의미 규칙]
+  V -->|근거 부족| X[추가 파일 요청<br/>확장 1회]
+  X --> M
+  V --> R[analysis-result.json<br/>complete · needs_input · unsupported]
+```
+
+- 정적 관측값(detected)은 서버가 보존하고, 모델은 suggested/unknown 추가 제안만 반환한다.
+- 원본 관계·서비스·scope로 뒷받침되는 제안만 병합하고, 충돌은 관측값을 유지한 채 질문으로 남긴다.
+- `complete`는 분석 필수 정보가 채워졌다는 뜻이며 실제 빌드·배포 성공을 뜻하지 않는다.
+
+상세: [의미 검증](docs/semantic-evidence-verification.md), [모델 검토 프로토콜 v2](docs/model-review-protocol.md), [산출물·OpenCode 환경](docs/analysis-internals.md)
+
+## 기술 스택
+
+- Python 3.11+ (CI: 3.11·3.13), uv
+- tree-sitter (JavaScript/TypeScript 파싱), jsonschema, httpx, PyYAML
+- OpenCode 1.18.33 서버 경유 LLM: Hive `zai-org/glm-5.3-flash`(기본), OpenAI `gpt-6-luna`
+- 테스트 프론트(선택): FastAPI + uvicorn
+
+## 디렉터리 구조
+
+```text
+src/iris_analyzer/  패키지 (preprocess, opencode, verification, deployment, build, organization, demo …)
+contracts/          WAS·프론트와 공유하는 TS 타입·JSON Schema 초안
+docs/               설계·계약·사용법 문서
+evaluations/        정답셋·평가 사례·보관 프롬프트
+reports/            실측 평가·검증 보고서
+scripts/            전처리·분석·평가 스크립트
+fixtures/           테스트·시연용 샘플 저장소
+tests/              pytest
+```
+
+## 빠른 시작
+
+Python 3.11+와 [uv](https://docs.astral.sh/uv/)가 필요하다. 아래는 키 없이 동작하는 정적 분석이다.
 
 ```sh
 uv sync --extra dev
+uv run iris-analyzer analyze --repo fixtures/separated-web-api --offline --out artifacts/static
+```
+
+LLM 분석은 OpenCode를 설치하고 키를 넣은 뒤 `--offline`을 뺀다.
+
+```sh
 npm install -g opencode-ai@1.18.33
-cp .env.example .env
-# .env의 HIVE_AI=xxx를 실제 키로 교체
+cp .env.example .env   # HIVE_AI=xxx 를 실제 키로 교체 (OpenAI는 OPENAI_API + OPENCODE_PROVIDER=openai)
+uv run iris-analyzer analyze --repo /path/to/repo --env-file .env --out artifacts/analysis
 ```
 
-uv 없이 설치하려면 가상환경에서 `pip install -e '.[dev]'`를 사용합니다. `uv.lock`에 Python 의존성 버전을 고정했습니다. OpenCode 실행 파일은 `--opencode-executable /path/to/opencode`로 지정할 수도 있습니다.
+- 종료 코드: 0 정상(결과 status 별도), 1 품질 기준 미달·검증 호출 실패, 2 오류.
+- 모델 비용은 `artifacts/model-budget-ledger.json`에 예약·정산되며 기본 누적 상한은 USD 1이다.
 
-Hive 기본 설정은 `hive-ai / zai-org/glm-5.3-flash`입니다. 다른 모델은 `--model deepseek-ai/deepseek-v4.1-flash`로 지정합니다. `.env`의 `HIVE_MODEL`, `HIVE_BASE_URL`, `OPENCODE_PROVIDER`도 지원합니다. `.env`는 Git에서 제외되며 키는 모델 입력·보고서에 넣지 않습니다. 상위 폴더의 키는 `--env-file ../.env`로 사용합니다.
+다른 진입점(테스트 프론트 `iris-review-demo`, 배포 계획 `iris-deployment`, 빌드 인계 `iris-build-prepare`, 스크립트 CLI, `iris-organization`)과 공급자·예산 옵션은 [docs/usage.md](docs/usage.md)에 있다.
 
-OpenAI는 `OPENAI_API` 또는 표준 이름 `OPENAI_API_KEY`를 읽습니다. 다음처럼 설정하면 기본 공급자가 바뀝니다. 키는 서버에만 두며 프론트에는 전달하지 않습니다.
+## 인터페이스 요약
 
-```dotenv
-OPENAI_API=your-key
-OPENAI_MODEL=gpt-6-luna
-OPENCODE_PROVIDER=openai
-```
+- 라이브러리: `analyze_with_report(repo, on_event=...)` → `AnalysisResult` v1. 이벤트 `queued → preprocessing → analyzing → validating → succeeded`(+ expanding, needs_input, unsupported, failed).
+- 스키마: `src/iris_analyzer/schemas/`, 공유 타입: `contracts/*.ts`.
+- 빌드 인계 v2: 기존 Dockerfile 보존, 없으면 Railpack 경로 추천 → [build-preparation.md](docs/build-preparation.md)
+- 로그 기반 개선 인계: draft 계약만 있음 → [remediation-handoff.md](docs/remediation-handoff.md)
 
-`OPENCODE_OUTPUT_MODE`를 생략하면 OpenAI는 구조화 응답 도구, Hive는 JSON 텍스트를 사용합니다. GPT-6 Luna 기본 reasoning은 `low`이며 이때 temperature를 보내지 않습니다. 분석 모델은 [v2 추가 제안 프로토콜](docs/model-review-protocol.md)을 사용합니다. 서버가 요청·응답 연결을 확인한 뒤 snapshot/context를 붙이고 의미 검증을 수행합니다. 배포 계획의 digest 검증은 기존 계약을 유지합니다. 이전 분석 프로토콜의 실제 두 프로젝트 검증은 [OpenAI 검증 보고서](reports/openai-validation.md)에 있습니다.
+상세: [공통 계약](docs/implementation-contract.md), [WAS 연결 준비](docs/control-plane-readiness.md)
 
-```sh
-uv run iris-analyzer analyze --repo ../tested_code/Temp_log \
-  --env-file ../.env --provider openai --model gpt-6-luna --out artifacts/openai-analysis
-uv run iris-deployment --repo ../tested_code/Temp_log \
-  --env-file ../.env --provider openai --model gpt-6-luna --out artifacts/openai-deployment
-```
+## 배포
 
-공급자를 명시적으로 바꾸면 다른 공급자의 `OPENCODE_MODEL`, 응답 모드·reasoning·native JSON 설정을 가져오지 않습니다. 비용 상한은 양쪽 공급자가 같은 ledger를 공유합니다. OpenAI 비용은 cache write·reasoning·긴 context 할증까지 반영한 추정값이며 실제 청구는 별도로 확인해야 합니다.
+- 운영 서버·이미지가 없다. iris-infra는 "Code Analyzer 서비스화는 후속 범위"로 두고 있다.
+- 현재 사용 방식은 로컬 CLI·라이브러리이며, 연동 시 iris-was가 wheel로 고정해 Worker 안에서 실행하는 형태다.
+- CI(`.github/workflows/test.yml`)는 모든 push·PR에서 모델 비용 없는 ruff·pytest만 실행한다.
 
-## 실행
+## 현재 상태 / 한계
 
-### GitHub 링크를 받는 테스트 프론트
+- 구현: 전처리·정적 분석, OpenCode 경유 LLM 추가 제안, 스키마·의미 검증, 배포 계획·Terraform/Helm 템플릿 출력, 빌드 인계 v2, Organization 다중 레포 분석([문서](docs/1002-organization-system.md)).
+- 미연동: iris-was 운영 흐름, 플랫폼 공용 예산·DB 저장, 오류 에이전트·WAS 큐와의 개선 인계.
+- 한계: 동적 import·라우트·포트와 런타임 분기는 unresolved로 남긴다. 인증은 middleware 이름만으로 확정하지 않는다. 테스트는 모듈 단위이며 전체 배포 E2E를 뜻하지 않는다.
 
-```sh
-uv sync --extra dev --extra demo
-gh auth status  # 비공개 저장소는 서버에서 해당 저장소 접근 권한 필요
-uv run --extra demo iris-review-demo --env-file ../.env
-# 전역 opencode가 없으면 --opencode-executable /path/to/opencode 추가
-```
+## 문서
 
-브라우저에서 <http://127.0.0.1:8765/>를 열고 GitHub 저장소 링크를 입력합니다. 브랜치·태그·커밋을 따로 지정하거나 `/tree/test/feature` 링크를 사용할 수 있습니다. AI 공급자에서 Hive 또는 OpenAI를 선택할 수 있으며, 선택한 공급자의 키가 없으면 정적 분석을 제공합니다. 서비스 구성, 실행 명령, 포트, API 경로, 환경변수 키, 의존성, 확인할 항목을 표시합니다. 근거 버튼은 마스킹한 파일의 줄을 열고 JSON 다운로드는 고정 소스 커밋과 분석 결과를 저장합니다.
-
-테스트 서버는 `127.0.0.1`에 바인딩합니다. 인증된 GitHub CLI로 커밋 SHA를 먼저 고정하고 tarball을 자료로 읽습니다. 다운로드한 프로젝트를 설치·빌드·실행하지 않습니다. 압축 파일 32 MiB, 압축 해제 선언 크기 100 MiB, 파일당 1 MB, 분석 파일 2,000개, 아카이브 항목 10,000개를 제한합니다. 동시 분석 1개, 대기 포함 3개, 프로세스당 기록 24개입니다. 기록 한도에 도달하면 서버를 재시작합니다. 화면의 최근 기록은 탭을 새로고침하면 초기화됩니다.
-
-소스와 분석 산출물은 Git에서 제외된 `artifacts/review-demo/<id>/`에 남습니다. 화면의 근거와 모델 입력에는 기존 비밀 제외·마스킹을 적용하며, 소스 캐시는 운영자가 로컬에서 관리합니다. AI 요청은 기존 `artifacts/model-budget-ledger.json`과 누적 USD 1 상한을 공유합니다. 이 화면의 `/api/reviews`는 독립 테스트용 API입니다. 팀 WAS 연결 범위와 사용 예시는 [연결 준비 문서](docs/control-plane-readiness.md), 검증 결과는 [프론트 검증 보고서](reports/review-demo-validation.md)에 있습니다.
-
-### 배포 계획과 실행 설정
-
-```sh
-uv run iris-deployment --repo ../tested_code/Temp_log --offline --out artifacts/deployment-static
-uv run iris-deployment --repo ../tested_code/Temp_log --env-file ../.env --out artifacts/deployment-ai
-```
-
-미정인 클라우드·리전·트래픽·가용성·예산도 초기 가정으로 제안합니다. 소스 언어/버전 선언과 빠른 코드 검사, 사양·부분 비용·Kubernetes 계획을 별도 JSON으로 제공합니다. 측정한 부하 자료가 있으면 사양을 보정하며 build/test 성공을 실제 용량의 근거로 쓰지 않습니다. 준비된 이미지·네트워크·Secret·스토리지 등을 검증한 계획만 고정 Terraform/Helm 템플릿으로 변환합니다. 실제 apply·배포 승인은 수행하지 않습니다.
-
-테스트 프론트에서는 배포 조건을 바꾸고 같은 소스의 계획만 다시 생성할 수 있습니다. [배포 계획 계약과 아키텍처](docs/deployment-planning.md)에 모듈 경계, 입력, 가정·측정 처리, 비용과 템플릿 지원 범위를 설명했습니다.
-
-### 소스 분석 후 서비스 빌드 인계
-
-팀 WAS Worker가 호출하는 빌드 준비 v2는 기존 Dockerfile과 binary 자산을 보존합니다. Dockerfile이 없으면 서비스 담당의 Railpack 경로를 추천하며, 분석기가 Dockerfile을 생성하지 않습니다. 명시적 빌더 선택을 보존하고 실제 선택·빌드·ECR push는 서비스가 담당합니다. [빌드 인계 계약](docs/build-preparation.md), [v2 검증 결과](reports/railpack-handoff-validation.md)를 참조합니다.
-
-### 기존 분석 CLI
-
-```sh
-uv run python scripts/preprocess_repository.py \
-  --repo ../tested_code/Temp_log --out artifacts/preprocess
-uv run python scripts/analyze_repository.py \
-  --repo ../tested_code/Temp_log --offline --out artifacts/static
-uv run python scripts/analyze_repository.py \
-  --repo ../tested_code/Temp_log --env-file ../.env --out artifacts/analysis
-uv run python scripts/verify_opencode.py \
-  --env-file ../.env --repetitions 2 --out artifacts/verification
-uv run python scripts/evaluate_quality.py \
-  --tested-code ../tested_code --offline --out artifacts/quality-static
-uv run python scripts/evaluate_quality.py \
-  --tested-code ../tested_code --env-file ../.env --repetitions 2 \
-  --reasoning-effort low --max-output-tokens 8192 --max-total-tokens 750000 --out artifacts/quality-live
-```
-
-같은 명령은 `iris-analyzer preprocess|analyze|verify|evaluate`에서도 제공합니다. verify의 기본 소스는 `fixtures/separated-web-api`입니다. 품질 평가는 사용자가 제공한 `Temp_log`와 `portpolio-production`을 사용합니다. 원본 대상 프로젝트는 이 저장소에 복제하지 않았습니다. `evaluations/ground-truth.json`의 검토한 파일 digest가 달라지면 `EVALUATION_FIXTURE_CHANGED`로 중단하므로 정답과 소스를 함께 검토해서 갱신해야 합니다.
-
-기본 예산은 bundle 180,000 UTF-8 JSON bytes, 파일당 1,000,000 bytes, 추가 요청 최대 5개, 확장 1회입니다. `--max-bundle-bytes`, `--max-file-bytes`, `--max-expansions`, `--max-requested-files`로 조정합니다. 호출 전체 시간 예산은 `--timeout`으로 지정합니다. 정확한 모델 tokenizer가 없으므로 UTF-8 bytes를 보수적인 토큰 상한으로 사용합니다. 실제 요청의 스키마·프롬프트·출력과 허용된 단계·재시도·대화 성장분까지 따로 예약합니다. 기본 호출 수는 8회, 누적 토큰 한도는 500,000, 출력 한도는 8,192, 원격 모델 재시도는 0입니다. `--max-model-calls`, `--max-total-tokens`, `--max-output-tokens`, `--max-remote-retries`로 조정하며 자동으로 값이나 모델을 바꾸지 않습니다. 최종 평가 설정은 출력 8,192와 누적 토큰 750,000을 사용했습니다. 모델을 자동 교체하거나 실패 후 한도를 자동으로 올리지 않습니다.
-
-종료 코드 0은 정상 분석이며 결과 status는 complete, needs_input, unsupported 중 하나입니다. complete는 분석 프로필의 필수 정보가 채워졌다는 뜻입니다. 실제 빌드·실행 성공은 후속 모듈에서 확인합니다. 오류는 2, 품질 기준 미달 또는 검증 호출 실패는 1입니다.
-
-## 산출물과 데이터 계약
-
-전처리는 `manifest.json`, `context.json`, `evidence.jsonl`, `model-input.json`을 저장합니다. 전체 manifest는 로컬에 유지하고 모델에는 선정 파일 정보와 추가 요청이 가능한 경로만 전달합니다. 분석은 `analysis-result.json`, `verification-report.json`, `run-report.json`과 호출별 `revision-01/`, `revision-02/`를 추가합니다. 실제 요청은 `model-request.json`, 모델 delta 원본은 `model-wire-response.json`, 서버가 v1 형태로 변환한 응답은 `model-response.json`에 저장합니다. 실패 진단에는 안전하게 추린 `model-response-raw.json`을 사용합니다. 단일 완전 JSON 객체 추출 여부는 formatRecovery로 기록하며 여러 객체·불완전 JSON·잘린 응답은 거절합니다. run-report에는 단계 이벤트, 검증 판정, 모델·서버 버전, 세션 및 메시지 ID, 사용량과 지연, 오류 코드가 들어갑니다. 실제 청구액이 제공되지 않으면 null입니다.
-
-스키마는 `src/iris_analyzer/schemas/`에 있습니다. [공통 계약](docs/implementation-contract.md)에 모듈별 함수와 필드를 설명했습니다.
-
-```python
-from iris_analyzer.contracts import Limits
-from iris_analyzer.pipeline import analyze_with_report
-from iris_analyzer.preprocess import prepare_context, expand_context
-
-bundle = prepare_context("/path/to/repository", limits=Limits())
-expanded = expand_context(bundle, ["server/src/middleware.ts"])
-run = analyze_with_report("/path/to/repository", on_event=persist_job_event)
-result = run.result
-```
-
-on_event는 queued → preprocessing → analyzing → validating → succeeded와 expanding, needs_input, unsupported, failed 이벤트를 전달합니다. worker가 Job 기록에 연결하면 됩니다. 생성 시각·절대 경로는 재현 가능한 context에 넣지 않습니다. 확장은 현재 프로세스가 고정한 스냅샷에서만 읽고 revision·contextHash를 갱신합니다.
-
-표시 필드는 `{value,status,scope,evidenceIds,reason}`입니다. detected는 동일 scope의 정적 관측값과 일치해야 합니다. 모델은 suggested/unknown 추가 제안만 반환하며 관측값은 서버가 보존합니다. unknown은 null과 이유를 담습니다. suggested는 ID 존재 검사에 더해 불변 원본의 관계·서비스·scope를 확인한 제안만 병합합니다. 무관한 제안은 제외하고 미지원 관계는 보류합니다. 확인된 충돌은 관측값을 보존하며 질문으로 남깁니다. 직접 라이브러리 `validate_analysis` 호출도 같은 검증을 적용합니다. 지원하는 좁은 규칙과 남은 한계는 [의미 검증 문서](docs/semantic-evidence-verification.md)에 명시했습니다.
-
-componentRoots는 코드 모듈, deploymentCandidates는 실행 단위입니다. Temp_log의 client/server는 하나의 Web/API 앱으로 합쳐지고 MongoDB·볼륨은 의존성으로 표현합니다. 개발·컨테이너·호스트 매핑 포트는 별도 scope입니다. workingDirectory는 런타임의 작업 디렉터리이며 소스/build 루트와 별개입니다. 포트폴리오의 Node 빌드 정보와 nginx 실행 런타임도 분리합니다. API 경로와 외부 공개 라우팅도 구분합니다.
-
-## OpenCode 환경
-
-기본 실행은 임시 빈 작업 디렉터리와 별도 HOME/XDG 경로에 플랫폼 설정만 제공하는 서버를 시작합니다. localhost 바인딩과 임시 비밀번호를 사용합니다. 분석 대상 저장소나 개발자 전역 설정·플러그인·MCP를 연결하지 않습니다. 탐색·셸 도구는 거절하고 구조화 응답 도구만 허용합니다. 도구·설정 격리이며 운영체제 수준의 샌드박스는 아닙니다.
-
-어댑터는 health 버전, 실제 /doc OpenAPI 명세, provider/model 발견 결과를 확인하고 새 세션을 만듭니다. timeout·취소 시 원격 abort를 요청합니다. 끊긴 응답은 기존 세션 상태와 메시지를 조회해서 실행을 무조건 재제출하지 않습니다. 인증 오류와 없는 모델은 재시도하지 않습니다.
-
-Hive GLM의 기본은 `json_text`이며 수신 후 동일한 애플리케이션 스키마·근거 검증을 통과해야 합니다. 실제 검사에서 Hive는 필수 StructuredOutput 도구 요청과 네이티브 json_schema를 HTTP 400으로 거절했습니다. 검증한 Hive GLM에는 네이티브 `response_format=json_object`를 함께 전달합니다. 해당 도구를 지원하는 provider에 연결할 때만 `--output-mode structured`를 명시합니다. GLM에는 기본 추론 강도 `low`와 temperature 0을 전달합니다. Hive가 추론 강도 파라미터를 수락한 사실과 실제 처리 강도가 정확히 적용된다는 보장은 구분합니다. `OPENCODE_URL`은 같은 버전·권한을 구성한 외부 서버용입니다.
-
-## 테스트와 품질
-
-```sh
-uv run ruff check .
-uv run pytest --cov=iris_analyzer --cov-branch --cov-report=term-missing
-IRIS_OPENCODE_EXECUTABLE=/path/to/opencode uv run pytest tests/test_opencode_runtime.py
-```
-
-CI는 Python 3.11·3.13에서 모델 비용이 발생하지 않는 검사를 실행합니다. 실제 모델 평가는 별도 CLI입니다. 품질 평가는 소스에서 검토한 실행 값·서비스·환경변수·의존성·연결과 API 경로 집합을 비교하고 경로 precision/recall/F1을 기록합니다. 재현성, 근거 digest, 비밀 파일 제외도 검사합니다. 최종 검증 결과와 병합 전 모델 응답을 따로 기록합니다. 자연어 해석 전부를 자동 검증했다고 주장하지 않습니다. 실행 결과는 [품질 보고서](reports/quality-evaluation.md)에 정리합니다.
-
-동적 import·라우트·포트, 런타임 분기와 해석할 수 없는 참조는 unresolved입니다. 설정을 실행하지 않으므로 계산된 값은 확정하지 않습니다. 환경 예시는 키만 추출하고 모든 값을 가립니다. 실제 .env, 키·비밀 파일, symlink는 제공하지 않습니다. 소스의 알려진 자격 증명 패턴도 줄 수를 유지해서 가립니다. 다른 언어·프레임워크는 extractor 확장이 필요합니다. 인증은 middleware 이름만으로 확정하지 않습니다.
-
-설계 기준: 2026-09-30 인계서, Notion [term1_team_iris](https://app.notion.com/p/2668bee9ada4824682738196ada10126), [AI API](https://app.notion.com/p/3eb8bee9ada48064a1f8f9110465939c), [Hive 공식 문서](https://docs.thehive.ai/docs/chat-completions-openai-compatible-llms), [OpenCode 서버 문서](https://opencode.ai/docs/server/)와 고정 런타임의 실제 /doc.
-
-## 비용과 worker 연결
-
-CLI는 기본 `artifacts/model-budget-ledger.json`에 비용을 먼저 예약하고, 제공된 사용량에 따라 추정 비용으로 정산합니다. `--budget-ledger`로 같은 파일을 여러 프로세스에서 공유할 수 있으며 파일 잠금과 fsync를 사용합니다. 기본 누적 상한은 `--max-cost-usd 1.0`입니다. 사용량을 받지 못하면 예약액을 유지합니다. 허용된 원격 재시도와 구조화 모드의 미확인 이전 단계 비용도 보수적으로 유지합니다. 실제 청구액은 알 수 없으면 null입니다.
-
-2026-10-01 [Hive 공식 모델 페이지](https://thehive.ai/models/zai-org/glm-5.3-flash)에서 GLM의 100만 토큰당 입력 USD0.05, 출력 USD0.17, 캐시 읽기 USD0.01을 확인했습니다. 이 가격 스냅샷은 추정용입니다. 다른 모델은 검토한 `--pricing-json` 파일에 input/output/cacheRead 단가를 제공해야 금전 상한을 적용할 수 있습니다. 변경된 공급자 요금은 담당자가 다시 검토해야 합니다.
-
-로컬 파일을 공유하지 않는 worker·서버·별도 저장소는 비용 기록을 공유하지 않습니다. 팀의 프로젝트 총 예산은 플랫폼의 공용 예산 기록과 예약 트랜잭션으로 연결해야 합니다. 이 라이브러리 자체가 프로젝트 전체 청구서를 조회하거나 전역 원화 상한을 보장하지 않습니다.
-
-worker는 `analyze_with_report`에 모델 runner와 Job 이벤트 저장 콜백을 제공합니다. pipeline은 성공·실패 모두 스냅샷 참조를 해제합니다. prepare_context/expand_context를 직접 사용한 호출자는 확장이 끝난 뒤 `release_snapshot(snapshotId)`를 호출합니다. 같은 스냅샷을 쓰는 동시 작업은 참조 수로 보호합니다.
-
-플랫폼의 HTTP /analyze 요청 형식, 소스 전달 방식, 환경변수 등록 및 데이터베이스 저장은 팀과 계약을 맞춰 연결할 부분입니다. 이 패키지의 테스트는 분석 모듈의 테스트이며 전체 배포 시스템의 E2E 완료를 뜻하지 않습니다. 공개 노출 경로와 인증 판단은 확정하지 않습니다. API 경로는 코드 내부에서 관측한 경로이며 공개 라우팅과 운영 정책은 후속 계획에서 결정합니다.
-
-지원 환경은 macOS와 Linux입니다. 테스트/fixture 디렉터리는 최초 배포 단위 발견에서 제외하며, 직접 import한 파일과 허용된 추가 요청의 자료는 근거로 읽을 수 있습니다.
-
-### AI 판단·근거·기여 평가 기준
-
-[AI 판단 정책](docs/ai-judgment-policy.md)은 각 항목을 입력 → 확인할 근거 → 허용 결론 → 금지 단정 → 기대 결과로 정리합니다. 운영 프롬프트·입력, 의미 검증기, 원본 delta 기반 기여 평가에 반영했습니다. [실제 Hive 반복 평가](reports/ai-judgment-evaluation.md), [수동 검토](reports/ai-judgment-manual-review.md), [구성한 검증기 반례](reports/ai-judgment-audit.json)를 구분해서 제공합니다. 모델 응답 성공·검증 통과·새 사실 발견·실제 배포 성공은 각각 다른 지표입니다.
-
-```sh
-uv run python scripts/evaluate_ai_judgment.py --live --env-file ../.env \
-  --provider hive-ai --repetitions 3 --max-output-tokens 8192 \
-  --max-model-calls 150 --max-total-tokens 1500000 \
-  --max-cost-usd 20 --out artifacts/ai-judgment/run
-```
-
-위 평가의 USD 20은 이번 작업에서 승인받은 누적 상한이며 라이브러리 기본 상한은 USD 1을 유지합니다. 실제 요청의 프롬프트·스키마·baseline·실행 메타데이터까지 비용 예약에 포함합니다. 보관 프롬프트는 `--prompt-file`, 별도 사례는 `--corpus evaluations/ai-judgment-holdout.json`으로 평가합니다.
-
-### 검증된 문제의 로그 기반 개선 인계
-
-실패 로그·원본 식별자·검증 기록을 묶어 원인 미확정은 진단 전용, 검증된 코드 하자는 수정안 제안으로 넘기는 [개선 인계 설계](docs/remediation-handoff.md)를 추가했습니다. [draft 계약](contracts/remediation-handoff.v1.schema.json)은 형식 초안이며 실제 오류 에이전트·WAS 큐 연결은 아직 구현하지 않았습니다. Dockerfile 부재·설정 누락·인프라 장애는 코드 하자로 자동 분류하지 않습니다.
-
-1002 분석기·WAS·프론트 연동 변경 및 현재 설계: [docs/1002-integration-design.md](docs/1002-integration-design.md).
+- [사용법](docs/usage.md) · [산출물·OpenCode 환경](docs/analysis-internals.md) · [비용·worker 연결·AI 평가·개선 인계](docs/operations.md)
+- 설계: [1002 연동 설계](docs/1002-integration-design.md), [Organization](docs/1002-organization-system.md), [배포 계획](docs/deployment-planning.md), [AI 판단 정책](docs/ai-judgment-policy.md)
+- 평가 보고서: [품질](reports/quality-evaluation.md), [AI 판단](reports/ai-judgment-evaluation.md), [OpenAI 검증](reports/openai-validation.md)
