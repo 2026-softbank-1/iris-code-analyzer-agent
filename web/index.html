@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Iris Shop</title>
+  </head>
+  <body>
+    <main>
+      <header><p class="eyebrow">THREE IMAGES. ONE CHECKOUT.</p><h1>Iris Shop</h1><p>A small storefront with a real background order queue.</p></header>
+      <div class="toolbar"><label>Shopper <select id="user"></select></label><span id="connection" role="status">Connecting…</span></div>
+      <section aria-labelledby="products-heading"><h2 id="products-heading">The collection</h2><div id="products" class="grid"></div></section>
+      <section class="checkout"><h2>Your bag</h2><div id="cart"></div><button id="checkout" disabled>Place order</button><p id="message" role="status"></p></section>
+      <section><h2>Recent orders</h2><div id="orders"></div></section>
+    </main>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
