@@ -37,3 +37,25 @@
 - Temp_log는 루트 Dockerfile 하나가 client·server를 함께 빌드하지만, 계약 규칙(같은 디렉터리 변형 Dockerfile도 단위 후보로 계산, 워크스페이스 앱 2+)에 따라 complex로 판정된다. 실제 추출 unit은 `app` 1개 + mongodb 의존성이라 웹에서 1개 서비스 생성으로 이어진다.
 - Railpack 정적 사이트(Vite)의 포트는 빌더가 정하므로 force 결과에서 `port_unknown`으로 남는다. `preview`/`dev` 스크립트의 개발 포트는 런타임 포트로 쓰지 않는다.
 - Compose `profiles`/`extends`/`include`, `env_file` 내용, 동적 포트는 해석하지 않는다.
+
+## Phase 2 재검증 · env 바인딩 / 호스트 별칭 / DB 접속 정보 (2026-10-04)
+
+기능 커밋 `f6ff307`의 wheel을 깨끗한 venv에 설치해 같은 요청(`rootDirectory="."`, auto)으로 재실행했다. 두 레포 모두 decision/complexity/사유 코드/unit 목록/`dependsOn`은 Phase 1 결과와 같고, 추가 필드만 늘었다. durationMs 12 / 16.
+
+iris-multi-image-shop (`6836ce3da305`):
+
+| unit | env binding | hostAliases (host:port → target, 증거) |
+| --- | --- | --- |
+| web | 없음(`VITE_API_BASE_URL`은 build arg → null) | `api:3000` → `api` (`web/nginx/default.conf:14` proxy_pass) |
+| api | `DATABASE_URL` → dependency `postgres` url, `REDIS_URL` → dependency `redis` url | `postgres:5432` → postgres (`compose.yaml:31`), `redis:6379` → redis (`compose.yaml:32`) |
+| worker | `DATABASE_URL` → postgres url, `REDIS_URL` → redis url | `postgres:5432` (`compose.yaml:57`), `redis:6379` (`compose.yaml:58`) |
+
+dependencies: `postgres` = `{port:5432, database:"iris_shop", user:"iris_demo", passwordInSource:true}`(compose에 `${POSTGRES_PASSWORD:-…}` 기본값이 하드코딩돼 있음, 값은 출력되지 않음), `redis` = `{port:6379, database:null, user:null, passwordInSource:false}`.
+
+Temp_log (`54fa8072d9fb`): unit `app`의 `MONGO_URI` → dependency `mongo` url, hostAliases `mongo:27017` → `mongo`(`compose.yaml:20`). dependency `mongo` = `{port:27017, database:"archlog", user:"root", passwordInSource:false}`(`MONGO_INITDB_ROOT_PASSWORD`는 `${…:?}`라 소스에 값 없음; `database`는 `MONGO_INITDB_DATABASE`가 없어 URI 경로에서 가져옴).
+
+두 결과 JSON에서 compose 하드코딩 기본 비밀번호(`iris_demo_local`)는 나타나지 않는다(사용자명 `iris_demo`, 키 이름 `MONGO_APP_PASSWORD`만 존재).
+
+- wheel: `dist/iris_analyzer-0.1.0-py3-none-any.whl` (커밋 `f6ff307`에서 `uv build --wheel`)
+- sha256: `c3be0a5ef1ea8e11c67f863a0b309b8557ab03ef51cb518504daee3c441ec0e1`
+- 테스트: `uv run pytest -q` → 790 passed, 8 skipped (Phase 1 783 → +7 신규, fixture `fixtures/gate-links`). `uv run ruff check .` → All checks passed. 기존 테스트 중 필드 완전 일치를 단언하던 2건(`env` 행, `dependencies` 행)은 새 필드를 포함하도록 기대값만 갱신했다.
