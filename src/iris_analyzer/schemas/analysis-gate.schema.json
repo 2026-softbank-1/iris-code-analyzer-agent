@@ -555,6 +555,61 @@
                 "line"
               ]
             }
+          },
+          "initScripts": {
+            "type": "array",
+            "maxItems": 20,
+            "description": "Compose-mounted /docker-entrypoint-initdb.d files (path, hash, size only; never contents). Runs once on an empty data directory.",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1024,
+                  "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$))[^\\\\\\u0000]*$"
+                },
+                "kind": {
+                  "enum": [
+                    "sql",
+                    "js",
+                    "sh",
+                    "sql.gz"
+                  ]
+                },
+                "sha256": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^[0-9a-f]{64}$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "size": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "order": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "supported": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "path",
+                "kind",
+                "sha256",
+                "size",
+                "order",
+                "supported"
+              ]
+            }
           }
         },
         "required": [

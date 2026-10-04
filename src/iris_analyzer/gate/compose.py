@@ -15,6 +15,7 @@ import yaml
 
 from ..preprocess.extractors.docker import _command, _compose_port, _yaml_lines, _yaml_mapping
 from ..preprocess.extractors.execution import safe_repository_path
+from .initdb import volume_mounts
 from .links import line_of_key
 from .scan import RepositoryScan, parent
 from .sources import COMPOSE_STANDARD, env_required, image_name, port_number, url_engine, url_hosts
@@ -64,6 +65,7 @@ class ComposeService:
     hosts: set[str] = field(default_factory=set)
     depends_on: list[str] = field(default_factory=list)
     command: str | None = None
+    volumes: list[tuple[str, str]] = field(default_factory=list)
 
 
 def image_engine(image: str | None) -> str | None:
@@ -178,6 +180,7 @@ def load_compose(scan: RepositoryScan, path: str) -> tuple[list[ComposeService],
             filter(None, [_command(service.get("entrypoint")), _command(service.get("command"))])
         )
         item.command = command or None
+        item.volumes = volume_mounts(service.get("volumes"))
         result.append(item)
     return result, None
 

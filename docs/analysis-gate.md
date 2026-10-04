@@ -111,9 +111,24 @@ Railpack 인식 매니페스트: `package.json`, `requirements.txt`, `pyproject.
   - `localhost`·외부 도메인·알 수 없는 호스트는 무시한다. 별칭 대상은 `dependsOn`에도 추가된다.
 - `dependencies[]`: `port`(Compose `ports/expose`의 컨테이너 포트, 없으면 엔진 기본 5432/6379/3306/27017, `other`는 `null`), `database`(`POSTGRES_DB`/`MYSQL_DATABASE`/`MONGO_INITDB_DATABASE`, 없으면 이 DB를 가리키는 URL의 경로), `user`(`POSTGRES_USER`/`MYSQL_USER`/`MONGO_INITDB_ROOT_USERNAME`, 없으면 URL의 사용자, 없으면 postgres=`postgres`·mysql=`root`·그 외 `null`), `passwordInSource`(Compose에 비밀번호가 하드코딩됐거나 `${VAR:-기본값}` 기본값·URL 리터럴 비밀번호가 있으면 `true`. 값은 출력하지 않는다).
 
+## DB 초기화 스크립트 (계약 F)
+
+`dependencies[].initScripts[]`(선택 필드, 있을 때만 출력)는 Compose DB 서비스의 volumes 중 컨테이너 경로가 `/docker-entrypoint-initdb.d`(디렉터리) 또는 그 바로 아래 파일인 bind mount를 해석한 결과다. 공식 postgres/mysql/mongo 이미지는 데이터 디렉터리가 비어 있을 때 한 번만 이 파일들을 실행한다.
+
+```json
+{"path": "db/schema.sql", "kind": "sql", "sha256": "…", "size": 1827, "order": 0, "supported": true}
+```
+
+- 마운트 형태: 짧은 문법(`./db:/docker-entrypoint-initdb.d:ro`, `./db/a.sql:/docker-entrypoint-initdb.d/001-a.sql`)과 긴 문법(`type: bind`, `source`, `target`). 상대 경로는 해당 compose 파일 위치 기준. 디렉터리 마운트는 비재귀로 정규 파일만 나열하고(숨김 파일 제외), 파일 마운트는 컨테이너 쪽 파일명을 이름으로 쓴다. 같은 이름이 겹치면 나중 마운트가 이긴다.
+- `path`는 레포 루트 기준 POSIX 경로, `order`는 컨테이너 파일명 정렬(이미지 실행 순서와 동일) 기준 0부터. `sha256`은 내용 해시(64 MiB 초과 시 `null`). **내용은 출력하지 않는다.**
+- 무시: 심볼릭 링크(경로 구성요소 포함), 레포 밖·요청 `rootDirectory` 밖 경로, 절대/`~`/변수 경로, 명명 볼륨, 정규 파일이 아닌 것, 엔진이 실행하지 않는 확장자.
+- 엔진별 확장자: postgres/mysql `.sql`, `.sql.gz`, `.sh`; mongodb `.js`, `.sh`; redis·other는 해당 없음(필드 생략). 최대 20개.
+- `supported:false` + 질문: `.sh`는 `init_script_unsupported`(플랫폼이 실행하지 않음). 파일당 1 MiB 초과는 그 파일만, 지원 파일 합계가 1 MiB를 넘으면 해당 DB의 지원 스크립트 전부 `init_script_too_large`.
+- `analyze`일 때만 출력한다.
+
 ## 질문 코드
 
-`port_unknown`, `dockerfile_missing`, `dependency_built_from_dockerfile`, `image_service_ignored`, `compose_build_unsupported`(원격/동적 context, `dockerfile_inline`), `unit_outside_scope`, `compose_variant`, `compose_invalid`, `no_builder_signal`, `scan_truncated`, `file_too_large`, `ai_not_configured`. skip 응답에는 `ai_not_configured`·`scan_truncated`만 남긴다.
+`port_unknown`, `dockerfile_missing`, `dependency_built_from_dockerfile`, `image_service_ignored`, `compose_build_unsupported`(원격/동적 context, `dockerfile_inline`), `unit_outside_scope`, `compose_variant`, `compose_invalid`, `no_builder_signal`, `scan_truncated`, `file_too_large`, `init_script_unsupported`, `init_script_too_large`, `ai_not_configured`. skip 응답에는 `ai_not_configured`·`scan_truncated`만 남긴다.
 
 ## WAS 연동 메모
 

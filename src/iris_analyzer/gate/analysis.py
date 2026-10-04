@@ -26,6 +26,7 @@ from .compose import (
     is_adjunct,
     load_compose,
 )
+from .initdb import describe_scripts, mounted_files
 from .links import (
     DEFAULT_PORTS,
     DEFAULT_USERS,
@@ -243,6 +244,7 @@ class _Gate:
         self.ids: set[str] = set()
         self.dockerfiles: dict[str, Dockerfile] = {}
         self.service_ids: dict[str, str] = {}
+        self.init_files: dict[str, dict[str, str]] = {}
 
     # -- inventory -------------------------------------------------------
     def _inventory(self) -> None:
@@ -501,6 +503,8 @@ class _Gate:
                 _question("ai_not_configured", "AI 분석이 구성되지 않아 정적 분석 결과만 제공합니다.")
             )
         analyze = decision == "analyze"
+        if analyze:
+            self._init_scripts()
         if not analyze:
             self.questions = [
                 item for item in self.questions if item["code"] in {"ai_not_configured", "scan_truncated"}
@@ -553,6 +557,7 @@ class _Gate:
             if row["engine"] == engine and engine != "other" and (image is None or row["image"] == image):
                 row["evidence"] = _unique_evidence(row["evidence"] + evidence)
                 _merge_profile(row, profile)
+                self._collect_init(key, service)
                 return key
         identifier = self._new_id(name)
         self.dependencies[identifier] = {
@@ -566,7 +571,32 @@ class _Gate:
             "evidence": _unique_evidence(evidence),
         }
         _merge_profile(self.dependencies[identifier], profile, replace_port=True)
+        self._collect_init(identifier, service)
         return identifier
+
+    def _collect_init(self, identifier: str, service: ComposeService | None) -> None:
+        if service is None or not service.volumes:
+            return
+        files = mounted_files(self.scan.repo_root, self.scope, parent(service.file), service.volumes)
+        if files:
+            self.init_files.setdefault(identifier, {}).update(files)
+
+    def _init_scripts(self) -> None:
+        for identifier, files in sorted(self.init_files.items()):
+            row = self.dependencies[identifier]
+            scripts, problems = describe_scripts(self.scan.repo_root, row["engine"], files)
+            if not scripts:
+                continue
+            row["initScripts"] = scripts
+            for code, path in dict.fromkeys(problems):
+                reason = (
+                    "플랫폼이 셸 스크립트를 실행하지 않습니다"
+                    if code == "init_script_unsupported"
+                    else "파일당·합계 1 MiB 상한을 넘습니다"
+                )
+                self.questions.append(
+                    _question(code, f"'{identifier}' 초기화 스크립트 {path}를 자동 실행할 수 없습니다: {reason}.")
+                )
 
     def _extract_units(self) -> None:
         service_ids: dict[str, str] = {}

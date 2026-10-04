@@ -559,3 +559,180 @@ def test_unit_binding_cannot_use_database_properties():
     row = next(row for row in result["units"][0]["env"])
     row["binding"] = {"kind": "unit", "targetId": "api", "property": "password"}
     assert list(Draft202012Validator(RESULT_SCHEMA).iter_errors(result))
+
+
+# -- Contract F: database init scripts -------------------------------------------
+
+def init_repo(tmp_path: Path, compose: str, files: dict[str, object]) -> Path:
+    return write(
+        tmp_path / "repo",
+        {"compose.yaml": compose, "api/Dockerfile": "FROM node:22\nEXPOSE 3000\n", **files},
+    )
+
+
+def init_scripts(result: dict, dependency: str = "db") -> list[dict]:
+    return {row["id"]: row for row in result["dependencies"]}[dependency].get("initScripts", [])
+
+
+def sha(text: str) -> str:
+    import hashlib
+
+    return hashlib.sha256(text.encode()).hexdigest()
+
+
+def test_init_scripts_from_directory_mount_sorted_and_non_recursive(tmp_path):
+    repo = init_repo(
+        tmp_path,
+        "services:\n  api:\n    build: ./api\n  db:\n    image: postgres:16\n    volumes:\n"
+        "      - pgdata:/var/lib/postgresql/data\n      - ./db:/docker-entrypoint-initdb.d:ro\n",
+        {
+            "db/02-seed.sql": "INSERT INTO t VALUES (1);\n",
+            "db/01-schema.sql": "CREATE TABLE t (id int);\n",
+            "db/notes.md": "ignored",
+            "db/.hidden.sql": "x",
+            "db/nested/03.sql": "SELECT 1;",
+        },
+    )
+    result = gate(repo, mode="force")
+    scripts = init_scripts(result)
+    assert [(s["path"], s["kind"], s["order"], s["supported"]) for s in scripts] == [
+        ("db/01-schema.sql", "sql", 0, True),
+        ("db/02-seed.sql", "sql", 1, True),
+    ]
+    assert scripts[0]["sha256"] == sha("CREATE TABLE t (id int);\n")
+    assert scripts[0]["size"] == len("CREATE TABLE t (id int);\n")
+    assert not [q for q in result["questions"] if q["code"].startswith("init_script")]
+    assert "CREATE TABLE" not in json.dumps(result)
+
+
+def test_init_scripts_from_file_mounts_use_container_names(tmp_path):
+    repo = init_repo(
+        tmp_path,
+        "services:\n  api:\n    build: ./api\n  db:\n    image: postgres:16\n    volumes:\n"
+        "      - ./db/seed.sql:/docker-entrypoint-initdb.d/002-seed.sql:ro\n"
+        "      - ./db/schema.sql:/docker-entrypoint-initdb.d/001-schema.sql:ro\n"
+        "      - ./db/other.sql:/elsewhere/other.sql\n",
+        {"db/seed.sql": "SELECT 2;", "db/schema.sql": "SELECT 1;", "db/other.sql": "SELECT 3;"},
+    )
+    scripts = init_scripts(gate(repo, mode="force"))
+    assert [(s["path"], s["order"]) for s in scripts] == [("db/schema.sql", 0), ("db/seed.sql", 1)]
+
+
+def test_init_scripts_long_syntax_and_gzip(tmp_path):
+    repo = init_repo(
+        tmp_path,
+        "services:\n  api:\n    build: ./api\n  db:\n    image: mysql:8\n    volumes:\n"
+        "      - type: bind\n        source: ./sql\n        target: /docker-entrypoint-initdb.d\n"
+        "      - type: volume\n        source: data\n        target: /var/lib/mysql\n",
+        {"sql/a.sql.gz": "gzbytes", "sql/b.sql": "SELECT 1;"},
+    )
+    scripts = init_scripts(gate(repo, mode="force"))
+    assert [(s["path"], s["kind"]) for s in scripts] == [("sql/a.sql.gz", "sql.gz"), ("sql/b.sql", "sql")]
+
+
+def test_init_scripts_ignore_symlinks_and_outside_paths(tmp_path):
+    repo = init_repo(
+        tmp_path,
+        "services:\n  api:\n    build: ./api\n  db:\n    image: postgres:16\n    volumes:\n"
+        "      - ./db:/docker-entrypoint-initdb.d\n"
+        "      - ../outside.sql:/docker-entrypoint-initdb.d/9-out.sql\n"
+        "      - ./linked.sql:/docker-entrypoint-initdb.d/8-linked.sql\n"
+        "      - /etc/passwd:/docker-entrypoint-initdb.d/7-abs.sql\n",
+        {"db/real.sql": "SELECT 1;"},
+    )
+    (tmp_path / "outside.sql").write_text("SELECT 'out';")
+    (repo / "secret.sql").write_text("SELECT 'secret';")
+    (repo / "db" / "link.sql").symlink_to(repo / "secret.sql")
+    (repo / "linked.sql").symlink_to(repo / "secret.sql")
+    scripts = init_scripts(gate(repo, mode="force"))
+    assert [s["path"] for s in scripts] == ["db/real.sql"]
+
+
+def test_init_scripts_outside_requested_root_are_ignored(tmp_path):
+    repo = write(
+        tmp_path / "repo",
+        {
+            "app/compose.yaml": "services:\n  api:\n    build: .\n  db:\n    image: postgres:16\n    volumes:\n"
+            "      - ../db:/docker-entrypoint-initdb.d\n",
+            "app/Dockerfile": "FROM node:22\n",
+            "db/schema.sql": "SELECT 1;",
+        },
+    )
+    assert init_scripts(gate(repo, rootDirectory="app", mode="force")) == []
+
+
+def test_shell_init_script_is_unsupported_with_question(tmp_path):
+    repo = init_repo(
+        tmp_path,
+        "services:\n  api:\n    build: ./api\n  db:\n    image: postgres:16\n    volumes:\n"
+        "      - ./db:/docker-entrypoint-initdb.d\n",
+        {"db/01.sql": "SELECT 1;", "db/02-setup.sh": "#!/bin/sh\necho hi\n"},
+    )
+    result = gate(repo, mode="force")
+    scripts = init_scripts(result)
+    assert [(s["path"], s["kind"], s["supported"]) for s in scripts] == [
+        ("db/01.sql", "sql", True),
+        ("db/02-setup.sh", "sh", False),
+    ]
+    questions = [q for q in result["questions"] if q["code"] == "init_script_unsupported"]
+    assert len(questions) == 1 and "db/02-setup.sh" in questions[0]["message"]
+    assert "echo hi" not in json.dumps(result)
+
+
+def test_oversize_init_script_is_unsupported(tmp_path):
+    repo = init_repo(
+        tmp_path,
+        "services:\n  api:\n    build: ./api\n  db:\n    image: postgres:16\n    volumes:\n"
+        "      - ./db:/docker-entrypoint-initdb.d\n",
+        {"db/big.sql": "-- " + "x" * (1024 * 1024), "db/small.sql": "SELECT 1;"},
+    )
+    result = gate(repo, mode="force")
+    scripts = {s["path"]: s for s in init_scripts(result)}
+    assert scripts["db/big.sql"]["supported"] is False and scripts["db/big.sql"]["size"] > 1024 * 1024
+    assert scripts["db/small.sql"]["supported"] is True
+    assert [q["code"] for q in result["questions"] if q["code"].startswith("init_script")] == [
+        "init_script_too_large"
+    ]
+
+
+def test_total_init_script_size_over_limit_marks_all_unsupported(tmp_path):
+    chunk = "-- " + "x" * (600 * 1024)
+    repo = init_repo(
+        tmp_path,
+        "services:\n  api:\n    build: ./api\n  db:\n    image: postgres:16\n    volumes:\n"
+        "      - ./db:/docker-entrypoint-initdb.d\n",
+        {"db/1.sql": chunk, "db/2.sql": chunk},
+    )
+    result = gate(repo, mode="force")
+    assert [s["supported"] for s in init_scripts(result)] == [False, False]
+    assert len([q for q in result["questions"] if q["code"] == "init_script_too_large"]) == 2
+
+
+def test_mongo_accepts_js_and_ignores_sql_while_redis_has_none(tmp_path):
+    repo = init_repo(
+        tmp_path,
+        "services:\n  api:\n    build: ./api\n  mongo:\n    image: mongo:8\n    volumes:\n"
+        "      - ./docker/init.js:/docker-entrypoint-initdb.d/init.js:ro\n"
+        "      - ./docker/x.sql:/docker-entrypoint-initdb.d/x.sql:ro\n"
+        "  cache:\n    image: redis:7\n    volumes:\n      - ./db:/docker-entrypoint-initdb.d\n",
+        {"docker/init.js": "db.a.insert({})", "docker/x.sql": "SELECT 1;", "db/a.sql": "SELECT 1;"},
+    )
+    result = gate(repo, mode="force")
+    assert [(s["path"], s["kind"]) for s in init_scripts(result, "mongo")] == [("docker/init.js", "js")]
+    redis = {row["id"]: row for row in result["dependencies"]}["cache"]
+    assert "initScripts" not in redis
+
+
+def test_init_scripts_for_database_built_from_dockerfile(tmp_path):
+    repo = write(
+        tmp_path / "repo",
+        {
+            "compose.yaml": "services:\n  api:\n    build: ./api\n  mongo:\n    build:\n      context: .\n"
+            "      dockerfile: Dockerfile.mongo\n    volumes:\n"
+            "      - ./docker/init.js:/docker-entrypoint-initdb.d/init.js:ro\n",
+            "api/Dockerfile": "FROM node:22\n",
+            "Dockerfile.mongo": "FROM mongo:8\n",
+            "docker/init.js": "db.a.insert({})",
+        },
+    )
+    assert [s["path"] for s in init_scripts(gate(repo), "mongo")] == ["docker/init.js"]
