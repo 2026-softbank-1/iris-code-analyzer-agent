@@ -55,6 +55,8 @@ class ComposeService:
     root: str | None = None
     dockerfile: str | None = None
     problem: str | None = None
+    target: str | None = None
+    build_args: list[str] = field(default_factory=list)
     ports: list[tuple[int, int]] = field(default_factory=list)
     env: list[dict] = field(default_factory=list)
     env_engines: dict[str, str] = field(default_factory=dict)
@@ -197,7 +199,11 @@ def _build(item: ComposeService, build: object, base: str, scan: RepositoryScan)
         args = build.get("args")
         if isinstance(args, list):
             args = {str(entry).split("=", 1)[0]: (str(entry).split("=", 1) + [None])[1] for entry in args}
+        target = build.get("target")
+        if isinstance(target, (str, int, float)) and str(target).strip():
+            item.target = str(target).strip()
         if isinstance(args, dict):
+            item.build_args = sorted({str(key) for key in args})
             for key, value in args.items():
                 item.env.append(
                     {"key": str(key), "stage": "build", "required": value is None or env_required("", value)}

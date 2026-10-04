@@ -75,3 +75,16 @@ sha256: schema.sql `10c3dca9…1cd3`, seed.sql `d3195f26…a35f`, mongo-init.js 
 - wheel: `dist/iris_analyzer-0.1.0-py3-none-any.whl` (커밋 `5922112`에서 `uv build --wheel`)
 - sha256: `675acf6e3cda4e9acddb42878fa6f84e61d3e90d5051ff8d68a60793f64dc888`
 - 테스트: `uv run pytest -q` → 800 passed, 8 skipped (Phase 2 790 → +10: 디렉터리 마운트, 파일 마운트, 긴 문법+gz, 심볼릭 링크·레포 밖·절대 경로 무시, 요청 root 밖, `.sh` unsupported, 파일 oversize, 합계 oversize, mongo `.js`/redis 없음, Dockerfile 빌드 DB). `uv run ruff check .` → All checks passed.
+
+## 리뷰 P1 수정 검증 · `build.target` / URL path·query 보존 (2026-10-04)
+
+기능 커밋 `f6679dd`(브랜치 `fix/gate-build-target-url-suffix`)의 wheel을 깨끗한 venv에 설치해 같은 요청(`rootDirectory="."`, auto)으로 재실행했다. decision/complexity/사유 코드/unit·dependency 목록과 포트·role은 이전 결과와 같고 추가 필드만 늘었다. 응답 JSON에 compose 하드코딩 비밀번호(`iris_demo_local`)는 나타나지 않는다.
+
+| 레포 | 소스 커밋 | 결과 |
+| --- | --- | --- |
+| iris-multi-image-shop | `6836ce3da305` | compose가 이미 `target: runtime`을 쓴다. `api` 3000/api, `web` 80/web, `worker` 3001/worker로 이전과 동일(`buildTarget:"runtime"`). `web`은 `build.args`가 있어 `buildArgs:["VITE_API_BASE_URL"]` + 질문 `build_args_present`(web). api·worker `DATABASE_URL` → postgres url `{scheme:"postgresql", urlSuffix:"/iris_shop", hasCredentials:true}`, `REDIS_URL` → redis url `{scheme:"redis", urlSuffix:"", hasCredentials:false}`. durationMs 12 |
+| Temp_log | `54fa8072d9fb` | unit `app` 4000(`buildTarget:null`, `buildArgs:[]`). `MONGO_URI` → mongo url `{scheme:"mongodb", urlSuffix:"/archlog?authSource=archlog", hasCredentials:true}` — 수정 전에는 `/archlog?authSource=…`가 결과에서 사라졌다. durationMs 11 |
+
+- wheel: `dist/iris_analyzer-0.1.0-py3-none-any.whl` (커밋 `f6679dd`에서 `uv build --wheel`)
+- sha256: `ed93a0a95488f31c8f526c1f2d1f1de9e08a8f7cfd5c3a707246d2c5a3abfc40`
+- 테스트: `uv run pytest -q` → 805 passed, 8 skipped (이전 800 → +5: 다단계 Dockerfile target api/web과 상속 EXPOSE, 파생 stage EXPOSE 우선·기본 마지막 stage, target 없음, build args 키만, URL path/query/fragment 보존 + DB `sslmode` + 자격 증명 미노출 + `mongodb+srv`·비밀 쿼리·미해석 보간 null). 기존 2건은 binding에 새 필드가 생겨 기대값만 갱신했다. `uv run ruff check .` → All checks passed.

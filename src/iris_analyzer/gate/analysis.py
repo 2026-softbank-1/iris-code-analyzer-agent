@@ -104,6 +104,8 @@ class _Unit:
     docker: Dockerfile | None = None
     compose: ComposeService | None = None
     aliases: list[dict] = field(default_factory=list)
+    build_target: str | None = None
+    build_args: list[str] = field(default_factory=list)
 
     def contract(self) -> dict:
         return {
@@ -120,6 +122,8 @@ class _Unit:
             "env": _unique_env(self.env),
             "dependsOn": sorted(set(self.depends_on)),
             "hostAliases": self.aliases,
+            "buildTarget": self.build_target if self.builder == "dockerfile" else None,
+            "buildArgs": self.build_args,
             "evidence": _unique_evidence(self.evidence),
         }
 
@@ -242,7 +246,7 @@ class _Gate:
         self.dependencies: dict[str, dict] = {}
         self.units: list[_Unit] = []
         self.ids: set[str] = set()
-        self.dockerfiles: dict[str, Dockerfile] = {}
+        self.dockerfiles: dict[tuple[str, str | None], Dockerfile] = {}
         self.service_ids: dict[str, str] = {}
         self.init_files: dict[str, dict[str, str]] = {}
 
@@ -337,10 +341,10 @@ class _Gate:
             result.append(directory)
         return result
 
-    def _docker(self, path: str) -> Dockerfile:
-        if path not in self.dockerfiles:
-            self.dockerfiles[path] = parse_dockerfile(self.scan, path)
-        return self.dockerfiles[path]
+    def _docker(self, path: str, target: str | None = None) -> Dockerfile:
+        if (path, target) not in self.dockerfiles:
+            self.dockerfiles[(path, target)] = parse_dockerfile(self.scan, path, target)
+        return self.dockerfiles[(path, target)]
 
     def _covered(self, directory: str, roots: list[tuple[str, Dockerfile | None]]) -> bool:
         for root, docker in roots:
@@ -640,7 +644,7 @@ class _Gate:
                 )
                 continue
             path = join(service.root, service.dockerfile or "Dockerfile")
-            docker = self._docker(path) if self.scan.exists(path) else None
+            docker = self._docker(path, service.target) if self.scan.exists(path) else None
             if docker is not None:
                 claimed.add(path)
             engine = database_engine_hint(service, docker.final_image if docker else None)
@@ -672,8 +676,28 @@ class _Gate:
                 evidence=evidence,
                 docker=docker,
                 compose=service,
+                build_target=service.target,
+                build_args=list(service.build_args),
             )
             service_ids[service.name] = unit.id
+            if docker is not None and docker.target_missing:
+                self.questions.append(
+                    _question(
+                        "build_target_not_found",
+                        f"'{service.name}'의 build.target '{service.target}'에 해당하는 stage가 "
+                        f"{path}에 없습니다. 포트를 확인할 수 없어 비워 두었습니다.",
+                        unit.id,
+                    )
+                )
+            if service.build_args:
+                self.questions.append(
+                    _question(
+                        "build_args_present",
+                        f"'{service.name}'의 build.args({', '.join(service.build_args)})는 플랫폼이 아직 "
+                        "빌드 인자로 전달할 수 없습니다. 값 없이 빌드해도 되는지 확인하세요.",
+                        unit.id,
+                    )
+                )
             if docker is None:
                 self.questions.append(
                     _question(
@@ -778,6 +802,8 @@ class _Gate:
                         evidence=root_unit.evidence + [{"path": join(self.scope, "Procfile"), "line": line}],
                         docker=root_unit.docker,
                         compose=root_unit.compose,
+                        build_target=root_unit.build_target,
+                        build_args=list(root_unit.build_args),
                     )
                     self.units.append(unit)
 
@@ -808,6 +834,9 @@ class _Gate:
     def _enrich(self, unit: _Unit) -> None:
         """Ports, env keys and client-library dependencies from the unit's own files."""
         docker = unit.docker
+        if docker is not None and docker.target_missing:
+            unit.port = None
+            return self._enrich_env(unit)
         if unit.port is None and docker is not None:
             if docker.exposed:
                 unit.port, line = docker.exposed[0]
@@ -831,6 +860,9 @@ class _Gate:
                     unit.id,
                 )
             )
+        self._enrich_env(unit)
+
+    def _enrich_env(self, unit: _Unit) -> None:
         known = {row["key"] for row in unit.env}
         for key, required, engine, path, line in env_example_keys(self.scan, unit.root):
             if key not in known:

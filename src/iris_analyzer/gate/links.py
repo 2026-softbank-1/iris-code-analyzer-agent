@@ -25,6 +25,14 @@ _BARE_VAR = re.compile(r"\$[A-Za-z_][A-Za-z0-9_]*")
 _URL = re.compile(
     r"^\s*([a-z][a-z0-9+.-]*)://(?:([^:@/\s]*)(?::([^@/\s]*))?@)?([^:/?#@\s]+)(?::(\d+))?(?:/([^?#\s]*))?"
 )
+_URL_FULL = re.compile(
+    r"^([a-z][a-z0-9+.-]*)://(?:([^@/?#\s]*)@)?([^:/?#@\s]+)(?::(\d+))?([/?#]\S*)?$", re.I
+)
+_SECRET_PARAM = re.compile(
+    r"(?:^|[?&#;])(?:[^=&#]*(?:password|passwd|pwd|secret|token|credential|api[_-]?key|access[_-]?key)"
+    r"[^=&#]*|sig|signature)=",
+    re.I,
+)
 _EMBEDDED_HOST = re.compile(r"(?:://|@)([A-Za-z0-9_.-]+)(?::(\d+))?")
 _HOST_PORT = re.compile(r"^([A-Za-z0-9_.-]+):(\d+)$")
 _SOURCE_LITERAL = re.compile(
@@ -153,11 +161,36 @@ def dependency_profile(engine: str, service) -> dict:
     }
 
 
+def url_parts(value: object) -> dict | None:
+    """Scheme, exact path+query+fragment and a credentials flag of a whole URL value.
+
+    Userinfo is dropped (only reported as ``hasCredentials``). None when the URL cannot
+    be reduced safely: unresolved interpolation after the host, ``+srv`` schemes, or a
+    secret-looking query parameter.
+    """
+    text = substitute(value).strip()
+    match = _URL_FULL.match(text)
+    if not match or UNRESOLVED in (match[1] + (match[3] or "") + (match[5] or "")):
+        return None
+    scheme, suffix = match[1], match[5] or ""
+    if scheme.lower().endswith("+srv") or _SECRET_PARAM.search(suffix):
+        return None
+    return {"scheme": scheme, "urlSuffix": suffix, "hasCredentials": match[2] is not None}
+
+
 def key_binding(key: str, value: object, names: dict[str, str], kinds: dict[str, str]) -> dict | None:
     """Binding from a Compose value: ``{kind, targetId, property}`` or None."""
     parsed = whole_url_host(value)
     if parsed and parsed.host in names:
-        return {"kind": kinds[names[parsed.host]], "targetId": names[parsed.host], "property": "url"}
+        parts = url_parts(value)
+        if parts is None:
+            return None
+        return {
+            "kind": kinds[names[parsed.host]],
+            "targetId": names[parsed.host],
+            "property": "url",
+            **parts,
+        }
     text = substitute(value).strip()
     if text in names and _HOST_KEY.match(key):
         return {"kind": kinds[names[text]], "targetId": names[text], "property": "host"}

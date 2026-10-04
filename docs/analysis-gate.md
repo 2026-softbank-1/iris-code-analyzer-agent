@@ -58,7 +58,7 @@ python -m iris_analyzer.gate.cli --request-stdin
 - `env[]`는 키·단계(`runtime`/`build`)·필수 여부만 담고 **값은 내보내지 않는다**. 필수: 값이 비었거나 `${VAR}`/`${VAR:?}` 보간, 연결 URL 키(`DATABASE_URL`, `REDIS_URL`, `MONGO_URI` …), 비밀 키 이름(`SECRET`, `PASSWORD`, `TOKEN` …).
 - `dependencies[].image`는 Compose 이미지 또는 DB Dockerfile의 FROM, 코드 의존성으로만 추론한 경우 `null`.
 - `questions[].unitId`는 전역 질문이면 `null`.
-- Phase 2 추가 필드(스키마에서는 선택이지만 이 구현은 항상 출력): `units[].env[].binding`, `units[].hostAliases[]`, `dependencies[].port/database/user/passwordInSource`. 아래 "프로젝트 내부 통신" 참조.
+- Phase 2 추가 필드(스키마에서는 선택이지만 이 구현은 항상 출력): `units[].env[].binding`, `units[].buildTarget`, `units[].buildArgs`, `units[].hostAliases[]`, `dependencies[].port/database/user/passwordInSource`. 아래 "프로젝트 내부 통신" 참조.
 - `analysis = {"engine":"static","durationMs":…,"modelCalls":0}`, `executionAuthorized`는 항상 `false`.
 
 ## 판정 규칙
@@ -95,6 +95,8 @@ Railpack 인식 매니페스트: `package.json`, `requirements.txt`, `pyproject.
 - `dependsOn`: Compose `depends_on`, 환경변수 URL의 호스트명(`@postgres:5432`)과 스킴(`redis://`), unit 매니페스트의 클라이언트 라이브러리(`pg`, `ioredis`, `bullmq`, `mongoose`, `psycopg`, `redis` …). 같은 엔진은 하나의 dependency로 합친다.
 - `env`: Compose `environment`(runtime), `build.args`(build), unit 루트의 `.env.example` 계열 키. 실제 `.env`는 읽지 않는다.
 - `role`: 이름(worker/queue/consumer/cron → `worker`), 최종 이미지 nginx/caddy/httpd → `web`, 이름(web/frontend/client → `web`, api/server/backend → `api`), 프레임워크 의존성 순. `public`은 worker가 아니면 `true`.
+- **`build.target`**: Compose `build.target`이 있으면 Dockerfile의 해당 stage를 기준으로 EXPOSE·`ENV PORT`·CMD/ENTRYPOINT·베이스 이미지(role 판정의 nginx→web 등)를 계산한다. target 이름은 대소문자를 구분하지 않고 `FROM x AS name`으로 찾는다. stage가 `FROM <앞선 stage>`이면 Docker처럼 그 stage를 상속한다(EXPOSE는 누적하되 더 파생된 stage의 값을 우선, `ENV PORT`·CMD는 파생 stage가 덮어씀, ENTRYPOINT를 새로 지정하면 상속된 CMD는 초기화). target이 없으면 마지막 stage. 이 값은 `units[].buildTarget`(문자열 또는 `null`, 선택 필드)으로 낸다. target stage가 Dockerfile에 없으면 `port`는 `null`로 두고 소스 포트 추정도 하지 않으며 `build_target_not_found` 질문을 남긴다.
+- **`build.args`**: 키만 `units[].buildArgs`(정렬된 문자열 배열, 선택 필드)로 내고 값은 어디에도 출력하지 않는다. WAS가 아직 빌드 인자를 전달하지 못하므로 unit마다 `build_args_present` 질문을 남긴다. (기존대로 `env[]`에는 stage=`build` 키로도 나온다.)
 - `startCommand`는 Compose `entrypoint`/`command` 또는 Procfile 명령일 때만 채운다. `buildCommand`는 채우지 않는다(빌더가 결정).
 
 ## 프로젝트 내부 통신 (Phase 2 추가 필드)
@@ -104,6 +106,7 @@ Railpack 인식 매니페스트: `package.json`, `requirements.txt`, `pyproject.
 - `units[].env[].binding`: `{"kind":"dependency","targetId":"postgres","property":"url|host|port|user|password|database"}`, `{"kind":"unit","targetId":"api","property":"url|host|port"}` 또는 `null`(확인 못 함). runtime 변수만 대상이다(build arg는 `null`).
   - 1순위 Compose `environment` 값: 전체가 URL이고 호스트가 Compose 서비스명이면 `url`(`postgres://…@postgres:5432/app` → postgres url, `http://api:3000` → unit api url). 값이 서비스명이면 `*_HOST`류 키는 `host`. 같은 접두어의 `*_HOST`가 바인딩돼 있으면 `*_PORT/*_USER/*_PASSWORD/*_DB`는 `port/user/password/database`(unit 대상은 `port`만).
   - 2순위 키 이름: `DATABASE_URL/DB_URL`(unit이 의존하는 postgres, 없으면 mysql), `POSTGRES_URL`, `MONGO_URL/MONGODB_URI/MONGO_URI`, `REDIS_URL`, `MYSQL_URL`. 해당 엔진 의존성이 후보 1개로 정해질 때만 연결한다. Compose 값이 외부 호스트 URL이면 키 이름이 같아도 `null`로 둔다.
+  - URL 바인딩(`property:"url"`)은 Compose에 적힌 URL에서 만든 경우 추가로 `scheme`(적힌 그대로: `http`, `postgresql`, `postgres+asyncpg`, `redis`, `mongodb` …), `urlSuffix`(host:port 뒤의 path+query+fragment 원문, 없으면 `""`; 예 `/api/v1?tenant=demo`, `/app?sslmode=disable`), `hasCredentials`(userinfo가 있었는지)를 낸다. 플랫폼은 대상의 host:port만 바꾸고 `scheme://` + host:port + `urlSuffix`로 URL을 다시 만든다. **userinfo(사용자·비밀번호)는 절대 출력하지 않는다.** URL을 안전하게 줄일 수 없으면 binding을 `null`로 둔다: `mongodb+srv` 등 `+srv` 스킴, host 뒤에 해석할 수 없는 `${VAR}` 보간(`/${PATH}`), 비밀로 보이는 쿼리 파라미터(`password|passwd|pwd|secret|token|credential|api_key|access_key|sig`가 이름에 들어간 것, 예 `?token=…`). 키 이름 휴리스틱으로만 연결한 binding(적힌 URL 없음)에는 이 세 필드가 없다.
 - `units[].hostAliases[]`: `{"host","port","targetId","evidence":[{path,line}]}`. 다른 unit/dependency를 Compose 서비스명(또는 unit/dependency id)으로 부르는 곳을 모은다. `host`가 Compose에서 쓰는 이름, `targetId`는 결과의 unit/dependency id, `port`는 URL에 적힌 포트(없으면 대상의 포트, 모르면 `null`). 근거:
   - Compose `environment` 값(URL 호스트, 값 전체가 서비스명, `host:port`) — 증거는 compose 파일의 해당 키 줄.
   - nginx 계열 `*.conf`/`nginx*` 파일의 `proxy_pass`/`fastcgi_pass`/`grpc_pass`/`uwsgi_pass`와 `upstream { server host:port }`(상한 40개 파일; unit 루트가 가장 깊은 소유 unit에 귀속).
@@ -128,7 +131,7 @@ Railpack 인식 매니페스트: `package.json`, `requirements.txt`, `pyproject.
 
 ## 질문 코드
 
-`port_unknown`, `dockerfile_missing`, `dependency_built_from_dockerfile`, `image_service_ignored`, `compose_build_unsupported`(원격/동적 context, `dockerfile_inline`), `unit_outside_scope`, `compose_variant`, `compose_invalid`, `no_builder_signal`, `scan_truncated`, `file_too_large`, `init_script_unsupported`, `init_script_too_large`, `ai_not_configured`. skip 응답에는 `ai_not_configured`·`scan_truncated`만 남긴다.
+`port_unknown`, `build_target_not_found`, `build_args_present`, `dockerfile_missing`, `dependency_built_from_dockerfile`, `image_service_ignored`, `compose_build_unsupported`(원격/동적 context, `dockerfile_inline`), `unit_outside_scope`, `compose_variant`, `compose_invalid`, `no_builder_signal`, `scan_truncated`, `file_too_large`, `init_script_unsupported`, `init_script_too_large`, `ai_not_configured`. skip 응답에는 `ai_not_configured`·`scan_truncated`만 남긴다.
 
 ## WAS 연동 메모
 
