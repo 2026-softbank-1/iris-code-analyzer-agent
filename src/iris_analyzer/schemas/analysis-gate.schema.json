@@ -1,0 +1,730 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://iris.example/contracts/analysis-gate.v1.schema.json",
+  "$comment": "Analysis gate result. Paths are POSIX-relative to the repository root, except units[].dockerfilePath (relative to the unit rootDirectory) and simpleBuild.dockerfilePath (relative to the request rootDirectory). Environment values are never included.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": "iris.analysis-gate.v1"
+    },
+    "sourceSha": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "rootDirectory": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024,
+      "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$))[^\\\\\\u0000]*$"
+    },
+    "decision": {
+      "enum": [
+        "skip",
+        "analyze"
+      ]
+    },
+    "complexity": {
+      "enum": [
+        "simple",
+        "complex",
+        "unsupported"
+      ]
+    },
+    "reasons": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1
+          },
+          "paths": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1024,
+              "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$))[^\\\\\\u0000]*$"
+            }
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "paths"
+        ]
+      }
+    },
+    "signals": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "dockerfiles": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024,
+            "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$))[^\\\\\\u0000]*$"
+          }
+        },
+        "composeFiles": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024,
+            "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$))[^\\\\\\u0000]*$"
+          }
+        },
+        "composeBuildServices": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "composeImageServices": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "workspaceManifests": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024,
+            "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$))[^\\\\\\u0000]*$"
+          }
+        },
+        "runtimeManifests": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1024,
+                "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$))[^\\\\\\u0000]*$"
+              },
+              "runtime": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "path",
+              "runtime"
+            ]
+          }
+        }
+      },
+      "required": [
+        "dockerfiles",
+        "composeFiles",
+        "composeBuildServices",
+        "composeImageServices",
+        "workspaceManifests",
+        "runtimeManifests"
+      ]
+    },
+    "simpleBuild": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "builder": {
+              "enum": [
+                "dockerfile",
+                "railpack"
+              ]
+            },
+            "dockerfilePath": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1024,
+                  "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$))[^\\\\\\u0000]*$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "builder",
+            "dockerfilePath"
+          ]
+        }
+      ]
+    },
+    "units": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9]([a-z0-9-]{0,62}[a-z0-9])?$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "rootDirectory": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024,
+            "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$))[^\\\\\\u0000]*$"
+          },
+          "builder": {
+            "enum": [
+              "dockerfile",
+              "railpack"
+            ]
+          },
+          "dockerfilePath": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1024,
+                "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$))[^\\\\\\u0000]*$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "port": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 65535
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "startCommand": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "buildCommand": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "role": {
+            "enum": [
+              "web",
+              "api",
+              "worker",
+              "app"
+            ]
+          },
+          "public": {
+            "type": "boolean"
+          },
+          "env": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "key": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z_][A-Za-z0-9_.-]*$"
+                },
+                "stage": {
+                  "enum": [
+                    "runtime",
+                    "build"
+                  ]
+                },
+                "required": {
+                  "type": "boolean"
+                },
+                "binding": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "kind": {
+                          "enum": [
+                            "dependency",
+                            "unit"
+                          ]
+                        },
+                        "targetId": {
+                          "type": "string",
+                          "pattern": "^[a-z0-9]([a-z0-9-]{0,62}[a-z0-9])?$"
+                        },
+                        "property": {
+                          "enum": [
+                            "url",
+                            "host",
+                            "port",
+                            "user",
+                            "password",
+                            "database"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "targetId",
+                        "property"
+                      ],
+                      "allOf": [
+                        {
+                          "if": {
+                            "properties": {
+                              "kind": {
+                                "const": "unit"
+                              }
+                            }
+                          },
+                          "then": {
+                            "properties": {
+                              "property": {
+                                "enum": [
+                                  "url",
+                                  "host",
+                                  "port"
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "description": "Where the platform can source this variable from. Optional for results produced before Phase 2; null when unknown."
+                }
+              },
+              "required": [
+                "key",
+                "stage",
+                "required"
+              ]
+            }
+          },
+          "dependsOn": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "hostAliases": {
+            "type": "array",
+            "description": "Hostnames (Compose service names) this unit uses to reach another unit or dependency. Optional for results produced before Phase 2.",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "host": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "port": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 65535
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "targetId": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9]([a-z0-9-]{0,62}[a-z0-9])?$"
+                },
+                "evidence": {
+                  "type": "array",
+                  "maxItems": 100,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "path": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 1024,
+                        "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$))[^\\\\\\u0000]*$"
+                      },
+                      "line": {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    },
+                    "required": [
+                      "path",
+                      "line"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "host",
+                "port",
+                "targetId",
+                "evidence"
+              ]
+            }
+          },
+          "evidence": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1024,
+                  "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$))[^\\\\\\u0000]*$"
+                },
+                "line": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              },
+              "required": [
+                "path",
+                "line"
+              ]
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "rootDirectory",
+          "builder",
+          "dockerfilePath",
+          "port",
+          "startCommand",
+          "buildCommand",
+          "role",
+          "public",
+          "env",
+          "dependsOn",
+          "evidence"
+        ]
+      }
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9]([a-z0-9-]{0,62}[a-z0-9])?$"
+          },
+          "engine": {
+            "enum": [
+              "postgres",
+              "redis",
+              "mysql",
+              "mongodb",
+              "other"
+            ]
+          },
+          "image": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "port": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 65535
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "database": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "user": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "passwordInSource": {
+            "type": "boolean",
+            "description": "True when the source hardcodes a password; the value is never returned."
+          },
+          "evidence": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1024,
+                  "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$))[^\\\\\\u0000]*$"
+                },
+                "line": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              },
+              "required": [
+                "path",
+                "line"
+              ]
+            }
+          },
+          "initScripts": {
+            "type": "array",
+            "maxItems": 20,
+            "description": "Compose-mounted /docker-entrypoint-initdb.d files (path, hash, size only; never contents). Runs once on an empty data directory.",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1024,
+                  "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$))[^\\\\\\u0000]*$"
+                },
+                "kind": {
+                  "enum": [
+                    "sql",
+                    "js",
+                    "sh",
+                    "sql.gz"
+                  ]
+                },
+                "sha256": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^[0-9a-f]{64}$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "size": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "order": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "supported": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "path",
+                "kind",
+                "sha256",
+                "size",
+                "order",
+                "supported"
+              ]
+            }
+          }
+        },
+        "required": [
+          "id",
+          "engine",
+          "image",
+          "evidence"
+        ]
+      }
+    },
+    "questions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "unitId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "code",
+          "unitId",
+          "message"
+        ]
+      }
+    },
+    "analysis": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "engine": {
+          "const": "static"
+        },
+        "durationMs": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "modelCalls": {
+          "const": 0
+        }
+      },
+      "required": [
+        "engine",
+        "durationMs",
+        "modelCalls"
+      ]
+    },
+    "executionAuthorized": {
+      "const": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "sourceSha",
+    "rootDirectory",
+    "decision",
+    "complexity",
+    "reasons",
+    "signals",
+    "simpleBuild",
+    "units",
+    "dependencies",
+    "questions",
+    "analysis",
+    "executionAuthorized"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "decision": {
+            "const": "skip"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "complexity": {
+            "const": "simple"
+          },
+          "simpleBuild": {
+            "type": "object"
+          },
+          "units": {
+            "maxItems": 0
+          },
+          "dependencies": {
+            "maxItems": 0
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "simpleBuild": {
+            "type": "null"
+          }
+        }
+      }
+    }
+  ]
+}
