@@ -28,6 +28,10 @@ from .compose import (
 )
 from .initdb import describe_scripts, mounted_files
 from .links import (
+    _DATABASE_KEYS,
+    _PASSWORD_KEYS,
+    _SOURCE_SUFFIXES,
+    _USER_KEYS,
     DEFAULT_PORTS,
     DEFAULT_USERS,
     MAX_EVIDENCE,
@@ -37,8 +41,10 @@ from .links import (
     heuristic_binding,
     key_binding,
     parse_url,
+    required_refs,
     sibling_bindings,
     source_aliases,
+    url_userinfo,
     whole_url_host,
 )
 from .scan import RepositoryScan, join, parent, relative_to, scan_repository, within
@@ -50,6 +56,7 @@ from .sources import (
     dockerfile_copies,
     dockerfile_variant,
     env_example_keys,
+    env_required,
     inferred_dependencies,
     is_compose_file,
     is_dev_dockerfile,
@@ -202,6 +209,33 @@ def run_gate(document: object) -> dict:
     return validate_gate_result(result)
 
 
+_SECRET_NAME = re.compile(r"PASSWORD|PASSWD|SECRET|TOKEN|API_?KEY|PRIVATE_?KEY|SALT", re.I)
+_RANDOM_NAME = re.compile(r"PASSWORD|PASSWD|SECRET|SALT", re.I)
+_WHOLE_REF = re.compile(r"^\s*\$\{([A-Za-z_][A-Za-z0-9_]*)(?::?\?[^}]*)?\}\s*$")
+
+
+def _whole_ref(value: object) -> str | None:
+    """Variable name when the whole value is ``${VAR}`` / ``${VAR:?msg}`` (no default)."""
+    match = _WHOLE_REF.match("" if value is None else str(value))
+    return match[1] if match else None
+
+
+def _managed_keys(engine: str | None) -> set[str]:
+    """Container env keys the official image (and so the platform) manages itself."""
+    return set(_PASSWORD_KEYS.get(engine, ())) | set(_USER_KEYS.get(engine, ())) | set(
+        _DATABASE_KEYS.get(engine, ())
+    )
+
+
+def _env_read_pattern(key: str) -> re.Pattern[str]:
+    name = re.escape(key)
+    return re.compile(
+        r"(?:process\.env|import\.meta\.env|os\.environ|environ|getenv|Getenv|ENV|\benv)\s*"
+        rf"(?:\.get\s*)?(?:\.|\[|\()\s*['\"`]?{name}(?![A-Za-z0-9_])"
+        rf"|\{{[^}}]*(?<![A-Za-z0-9_]){name}(?![A-Za-z0-9_])[^}}]*\}}\s*=\s*process\.env"
+    )
+
+
 def _slug(value: str, fallback: str = "app") -> str:
     text = re.sub(r"[^a-z0-9]+", "-", value.lower().split("/")[-1]).strip("-")[:40].strip("-")
     return text or fallback
@@ -214,6 +248,8 @@ def _unique_env(rows: list[dict]) -> list[dict]:
         if key in seen:
             seen[key]["required"] = seen[key]["required"] or row["required"]
             seen[key]["binding"] = seen[key]["binding"] or row.get("binding")
+            if row.get("secretId") and not seen[key].get("secretId"):
+                seen[key]["secretId"] = row["secretId"]
         else:
             seen[key] = {
                 "key": row["key"],
@@ -221,6 +257,8 @@ def _unique_env(rows: list[dict]) -> list[dict]:
                 "required": bool(row["required"]),
                 "binding": row.get("binding"),
             }
+            if row.get("secretId"):
+                seen[key]["secretId"] = row["secretId"]
     return [seen[key] for key in sorted(seen, key=lambda item: (item[1] != "runtime", item[0]))]
 
 
@@ -249,6 +287,8 @@ class _Gate:
         self.dockerfiles: dict[tuple[str, str | None], Dockerfile] = {}
         self.service_ids: dict[str, str] = {}
         self.init_files: dict[str, dict[str, str]] = {}
+        self.secrets: list[dict] = []
+        self.example_empty: set[tuple[str, str]] = set()
 
     # -- inventory -------------------------------------------------------
     def _inventory(self) -> None:
@@ -509,6 +549,7 @@ class _Gate:
         analyze = decision == "analyze"
         if analyze:
             self._init_scripts()
+            self._secrets()
         if not analyze:
             self.questions = [
                 item for item in self.questions if item["code"] in {"ai_not_configured", "scan_truncated"}
@@ -533,6 +574,7 @@ class _Gate:
             if analyze
             else [],
             "dependencies": [self.dependencies[key] for key in sorted(self.dependencies)] if analyze else [],
+            "secrets": self.secrets if analyze else [],
             "questions": self.questions,
             "analysis": {"engine": "static", "durationMs": 0, "modelCalls": 0},
             "executionAuthorized": False,
@@ -660,9 +702,10 @@ class _Gate:
                 )
                 self.questions.append(
                     _question(
-                        "dependency_built_from_dockerfile",
-                        f"'{service.name}'는 {engine} 데이터베이스를 직접 빌드합니다. 플랫폼은 DB를 만들지 "
-                        "않으므로 관리형/외부 인스턴스를 Variables로 연결하세요.",
+                        "custom_database_image",
+                        f"'{service.name}'는 {engine} 데이터베이스를 직접 빌드합니다({path}). "
+                        f"플랫폼 개발용 DB는 공식 이미지를 쓰므로 {path}의 커스텀 설정은 적용되지 않습니다. "
+                        "필요한 초기화는 마운트한 init 스크립트로 전달하세요.",
                     )
                 )
                 continue
@@ -744,9 +787,9 @@ class _Gate:
                 self._dependency(label, engine, docker.final_image, [{"path": path, "line": 1}])
                 self.questions.append(
                     _question(
-                        "dependency_built_from_dockerfile",
-                        f"{path}는 {engine} 데이터베이스 이미지입니다. 플랫폼은 DB를 만들지 않으므로 "
-                        "관리형/외부 인스턴스를 Variables로 연결하세요.",
+                        "custom_database_image",
+                        f"{path}는 {engine} 데이터베이스 이미지입니다. 플랫폼 개발용 DB는 공식 이미지를 "
+                        f"쓰므로 {path}의 커스텀 설정은 적용되지 않습니다.",
                     )
                 )
                 continue
@@ -864,13 +907,166 @@ class _Gate:
 
     def _enrich_env(self, unit: _Unit) -> None:
         known = {row["key"] for row in unit.env}
-        for key, required, engine, path, line in env_example_keys(self.scan, unit.root):
+        consumed = self._consumed_keys(unit)
+        for key, required, engine, path, line, empty in env_example_keys(self.scan, unit.root):
+            if consumed is not None and key not in consumed:
+                continue
             if key not in known:
                 unit.env.append({"key": key, "stage": "runtime", "required": required})
+                if empty:
+                    self.example_empty.add((unit.id, key))
             if engine:
                 self._link(unit, engine, path, line)
+        for key, required in self._env_file_rows(unit):
+            if key not in known:
+                known.add(key)
+                unit.env.append({"key": key, "stage": "runtime", "required": required})
         for engine, path, line in inferred_dependencies(self.scan, unit.root):
             self._link(unit, engine, path, line)
+
+    def _env_file_rows(self, unit: _Unit) -> list[tuple[str, bool]]:
+        """Keys (never values) of the Compose service's ``env_file`` files."""
+        rows = []
+        for path in unit.compose.env_files if unit.compose else []:
+            for line in (self.scan.read(path) or "").splitlines():
+                match = re.match(r"\s*(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$", line)
+                if match:
+                    rows.append((match[1], env_required(match[1], match[2].strip().strip("\"'"))))
+        return rows
+
+    def _consumed_keys(self, unit: _Unit) -> set[str] | None:
+        """Env example keys this unit really reads, or None when no filter applies.
+
+        A Compose unit gets keys from its own ``environment``/``env_file``/source reads;
+        a shared root ``.env.example`` (which also feeds sibling services such as the
+        database) must not add keys on its own. Units without Compose keep every key of
+        their own directory's example file.
+        """
+        if unit.compose is None:
+            return None
+        wanted = [key for key, *_ in env_example_keys(self.scan, unit.root)]
+        consumed = {key for key, _ in self._env_file_rows(unit)}
+        if not wanted:
+            return consumed
+        deeper = [
+            other.root
+            for other in self.units
+            if other is not unit and other.root != "." and within(other.root, unit.root) and other.root != unit.root
+        ]
+        texts = []
+        checked = 0
+        for path in self.scan.files():
+            if not path.endswith(_SOURCE_SUFFIXES) or not within(path, unit.root):
+                continue
+            if len(PurePosixPath(relative_to(path, unit.root)).parts) > 6 or any(
+                within(path, root) for root in deeper
+            ):
+                continue
+            checked += 1
+            if checked > 300:
+                break
+            text = self.scan.read(path)
+            if text:
+                texts.append(text)
+        for key in wanted:
+            pattern = _env_read_pattern(key)
+            if any(pattern.search(text) for text in texts):
+                consumed.add(key)
+        return consumed
+
+    # -- secrets -------------------------------------------------------------
+    def _secrets(self) -> None:
+        """Generated/shared/platform-managed secrets. Only names and ids; never values."""
+        found: dict[str, dict] = {}
+
+        def entry(var: str) -> dict:
+            return found.setdefault(
+                var,
+                {"consumers": set(), "evidence": [], "url": False, "managed": None, "targets": set()},
+            )
+
+        extras: list[tuple[str, str, str, str | None, bool]] = []
+        for name, service in sorted(self.services.items()):
+            target = self.service_ids.get(name)
+            if target is None:
+                continue
+            kind = "dependency" if target in self.dependencies else "unit"
+            engine = self.dependencies[target]["engine"] if kind == "dependency" else None
+            for key, value in service.env_values.items():
+                line = service.env_lines.get(key, service.line)
+                userinfo = url_userinfo(value)
+                for var in required_refs(value):
+                    row = entry(var)
+                    in_url = bool(userinfo and userinfo[1] == var)
+                    row["url"] = row["url"] or in_url
+                    row["consumers"].add((kind, target, var if in_url else key, "url_password" if in_url else "env"))
+                    row["targets"].add(target)
+                    row["evidence"].append({"path": service.file, "line": line})
+                    whole = _whole_ref(value)
+                    if kind == "dependency" and whole == var and key in _PASSWORD_KEYS.get(engine, ()):
+                        row["managed"] = {"dependencyId": target, "property": "password"}
+                if kind == "dependency" and key not in _managed_keys(engine) and "${" in str(value):
+                    extras.append((target, key, str(value), _whole_ref(value), True))
+        for (unit_id, key) in sorted(self.example_empty):
+            if _SECRET_NAME.search(key):
+                row = entry(key)
+                row["consumers"].add(("unit", unit_id, key, "env"))
+                row["targets"].add(unit_id)
+                unit = next(item for item in self.units if item.id == unit_id)
+                row["evidence"].append(self._example_evidence(unit, key))
+
+        secrets = {}
+        for var, row in found.items():
+            if not (row["url"] or _SECRET_NAME.search(var) or len(row["targets"]) > 1):
+                continue
+            generate = None
+            if row["managed"] is None and (row["url"] or _RANDOM_NAME.search(var)):
+                generate = "random"
+            item = {
+                "id": var,
+                "generate": generate,
+                "consumers": [
+                    {"kind": kind, "targetId": target, "key": key, "via": via}
+                    for kind, target, key, via in sorted(row["consumers"])
+                ],
+                "evidence": _unique_evidence(row["evidence"])[:MAX_EVIDENCE],
+            }
+            if row["managed"] is not None:
+                item["platformManaged"] = row["managed"]
+            secrets[var] = item
+        self.secrets = [secrets[key] for key in sorted(secrets)]
+
+        for target, key, value, whole, _ in extras:
+            row = self.dependencies[target]
+            env = row.setdefault("env", [])
+            if all(item["key"] != key for item in env):
+                entry_ = {"key": key}
+                if whole in secrets:
+                    entry_["secretId"] = whole
+                env.append(entry_)
+        for row in self.dependencies.values():
+            if "env" in row:
+                row["env"].sort(key=lambda item: item["key"])
+        for unit in self.units:
+            compose = unit.compose
+            for row in unit.env:
+                if row["stage"] != "runtime":
+                    continue
+                value = compose.env_values.get(row["key"]) if compose else None
+                whole = _whole_ref(value) if value is not None else None
+                if whole in secrets:
+                    row["secretId"] = whole
+                elif row["key"] in secrets and any(
+                    (item["kind"], item["targetId"], item["key"]) == ("unit", unit.id, row["key"])
+                    for item in secrets[row["key"]]["consumers"]
+                ):
+                    row["secretId"] = row["key"]
+
+    def _example_evidence(self, unit: _Unit, key: str) -> dict:
+        for name_key, _, _, path, line, _ in env_example_keys(self.scan, unit.root):
+            if name_key == key:
+                return {"path": path, "line": line}
+        return {"path": unit.root, "line": 1}
 
     def _link(self, unit: _Unit, engine: str, path: str, line: int) -> None:
         for row in self.dependencies.values():

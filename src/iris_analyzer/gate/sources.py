@@ -423,8 +423,10 @@ def env_required(key: str, value: object) -> bool:
     return bool(_CONNECTION_KEY.search(key) or _SECRET_KEY.search(key))
 
 
-def env_example_keys(scan: RepositoryScan, directory: str) -> list[tuple[str, bool, str | None, str, int]]:
-    """(key, required, url engine, path, line) from env example files; values are not returned."""
+def env_example_keys(
+    scan: RepositoryScan, directory: str
+) -> list[tuple[str, bool, str | None, str, int, bool]]:
+    """(key, required, url engine, path, line, empty) from env example files; values are not returned."""
     rows = []
     for name in ENV_EXAMPLES:
         if name not in scan.names(directory):
@@ -436,7 +438,7 @@ def env_example_keys(scan: RepositoryScan, directory: str) -> list[tuple[str, bo
                 continue
             value = match[2].strip().strip("\"'")
             required = not value or bool(_CONNECTION_KEY.search(match[1]) or _SECRET_KEY.search(match[1]))
-            rows.append((match[1], required, url_engine(value), path, number))
+            rows.append((match[1], required, url_engine(value), path, number, not value))
         break
     return rows
 

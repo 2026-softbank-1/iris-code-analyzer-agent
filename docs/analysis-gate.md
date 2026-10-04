@@ -86,7 +86,7 @@ Railpack 인식 매니페스트: `package.json`, `requirements.txt`, `pyproject.
 
 기존 전처리 Docker 추출기의 Compose 포트·명령·YAML 위치 해석(`_compose_port`, `_command`, `_yaml_mapping`, `_yaml_lines`)과 `safe_repository_path`를 그대로 재사용한다.
 
-1. **Compose**: build 서비스 → unit(`builder=dockerfile`, context → rootDirectory, dockerfile → dockerfilePath). 이미지 서비스 → dependency(`postgres|redis|mysql|mongodb`, 메시지 큐·검색 등은 `other`). 프록시·터널·관리 도구(cloudflared, traefik, adminer …)는 무시한다. DB를 직접 빌드하는 서비스(`Dockerfile.mongo`, `FROM mongo`, `command: mongod`)는 unit이 아니라 dependency로 두고 `dependency_built_from_dockerfile` 질문을 남긴다.
+1. **Compose**: build 서비스 → unit(`builder=dockerfile`, context → rootDirectory, dockerfile → dockerfilePath). 이미지 서비스 → dependency(`postgres|redis|mysql|mongodb`, 메시지 큐·검색 등은 `other`). 프록시·터널·관리 도구(cloudflared, traefik, adminer …)는 무시한다. DB를 직접 빌드하는 서비스(`Dockerfile.mongo`, `FROM mongo`, `command: mongod`)는 unit이 아니라 dependency로 두고 `custom_database_image` 질문을 남긴다.
 2. **Compose에 없는 Dockerfile** → 디렉터리 단위 unit(변형은 `<dir>-<variant>` id, 루트는 `app`).
 3. **Railpack**: Dockerfile이 포함하지 않는 워크스페이스 앱·매니페스트 디렉터리 → `builder=railpack` unit.
 4. **Procfile** 프로세스 2개 이상이면 루트 unit을 프로세스별 unit으로 나누고 `startCommand`에 명령을 넣는다.
@@ -129,9 +129,23 @@ Railpack 인식 매니페스트: `package.json`, `requirements.txt`, `pyproject.
 - `supported:false` + 질문: `.sh`는 `init_script_unsupported`(플랫폼이 실행하지 않음). 파일당 1 MiB 초과는 그 파일만, 지원 파일 합계가 1 MiB를 넘으면 해당 DB의 지원 스크립트 전부 `init_script_too_large`.
 - `analyze`일 때만 출력한다.
 
+## 비밀값과 소비 키 (계약 G)
+
+선택 필드만 추가했다. 값·기본값은 어디에도 출력하지 않는다(id·키 이름·`path:line`만).
+
+- 최상위 `secrets[]`: `{id, generate: "random"|null, platformManaged?: {dependencyId, property:"password"}, consumers:[{kind: unit|dependency, targetId, key, via: env|url_password}], evidence}`. 대상은 Compose environment의 기본값 없는 `${VAR}`/`${VAR:?msg}` 중 이름이 `PASSWORD|PASSWD|SECRET|TOKEN|API_KEY|PRIVATE_KEY|SALT`이거나, URL userinfo 비밀번호이거나, 둘 이상의 서비스가 함께 쓰는 값, 그리고 unit이 읽는 `.env.example`의 빈 값(같은 이름 패턴). `${VAR:-기본값}`은 대상이 아니다.
+  - `generate: "random"`: URL 비밀번호이거나 이름에 `PASSWORD|PASSWD|SECRET|SALT`가 있을 때. `TOKEN`/`API_KEY`/`PRIVATE_KEY`만 해당하거나 단순 공유 값은 외부 발급 값일 가능성이 커서 `null`(사용자 입력).
+  - `via: "url_password"`는 URL userinfo의 `${VAR}`이며 consumer `key`는 소비 서비스에 저장할 변수 이름(= secret id)이다. `env`는 해당 서비스 환경변수 키.
+  - DB 엔진 관리 비밀번호 키(`MONGO_INITDB_ROOT_PASSWORD`, `POSTGRES_PASSWORD` 등)에 매핑된 값은 `generate: null` + `platformManaged`.
+- `dependencies[].env: [{key, secretId?}]`: DB 서비스 환경변수 중 엔진이 관리하지 않는 키로 값이 `${…}` 보간인 것(예: mongo의 `MONGO_APP_PASSWORD`).
+- `units[].env[].secretId`: 값이 통째로 `${VAR}`이고 VAR가 secret인 키.
+- `units[].env[]`는 그 unit이 실제로 소비하는 키만 낸다. Compose unit은 자기 `environment`/`env_file` 키와, 소스에서 읽는(`process.env.X`, `os.environ[...]`, `getenv` 등) `.env.example` 키만 포함한다. 루트 `.env.example`만 근거인 키(예: DB 전용 `MONGO_ROOT_PASSWORD`)는 넣지 않는다. Compose 없는 unit은 기존대로 자기 디렉터리의 예시 파일 키를 모두 낸다.
+- URL 바인딩(`property:"url"`)에 userinfo가 있으면(`hasCredentials:true`) `user`(리터럴일 때만, 보간이면 `null`)와 `passwordSecretId`(비밀번호가 `${VAR}`일 때 secret id, 아니면 `null`)를 더한다. 플랫폼은 이때 DB 관리 자격증명 대신 이 사용자/비밀값을 쓴다.
+- 질문 `custom_database_image`(이전 `dependency_built_from_dockerfile`): DB를 Dockerfile로 직접 빌드하면 "플랫폼 개발용 DB는 공식 이미지를 쓰므로 Dockerfile의 커스텀 설정은 적용되지 않습니다"를 안내한다.
+
 ## 질문 코드
 
-`port_unknown`, `build_target_not_found`, `build_args_present`, `dockerfile_missing`, `dependency_built_from_dockerfile`, `image_service_ignored`, `compose_build_unsupported`(원격/동적 context, `dockerfile_inline`), `unit_outside_scope`, `compose_variant`, `compose_invalid`, `no_builder_signal`, `scan_truncated`, `file_too_large`, `init_script_unsupported`, `init_script_too_large`, `ai_not_configured`. skip 응답에는 `ai_not_configured`·`scan_truncated`만 남긴다.
+`port_unknown`, `build_target_not_found`, `build_args_present`, `dockerfile_missing`, `custom_database_image`, `image_service_ignored`, `compose_build_unsupported`(원격/동적 context, `dockerfile_inline`), `unit_outside_scope`, `compose_variant`, `compose_invalid`, `no_builder_signal`, `scan_truncated`, `file_too_large`, `init_script_unsupported`, `init_script_too_large`, `ai_not_configured`. skip 응답에는 `ai_not_configured`·`scan_truncated`만 남긴다.
 
 ## WAS 연동 메모
 

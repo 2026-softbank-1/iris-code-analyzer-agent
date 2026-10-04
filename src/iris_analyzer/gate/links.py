@@ -21,6 +21,9 @@ MAX_CONFIG_FILES = 40
 MAX_EVIDENCE = 20
 
 _VAR = re.compile(r"\$\{[A-Za-z_][A-Za-z0-9_]*(?::?([-?+=])([^}]*))?\}")
+_NAMED_VAR = re.compile(r"\$\{([A-Za-z_][A-Za-z0-9_]*)(?::?([-?+=])([^}]*))?\}")
+_USERINFO = re.compile(r"^\s*[a-z][a-z0-9+.-]*://([^@/?#\s]*)@", re.I)
+_TOKEN = re.compile("\x01([A-Za-z_][A-Za-z0-9_]*)\x02")
 _BARE_VAR = re.compile(r"\$[A-Za-z_][A-Za-z0-9_]*")
 _URL = re.compile(
     r"^\s*([a-z][a-z0-9+.-]*)://(?:([^:@/\s]*)(?::([^@/\s]*))?@)?([^:/?#@\s]+)(?::(\d+))?(?:/([^?#\s]*))?"
@@ -86,6 +89,37 @@ def substitute(value: object) -> str:
         return match[2] if match[1] == "-" and match[2] else UNRESOLVED
 
     return _BARE_VAR.sub(UNRESOLVED, _VAR.sub(replace, "" if value is None else str(value)))
+
+
+def required_refs(value: object) -> list[str]:
+    """Names of ``${VAR}`` / ``${VAR:?msg}`` references that carry no default (never values)."""
+    text = "" if value is None else str(value)
+    return list(
+        dict.fromkeys(m[1] for m in _NAMED_VAR.finditer(text) if m[2] in (None, "?"))
+    )
+
+
+def url_userinfo(value: object) -> tuple[str | None, str | None] | None:
+    """``(user, passwordSecretId)`` of a URL value's userinfo, None without userinfo.
+
+    ``user`` is only returned when it is a plain literal (interpolated users give None);
+    ``passwordSecretId`` only when the password is exactly one ``${VAR}`` without default.
+    Literal usernames are not secrets; literal passwords are never returned.
+    """
+
+    def tokenize(match: re.Match[str]) -> str:
+        if match[2] in (None, "?"):
+            return f"\x01{match[1]}\x02"
+        return UNRESOLVED
+
+    text = _BARE_VAR.sub(UNRESOLVED, _NAMED_VAR.sub(tokenize, "" if value is None else str(value)))
+    match = _USERINFO.match(text)
+    if not match:
+        return None
+    user, _, password = match[1].partition(":")
+    literal = bool(user) and not re.search("[\x00\x01\x02]", user)
+    token = _TOKEN.fullmatch(password)
+    return (user if literal else None), (token[1] if token else None)
 
 
 def resolved(value: str | None) -> str | None:
@@ -185,12 +219,17 @@ def key_binding(key: str, value: object, names: dict[str, str], kinds: dict[str,
         parts = url_parts(value)
         if parts is None:
             return None
-        return {
+        binding = {
             "kind": kinds[names[parsed.host]],
             "targetId": names[parsed.host],
             "property": "url",
             **parts,
         }
+        if parts["hasCredentials"]:
+            user, secret = url_userinfo(value) or (None, None)
+            binding["user"] = user
+            binding["passwordSecretId"] = secret
+        return binding
     text = substitute(value).strip()
     if text in names and _HOST_KEY.match(key):
         return {"kind": kinds[names[text]], "targetId": names[text], "property": "host"}

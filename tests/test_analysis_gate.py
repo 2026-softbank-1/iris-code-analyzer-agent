@@ -364,7 +364,7 @@ def test_database_dockerfile_variant_counts_and_becomes_dependency(tmp_path):
     assert [unit["id"] for unit in result["units"]] == ["app"]
     assert result["units"][0]["port"] == 4000
     assert result["dependencies"][0]["engine"] == "mongodb"
-    assert "dependency_built_from_dockerfile" in [item["code"] for item in result["questions"]]
+    assert "custom_database_image" in [item["code"] for item in result["questions"]]
 
 
 def test_procfile_with_two_processes_analyzes(tmp_path):
@@ -465,6 +465,7 @@ def test_env_bindings_from_compose_values_siblings_and_key_names():
     assert api["DATABASE_URL"] == {
         "kind": "dependency", "targetId": "postgres", "property": "url",
         "scheme": "postgres", "urlSuffix": "/shop", "hasCredentials": True,
+        "user": "app", "passwordSecretId": None,
     }
     # Compose service name `cache` differs from the engine; the host decides the target.
     assert api["REDIS_URL"] == {
@@ -874,9 +875,204 @@ def test_url_binding_keeps_scheme_and_exact_suffix_without_credentials(tmp_path)
     assert env["SELF_PG"] == {
         "kind": "dependency", "targetId": "db", "property": "url",
         "scheme": "postgresql+asyncpg", "urlSuffix": "/app?sslmode=disable", "hasCredentials": True,
+        "user": "u", "passwordSecretId": None,
     }
     assert env["PLAIN"]["urlSuffix"] == ""
     assert env["AUTHSRC"]["urlSuffix"] == "/app?authSource=admin&retryWrites=true"
     assert env["AUTHSRC"]["scheme"] == "mongodb" and env["AUTHSRC"]["hasCredentials"] is True
     assert env["SRV"] is None and env["TOKENED"] is None and env["UNRES"] is None
     assert "pw-leak-1" not in json.dumps(result)
+
+
+# -- 계약 G: secrets, unit-consumed env, URL user ---------------------------------
+
+TEMP_LOG_COMPOSE = """\
+services:
+  app:
+    build: .
+    ports: ['127.0.0.1:${APP_PORT:-8080}:4000']
+    environment:
+      NODE_ENV: production
+      PUBLIC_URL: ${PUBLIC_URL:-http://localhost:8080}
+      SESSION_SECRET: ${SESSION_SECRET:?Run make init}
+      MONGO_URI: mongodb://archlog:${MONGO_APP_PASSWORD:?Run make init}@mongo:27017/archlog?authSource=archlog
+    depends_on:
+      mongo: {condition: service_healthy}
+  mongo:
+    image: temp-log-mongo:local
+    build: {context: ., dockerfile: Dockerfile.mongo}
+    command: [mongod, --bind_ip_all, --auth]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:?Run make init}
+      MONGO_APP_PASSWORD: ${MONGO_APP_PASSWORD:?Run make init}
+      HOME: /tmp
+    volumes:
+      - mongo-data:/data/db
+      - ./docker/mongo-init.js:/docker-entrypoint-initdb.d/init.js:ro
+volumes:
+  mongo-data:
+"""
+TEMP_LOG_EXAMPLE = (
+    "APP_PORT=8080\nSESSION_SECRET=generate-a-random-secret-with-make-init\n"
+    "MONGO_ROOT_PASSWORD=generate-with-make-init\nMONGO_APP_PASSWORD=generate-with-make-init\n"
+)
+
+
+def temp_log_repo(tmp_path: Path) -> Path:
+    return write(
+        tmp_path / "repo",
+        {
+            "compose.yaml": TEMP_LOG_COMPOSE,
+            "Dockerfile": "FROM node:22\nEXPOSE 4000\n",
+            "Dockerfile.mongo": "FROM mongo:8.0.32\n",
+            ".env.example": TEMP_LOG_EXAMPLE,
+            "docker/mongo-init.js": "db.createUser({})",
+            "server/index.js": "const s = process.env.SESSION_SECRET; app.listen(4000)\n",
+            "scripts/init.py": "open('.env','w').write('MONGO_ROOT_PASSWORD=' + secrets.token_hex())\n",
+        },
+    )
+
+
+def secret_map(result: dict) -> dict[str, dict]:
+    return {item["id"]: item for item in result["secrets"]}
+
+
+def test_temp_log_secrets_generated_shared_and_platform_managed(tmp_path):
+    result = gate(temp_log_repo(tmp_path))
+    secrets = secret_map(result)
+    assert set(secrets) == {"MONGO_APP_PASSWORD", "MONGO_ROOT_PASSWORD", "SESSION_SECRET"}
+    app_pw = secrets["MONGO_APP_PASSWORD"]
+    assert app_pw["generate"] == "random" and "platformManaged" not in app_pw
+    assert app_pw["consumers"] == [
+        {"kind": "dependency", "targetId": "mongo", "key": "MONGO_APP_PASSWORD", "via": "env"},
+        {"kind": "unit", "targetId": "app", "key": "MONGO_APP_PASSWORD", "via": "url_password"},
+    ]
+    assert app_pw["evidence"] and all(item["path"] == "compose.yaml" for item in app_pw["evidence"])
+    session = secrets["SESSION_SECRET"]
+    assert session["generate"] == "random"
+    assert session["consumers"] == [{"kind": "unit", "targetId": "app", "key": "SESSION_SECRET", "via": "env"}]
+    root = secrets["MONGO_ROOT_PASSWORD"]
+    assert root["generate"] is None
+    assert root["platformManaged"] == {"dependencyId": "mongo", "property": "password"}
+    assert root["consumers"] == [
+        {"kind": "dependency", "targetId": "mongo", "key": "MONGO_INITDB_ROOT_PASSWORD", "via": "env"}
+    ]
+
+    app = units(result)["app"]
+    keys = {row["key"] for row in app["env"]}
+    assert "MONGO_ROOT_PASSWORD" not in keys  # only the mongo service consumes it
+    assert {"SESSION_SECRET", "MONGO_URI", "NODE_ENV"} <= keys
+    row = {row["key"]: row for row in app["env"]}
+    assert row["SESSION_SECRET"]["secretId"] == "SESSION_SECRET"
+    assert row["MONGO_URI"]["binding"] == {
+        "kind": "dependency", "targetId": "mongo", "property": "url", "scheme": "mongodb",
+        "urlSuffix": "/archlog?authSource=archlog", "hasCredentials": True,
+        "user": "archlog", "passwordSecretId": "MONGO_APP_PASSWORD",
+    }
+    mongo = {row["id"]: row for row in result["dependencies"]}["mongo"]
+    assert mongo["env"] == [{"key": "MONGO_APP_PASSWORD", "secretId": "MONGO_APP_PASSWORD"}]
+    question = next(item for item in result["questions"] if item["code"] == "custom_database_image")
+    assert "공식 이미지" in question["message"] and "만들지 않으므로" not in question["message"]
+
+
+def test_root_env_example_alone_does_not_add_keys_but_source_reads_and_env_file_do(tmp_path):
+    repo = write(
+        tmp_path / "repo",
+        {
+            "compose.yaml": "services:\n  api:\n    build: ./api\n    env_file: [./api/api.env]\n"
+            "  worker:\n    build: ./worker\n",
+            ".env.example": "DB_PASSWORD=\nREAD_ME=1\nUNUSED_TOKEN=\nFROM_FILE=\n",
+            "api/Dockerfile": "FROM node:22\nEXPOSE 3000\n",
+            "api/api.env": "FROM_FILE=x\n",
+            "worker/Dockerfile": "FROM node:22\n",
+            "worker/index.js": "const a = process.env.READ_ME;\n",
+        },
+    )
+    found = units(gate(repo))
+    # api reads FROM_FILE through env_file; neither service gets DB_PASSWORD/UNUSED_TOKEN from the root example.
+    assert {row["key"] for row in found["api"]["env"]} == {"FROM_FILE"}
+    assert {row["key"] for row in found["worker"]["env"]} == set()
+
+    write(repo, {"api/.env.example": "FROM_FILE=\nNOT_READ=\nREAD_ME=\n", "api/src/a.js": "const {READ_ME} = process.env;\n"})
+    api = {row["key"] for row in units(gate(repo))["api"]["env"]}
+    assert api == {"FROM_FILE", "READ_ME"}
+
+
+def test_empty_env_example_secrets_and_generate_rules(tmp_path):
+    repo = write(
+        tmp_path / "repo",
+        {
+            "compose.yaml": "services:\n  api:\n    build: ./api\n"
+            "    environment:\n      STRIPE_API_KEY: ${STRIPE_API_KEY}\n      SHARED_TOKEN: ${SHARED_TOKEN}\n"
+            "      LABEL: ${LABEL:-x}\n      PLAIN: ${PLAIN}\n"
+            "  worker:\n    build: ./worker\n    environment:\n      SHARED_TOKEN: ${SHARED_TOKEN}\n"
+            "      OTHER: ${PLAIN}\n",
+            "api/Dockerfile": "FROM node:22\nEXPOSE 3000\n",
+            "worker/Dockerfile": "FROM node:22\nEXPOSE 3001\n",
+            "worker/.env.example": "JWT_SECRET=\nDEBUG=\n",
+            "worker/index.js": "process.env.JWT_SECRET; process.env.DEBUG\n",
+        },
+    )
+    result = gate(repo)
+    secrets = secret_map(result)
+    assert secrets["STRIPE_API_KEY"]["generate"] is None  # external credential, user supplied
+    assert secrets["SHARED_TOKEN"]["generate"] is None
+    assert [c["targetId"] for c in secrets["SHARED_TOKEN"]["consumers"]] == ["api", "worker"]
+    assert secrets["PLAIN"]["generate"] is None  # shared by two services, not a secret name
+    assert secrets["JWT_SECRET"]["generate"] == "random"
+    assert secrets["JWT_SECRET"]["evidence"] == [{"path": "worker/.env.example", "line": 1}]
+    assert "LABEL" not in secrets and "DEBUG" not in secrets
+    worker = {row["key"]: row for row in units(result)["worker"]["env"]}
+    assert worker["JWT_SECRET"]["secretId"] == "JWT_SECRET"
+
+
+def test_secrets_never_leak_values_or_defaults_on_stdout(tmp_path):
+    repo = write(
+        tmp_path / "repo",
+        {
+            "compose.yaml": "services:\n  api:\n    build: ./api\n    environment:\n"
+            "      API_SECRET: ${API_SECRET:-leak-default-1}\n"
+            "      DB: mongodb://literal-user:leak-literal-2@db:27017/x\n"
+            "      DB2: mongodb://${DB_USER:-leak-user-3}:${DB_PASS:-leak-default-4}@db:27017/y\n"
+            "      API_TOKEN: ${API_TOKEN:?leak-message-5}\n"
+            "  db:\n    image: mongo:7\n    environment:\n"
+            "      MONGO_INITDB_ROOT_PASSWORD: leak-literal-6\n      INIT_PW: ${INIT_PW:?x}\n",
+            "api/Dockerfile": "FROM node:22\nEXPOSE 3000\n",
+            "api/.env.example": "SESSION_SECRET=leak-example-7\nTOKEN_X=\n",
+            "api/index.js": "process.env.SESSION_SECRET; process.env.TOKEN_X\n",
+        },
+    )
+    request = {"schemaVersion": "iris.analysis-gate-request.v1", "sourceRoot": str(repo)}
+    completed = run_cli(json.dumps(request).encode())
+    assert completed.returncode == 0, completed.stderr
+    output = completed.stdout.decode()
+    for leaked in ("leak-default-1", "leak-literal-2", "leak-user-3", "leak-default-4", "leak-message-5",
+                   "leak-literal-6", "leak-example-7"):
+        assert leaked not in output
+    result = json.loads(output)
+    Draft202012Validator(RESULT_SCHEMA).validate(result)
+    assert "API_SECRET" not in secret_map(result)  # has a default, nothing to generate
+    env = {row["key"]: row for row in units(result)["api"]["env"]}
+    assert env["DB"]["binding"]["user"] == "literal-user" and env["DB"]["binding"]["passwordSecretId"] is None
+    assert env["DB2"]["binding"]["user"] is None and env["DB2"]["binding"]["passwordSecretId"] is None
+    secrets = secret_map(result)
+    assert "SESSION_SECRET" not in secrets  # example value is not empty, nothing references it
+    assert secrets["TOKEN_X"]["generate"] is None and "INIT_PW" not in secrets
+    assert {row["id"]: row for row in result["dependencies"]}["db"]["env"] == [{"key": "INIT_PW"}]
+    assert secrets["API_TOKEN"]["consumers"] == [{"kind": "unit", "targetId": "api", "key": "API_TOKEN", "via": "env"}]
+
+
+def test_results_without_secrets_fields_still_validate(tmp_path):
+    result = gate(temp_log_repo(tmp_path))
+    legacy = json.loads(json.dumps(result))
+    legacy.pop("secrets")
+    for unit in legacy["units"]:
+        for row in unit["env"]:
+            row.pop("secretId", None)
+            if row["binding"]:
+                row["binding"].pop("user", None)
+                row["binding"].pop("passwordSecretId", None)
+    for dep in legacy["dependencies"]:
+        dep.pop("env", None)
+    Draft202012Validator(RESULT_SCHEMA).validate(legacy)

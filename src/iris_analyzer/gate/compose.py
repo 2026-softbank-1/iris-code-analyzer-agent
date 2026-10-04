@@ -68,6 +68,8 @@ class ComposeService:
     depends_on: list[str] = field(default_factory=list)
     command: str | None = None
     volumes: list[tuple[str, str]] = field(default_factory=list)
+    # env_file paths (repository relative). Only their key names are ever read.
+    env_files: list[str] = field(default_factory=list)
 
 
 def image_engine(image: str | None) -> str | None:
@@ -183,8 +185,22 @@ def load_compose(scan: RepositoryScan, path: str) -> tuple[list[ComposeService],
         )
         item.command = command or None
         item.volumes = volume_mounts(service.get("volumes"))
+        item.env_files = _env_files(service.get("env_file"), base)
         result.append(item)
     return result, None
+
+
+def _env_files(value: object, base: str) -> list[str]:
+    entries = value if isinstance(value, list) else [value]
+    result = []
+    for entry in entries:
+        if isinstance(entry, dict):
+            entry = entry.get("path")
+        if isinstance(entry, str) and entry and "$" not in entry:
+            path = safe_repository_path(base, entry)
+            if path:
+                result.append(path)
+    return result
 
 
 def _build(item: ComposeService, build: object, base: str, scan: RepositoryScan) -> None:
