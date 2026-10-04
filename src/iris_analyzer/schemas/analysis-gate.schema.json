@@ -328,6 +328,31 @@
                         "hasCredentials": {
                           "type": "boolean",
                           "description": "True when the written URL carried userinfo (user[:password]@). The credentials are never returned."
+                        },
+                        "user": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 256
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "description": "Literal userinfo user of the written URL (null when interpolated). Only with hasCredentials=true."
+                        },
+                        "passwordSecretId": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "pattern": "^[A-Za-z_][A-Za-z0-9_.-]*$"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "description": "secrets[].id when the userinfo password is ${VAR}; null for a literal password (never returned). Only with hasCredentials=true."
                         }
                       },
                       "required": [
@@ -360,6 +385,11 @@
                     }
                   ],
                   "description": "Where the platform can source this variable from. Optional for results produced before Phase 2; null when unknown."
+                },
+                "secretId": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z_][A-Za-z0-9_.-]*$",
+                  "description": "Top-level secrets[].id this variable is sourced from (value never returned)."
                 }
               },
               "required": [
@@ -645,6 +675,28 @@
                 "supported"
               ]
             }
+          },
+          "env": {
+            "type": "array",
+            "maxItems": 100,
+            "description": "Unmanaged container env keys of the database service filled by interpolation (e.g. MONGO_APP_PASSWORD read by an init script). Keys only, never values.",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "key": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z_][A-Za-z0-9_.-]*$"
+                },
+                "secretId": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z_][A-Za-z0-9_.-]*$"
+                }
+              },
+              "required": [
+                "key"
+              ]
+            }
           }
         },
         "required": [
@@ -711,6 +763,110 @@
     },
     "executionAuthorized": {
       "const": false
+    },
+    "secrets": {
+      "type": "array",
+      "maxItems": 200,
+      "description": "Secrets to generate/share or source from the platform. Ids and consumers only; values and defaults are never returned.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z_][A-Za-z0-9_.-]*$"
+          },
+          "generate": {
+            "enum": [
+              "random",
+              null
+            ],
+            "description": "random: platform generates one value shared by all consumers. null: user supplied or platformManaged."
+          },
+          "platformManaged": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "dependencyId": {
+                "type": "string",
+                "pattern": "^[a-z0-9]([a-z0-9-]{0,62}[a-z0-9])?$"
+              },
+              "property": {
+                "enum": [
+                  "password"
+                ]
+              }
+            },
+            "required": [
+              "dependencyId",
+              "property"
+            ],
+            "description": "Engine-managed credential: use the platform database password."
+          },
+          "consumers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "enum": [
+                    "unit",
+                    "dependency"
+                  ]
+                },
+                "targetId": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9]([a-z0-9-]{0,62}[a-z0-9])?$"
+                },
+                "key": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z_][A-Za-z0-9_.-]*$"
+                },
+                "via": {
+                  "enum": [
+                    "env",
+                    "url_password"
+                  ]
+                }
+              },
+              "required": [
+                "kind",
+                "targetId",
+                "key",
+                "via"
+              ]
+            }
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "line": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              },
+              "required": [
+                "path",
+                "line"
+              ]
+            }
+          }
+        },
+        "required": [
+          "id",
+          "generate",
+          "consumers",
+          "evidence"
+        ]
+      }
     }
   },
   "required": [
