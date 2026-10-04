@@ -26,6 +26,7 @@ from .compose import (
     is_adjunct,
     load_compose,
 )
+from .database_usage import database_uses
 from .initdb import describe_scripts, mounted_files
 from .links import (
     _DATABASE_KEYS,
@@ -56,6 +57,7 @@ from .sources import (
     dockerfile_copies,
     dockerfile_variant,
     env_example_keys,
+    env_example_values,
     env_required,
     inferred_dependencies,
     is_compose_file,
@@ -69,6 +71,7 @@ from .sources import (
     python_role,
     script_port,
     source_port,
+    url_engine,
     workspace_members,
     workspace_patterns,
 )
@@ -222,8 +225,10 @@ def _whole_ref(value: object) -> str | None:
 
 def _managed_keys(engine: str | None) -> set[str]:
     """Container env keys the official image (and so the platform) manages itself."""
-    return set(_PASSWORD_KEYS.get(engine, ())) | set(_USER_KEYS.get(engine, ())) | set(
-        _DATABASE_KEYS.get(engine, ())
+    return (
+        set(_PASSWORD_KEYS.get(engine, ()))
+        | set(_USER_KEYS.get(engine, ()))
+        | set(_DATABASE_KEYS.get(engine, ()))
     )
 
 
@@ -289,6 +294,7 @@ class _Gate:
         self.init_files: dict[str, dict[str, str]] = {}
         self.secrets: list[dict] = []
         self.example_empty: set[tuple[str, str]] = set()
+        self.external_database_keys: set[tuple[str, str]] = set()
 
     # -- inventory -------------------------------------------------------
     def _inventory(self) -> None:
@@ -452,9 +458,14 @@ class _Gate:
     def run(self) -> dict:
         self._inventory()
         self._extract_units()
+        self._cycles()
         docker_roots = [(unit.root, unit.docker) for unit in self.units if unit.builder == "dockerfile"]
         uncovered = [item for item in self._app_manifest_dirs() if not self._covered(item, docker_roots)]
         reasons = self._complex_reasons(uncovered)
+        if not reasons and (
+            self.dependencies or any(q["code"].startswith(("database_", "sqlite_")) for q in self.questions)
+        ):
+            reasons.append(_reason("database_configuration", "DB 생성·외부 연결·저장소 설정을 검토해야 함"))
         db_images = [
             service.name for service in self.image_services if image_engine(service.image) is not None
         ]
@@ -554,6 +565,7 @@ class _Gate:
             self.questions = [
                 item for item in self.questions if item["code"] in {"ai_not_configured", "scan_truncated"}
             ]
+        self.questions = list({(q["code"], q["unitId"], q["message"]): q for q in self.questions}.values())
         return {
             "schemaVersion": RESULT_VERSION,
             "sourceSha": self.request.source_sha,
@@ -581,6 +593,21 @@ class _Gate:
         }
 
     # -- units --------------------------------------------------------------
+    def _cycles(self) -> None:
+        graph = {unit.id: set(unit.depends_on) for unit in self.units}
+        remaining = set(graph)
+        while remaining:
+            ready = {key for key in remaining if not (graph[key] & remaining)}
+            if not ready:
+                self.questions.append(
+                    _question(
+                        "dependency_cycle",
+                        "서비스 간 순환 의존성으로 배포 순서를 정할 수 없습니다. 의존 관계를 수정하세요.",
+                    )
+                )
+                return
+            remaining -= ready
+
     def _new_id(self, base: str) -> str:
         candidate = _slug(base)
         index = 2
@@ -600,7 +627,8 @@ class _Gate:
     ) -> str:
         profile = dependency_profile(engine, service) if service is not None else {}
         for key, row in self.dependencies.items():
-            if row["engine"] == engine and engine != "other" and (image is None or row["image"] == image):
+            # Explicit Compose services are distinct even when images match.
+            if service is None and image is None and row["engine"] == engine and engine != "other":
                 row["evidence"] = _unique_evidence(row["evidence"] + evidence)
                 _merge_profile(row, profile)
                 self._collect_init(key, service)
@@ -641,7 +669,9 @@ class _Gate:
                     else "파일당·합계 1 MiB 상한을 넘습니다"
                 )
                 self.questions.append(
-                    _question(code, f"'{identifier}' 초기화 스크립트 {path}를 자동 실행할 수 없습니다: {reason}.")
+                    _question(
+                        code, f"'{identifier}' 초기화 스크립트 {path}를 자동 실행할 수 없습니다: {reason}."
+                    )
                 )
 
     def _extract_units(self) -> None:
@@ -762,14 +792,6 @@ class _Gate:
             for host in service.hosts:
                 if host in service_ids and service_ids[host] != unit.id:
                     unit.depends_on.append(service_ids[host])
-            for engine in service.env_engines.values():
-                if not any(
-                    row["engine"] == engine and row["id"] in unit.depends_on
-                    for row in self.dependencies.values()
-                ):
-                    unit.depends_on.append(
-                        self._dependency(engine, engine, None, [{"path": service.file, "line": service.line}])
-                    )
             unit.role = self._role(service.name, unit)
 
         # 2) Dockerfiles not referenced by Compose.
@@ -850,9 +872,9 @@ class _Gate:
                     )
                     self.units.append(unit)
 
+        self.service_ids = service_ids
         for unit in self.units:
             self._enrich(unit)
-        self.service_ids = service_ids
         self._link_units()
 
     def _base_name(self, directory: str) -> str:
@@ -908,21 +930,197 @@ class _Gate:
     def _enrich_env(self, unit: _Unit) -> None:
         known = {row["key"] for row in unit.env}
         consumed = self._consumed_keys(unit)
+        values = self._connection_values(unit)
+        configured_engines = set()
+        if unit.compose:
+            for key, engine in unit.compose.env_engines.items():
+                configured_engines.add(engine)
+                self._connection(
+                    unit,
+                    engine,
+                    values.get(key),
+                    unit.compose.file,
+                    unit.compose.env_lines.get(key, unit.compose.line),
+                    key,
+                )
         for key, required, engine, path, line, empty in env_example_keys(self.scan, unit.root):
             if consumed is not None and key not in consumed:
                 continue
             if key not in known:
+                known.add(key)
                 unit.env.append({"key": key, "stage": "runtime", "required": required})
                 if empty:
                     self.example_empty.add((unit.id, key))
             if engine:
-                self._link(unit, engine, path, line)
+                configured_engines.add(engine)
+                self._connection(unit, engine, values.get(key), path, line, key)
         for key, required in self._env_file_rows(unit):
             if key not in known:
                 known.add(key)
                 unit.env.append({"key": key, "stage": "runtime", "required": required})
-        for engine, path, line in inferred_dependencies(self.scan, unit.root):
-            self._link(unit, engine, path, line)
+        excluded = [
+            u.root for u in self.units if u is not unit and u.root != unit.root and within(u.root, unit.root)
+        ]
+        uses = database_uses(self.scan, unit.root, excluded)
+        for use in uses:
+            if use.engine == "sqlite":
+                if use.in_memory:
+                    continue
+                self.questions.append(
+                    _question(
+                        "sqlite_persistence_required",
+                        "SQLite 연결 코드가 있습니다. DB 컨테이너 대신 파일 경로·영속 볼륨·단일 쓰기 인스턴스를 설정하세요.",
+                        unit.id,
+                    )
+                )
+                continue
+            for key in use.keys:
+                if key not in known:
+                    unit.env.append({"key": key, "stage": "runtime", "required": True})
+                    known.add(key)
+            if use.url is not None:
+                parsed = parse_url(use.url)
+                if parsed and (
+                    parsed.host in self.service_ids
+                    or parsed.host in {"localhost", "127.0.0.1", "::1", "0.0.0.0"}
+                ):
+                    self.questions.append(
+                        _question(
+                            "database_connection_literal",
+                            "DB 주소가 코드에 직접 적혀 있습니다. 생성한 연결 정보를 주입할 환경변수로 변경하세요.",
+                            unit.id,
+                        )
+                    )
+                self._connection(unit, use.engine, use.url, use.path, use.line)
+            elif use.keys:
+                if any(url_engine(values.get(key)) not in {None, use.engine} for key in use.keys):
+                    self.external_database_keys.update((unit.id, key) for key in use.keys)
+                    self.questions.append(
+                        _question(
+                            "database_engine_conflict",
+                            "DB 클라이언트 종류와 연결 URL의 엔진이 다릅니다. 연결 설정을 수정하세요.",
+                            unit.id,
+                        )
+                    )
+                    continue
+                targets = [
+                    key
+                    for key in use.keys
+                    if key.upper().endswith(("URL", "URI", "HOST", "DSN", "CONNECTION_STRING"))
+                    or url_engine(values.get(key))
+                ]
+                external = False
+                for key in targets:
+                    value = values.get(key)
+                    parsed = parse_url(value) if value else None
+                    host = (
+                        parsed.host
+                        if parsed
+                        else value
+                        if key.upper().endswith("HOST") and value and "${" not in value
+                        else None
+                    )
+                    external |= bool(
+                        host
+                        and host not in self.service_ids
+                        and host not in {"localhost", "127.0.0.1", "::1", "0.0.0.0"}
+                    )
+                if external:
+                    self.external_database_keys.update((unit.id, key) for key in use.keys)
+                    self.questions.append(
+                        _question(
+                            "database_external_connection",
+                            "DB 연결 설정이 외부 호스트를 가리킵니다. 이 연결의 환경변수를 내부 DB에 바인딩하지 않습니다.",
+                            unit.id,
+                        )
+                    )
+                    continue
+                if not targets:
+                    self.questions.append(
+                        _question(
+                            "database_configuration_unknown",
+                            "DB 클라이언트의 대상 주소 설정을 추적하지 못했습니다.",
+                            unit.id,
+                        )
+                    )
+                for key in targets:
+                    self._connection(unit, use.engine, values.get(key), use.path, use.line, key)
+            elif use.engine not in configured_engines:
+                self.questions.append(
+                    _question(
+                        "database_configuration_unknown",
+                        "DB 클라이언트의 연결 설정을 추적하지 못했습니다.",
+                        unit.id,
+                    )
+                )
+        used_engines = {use.engine for use in uses} | configured_engines
+        for engine, _, _ in inferred_dependencies(self.scan, unit.root):
+            if engine not in used_engines and not any(
+                row["engine"] == engine and row["id"] in unit.depends_on for row in self.dependencies.values()
+            ):
+                self.questions.append(
+                    _question(
+                        "database_usage_unconfirmed",
+                        f"{engine} 라이브러리가 선언되어 있지만 연결 사용 근거가 없습니다. 자동 DB 생성 후보에서 제외했습니다.",
+                        unit.id,
+                    )
+                )
+
+    def _connection_values(self, unit: _Unit) -> dict[str, str]:
+        values = env_example_values(self.scan, unit.root)
+        if unit.compose:
+            values.update(unit.compose.env_values)
+        return values
+
+    def _connection(
+        self, unit: _Unit, engine: str, value: object, path: str, line: int, key: str | None = None
+    ) -> None:
+        configured_engine = url_engine(value)
+        if configured_engine and configured_engine != engine:
+            self.questions.append(
+                _question(
+                    "database_engine_conflict",
+                    "DB 클라이언트 종류와 연결 URL의 엔진이 다릅니다. 연결 설정을 수정하세요.",
+                    unit.id,
+                )
+            )
+            return
+        parsed = parse_url(value) if value else None
+        host = parsed.host if parsed else None
+        if (
+            host is None
+            and key
+            and key.upper().endswith("HOST")
+            and isinstance(value, str)
+            and "${" not in value
+        ):
+            host = value.strip()
+        if host:
+            target = self.service_ids.get(host)
+            if target in self.dependencies:
+                if parsed:
+                    self._learn(self.dependencies[target], parsed)
+                if target not in unit.depends_on:
+                    unit.depends_on.append(target)
+                return
+            if host not in {"localhost", "127.0.0.1", "::1", "0.0.0.0"}:
+                self.questions.append(
+                    _question(
+                        "database_external_connection",
+                        "구성된 DB 주소가 내부 DB 서비스와 일치하지 않습니다. 외부 연결 설정을 유지하고 자동 생성·바인딩하지 않습니다.",
+                        unit.id,
+                    )
+                )
+                return
+        self._link(unit, engine, path, line)
+        if parsed:
+            linked = [
+                row
+                for row in self.dependencies.values()
+                if row["engine"] == engine and row["id"] in unit.depends_on
+            ]
+            if len(linked) == 1:
+                self._learn(linked[0], parsed)
 
     def _env_file_rows(self, unit: _Unit) -> list[tuple[str, bool]]:
         """Keys (never values) of the Compose service's ``env_file`` files."""
@@ -951,7 +1149,10 @@ class _Gate:
         deeper = [
             other.root
             for other in self.units
-            if other is not unit and other.root != "." and within(other.root, unit.root) and other.root != unit.root
+            if other is not unit
+            and other.root != "."
+            and within(other.root, unit.root)
+            and other.root != unit.root
         ]
         texts = []
         checked = 0
@@ -999,7 +1200,9 @@ class _Gate:
                     row = entry(var)
                     in_url = bool(userinfo and userinfo[1] == var)
                     row["url"] = row["url"] or in_url
-                    row["consumers"].add((kind, target, var if in_url else key, "url_password" if in_url else "env"))
+                    row["consumers"].add(
+                        (kind, target, var if in_url else key, "url_password" if in_url else "env")
+                    )
                     row["targets"].add(target)
                     row["evidence"].append({"path": service.file, "line": line})
                     whole = _whole_ref(value)
@@ -1007,7 +1210,7 @@ class _Gate:
                         row["managed"] = {"dependencyId": target, "property": "password"}
                 if kind == "dependency" and key not in _managed_keys(engine) and "${" in str(value):
                     extras.append((target, key, str(value), _whole_ref(value), True))
-        for (unit_id, key) in sorted(self.example_empty):
+        for unit_id, key in sorted(self.example_empty):
             if _SECRET_NAME.search(key):
                 row = entry(key)
                 row["consumers"].add(("unit", unit_id, key, "env"))
@@ -1069,11 +1272,22 @@ class _Gate:
         return {"path": unit.root, "line": 1}
 
     def _link(self, unit: _Unit, engine: str, path: str, line: int) -> None:
-        for row in self.dependencies.values():
-            if row["engine"] == engine:
+        candidates = [row for row in self.dependencies.values() if row["engine"] == engine]
+        selected = [row for row in candidates if row["id"] in unit.depends_on]
+        if len(selected) == 1 or len(candidates) == 1:
+            for row in selected or candidates:
                 if row["id"] not in unit.depends_on:
                     unit.depends_on.append(row["id"])
                 return
+        if candidates:
+            self.questions.append(
+                _question(
+                    "database_target_ambiguous",
+                    f"{engine} DB가 여러 개입니다. 연결 대상의 호스트를 지정하세요.",
+                    unit.id,
+                )
+            )
+            return
         unit.depends_on.append(self._dependency(engine, engine, None, [{"path": path, "line": line}]))
 
     # -- links: env bindings and host aliases ------------------------------
@@ -1105,13 +1319,24 @@ class _Gate:
         for unit in self.units:
             found: list[tuple[str, int | None, str, int]] = list(configured.get(unit.id, []))
             compose = unit.compose
+            values = self._connection_values(unit)
             rows: dict[str, dict | None] = {}
             for row in unit.env:
                 if row["stage"] != "runtime":
                     continue
                 key = row["key"]
-                value = compose.env_values.get(key) if compose else None
-                binding = key_binding(key, value, names, kinds) if value is not None else None
+                value = values.get(key)
+                binding_names = names
+                parsed = parse_url(value) if value is not None else None
+                if parsed and parsed.host in {"localhost", "127.0.0.1", "::1", "0.0.0.0"}:
+                    local_targets = [
+                        identifier
+                        for identifier in by_engine.get(url_engine(value), [])
+                        if identifier in unit.depends_on
+                    ]
+                    if len(local_targets) == 1:
+                        binding_names = {**names, parsed.host: local_targets[0]}
+                binding = key_binding(key, value, binding_names, kinds) if value is not None else None
                 if binding and binding["targetId"] == unit.id:
                     binding = None
                 rows[key] = binding
@@ -1129,11 +1354,25 @@ class _Gate:
                 key = row["key"]
                 if row["stage"] != "runtime":
                     continue
+                if (unit.id, key) in self.external_database_keys:
+                    row["binding"] = None
+                    continue
                 binding = rows.get(key)
                 if binding is None:
-                    value = compose.env_values.get(key) if compose else None
+                    value = values.get(key)
                     parsed = parse_url(value) if value is not None else None
-                    if not (parsed and parsed.host):
+                    external_host = (
+                        key.upper().endswith("_HOST")
+                        and isinstance(value, str)
+                        and bool(value)
+                        and "${" not in value
+                        and value not in names
+                        and value not in {"localhost", "127.0.0.1", "::1", "0.0.0.0"}
+                    )
+                    if not external_host and (
+                        not (parsed and parsed.host)
+                        or parsed.host in {"localhost", "127.0.0.1", "::1", "0.0.0.0"}
+                    ):
                         binding = heuristic_binding(key, unit.depends_on, engines, single)
                 row["binding"] = binding
             paths = []

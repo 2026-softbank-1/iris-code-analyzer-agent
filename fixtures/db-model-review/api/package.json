@@ -1,0 +1,5 @@
+{
+  "name": "api",
+  "scripts": {"start": "node index.js"},
+  "dependencies": {"express": "5", "mongodb": "6", "pg": "8"}
+}

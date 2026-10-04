@@ -21,6 +21,25 @@ def express_source(port, *, multiline=False):
     return "const express = require('express');\nconst app = express();\n" + listener + "\n"
 
 
+def test_compose_non_node_contexts_own_their_container_facts(tmp_path):
+    write(tmp_path, "compose.yaml", "services:\n  api:\n    build: ./api\n  web:\n    build: ./web\n")
+    write(tmp_path, "api/Dockerfile", 'FROM python:3.13\nEXPOSE 3000\nCMD ["python", "app.py"]\n')
+    write(tmp_path, "web/Dockerfile", 'FROM python:3.13\nEXPOSE 8080\nCMD ["python", "app.py"]\n')
+    bundle = prepare_context(tmp_path)
+    try:
+        result = static_analysis(bundle)
+        assert len(result["services"]) == 2
+        roots = {c["candidateId"]: c["root"] for c in bundle["deploymentCandidates"]}
+        for fact in bundle["facts"]:
+            if fact.get("candidateId") in roots:
+                assert fact["component"] == roots[fact["candidateId"]]
+        for service in result["services"]:
+            expected = 3000 if service["root"]["value"] == "api" else 8080
+            assert {p["value"] for p in service["ports"] if p["scope"] == "container"} == {expected}
+    finally:
+        release_snapshot(bundle["source"]["snapshotId"])
+
+
 @pytest.mark.parametrize("multiline", [False, True])
 def test_source_listener_conflicts_with_docker_expose_in_same_scope(tmp_path, multiline):
     write(

@@ -7,9 +7,8 @@ Likelion에 배포할 저장소를 소스 근거로 분석해 서비스 구성·
 ![OpenCode](https://img.shields.io/badge/OpenCode-1.18.33-555)
 ![Status](https://img.shields.io/badge/status-개발%20중-orange)
 
-> **상태: 개발 중 — Likelion 배포 흐름(iris-was)에는 아직 연동되지 않음.**
-> iris-was `main`에 분석기 호출 코드가 없고, iris-gitops-environments `platform/`과 iris-infra 플랫폼 values에 analyzer 항목이 없다(iris-infra Terraform에 ECR 저장소 `iris/code-analyzer-agent` 정의만 있다).
-> 진행 중인 연동: iris-was 브랜치 `feat/ai-analysis-integration`(분석기 wheel 호출, PR 없음)과 [iris-was PR #6](https://github.com/2026-softbank-1/iris-was/pull/6)(빌드 인계, draft). 이 레포의 [PR #1](https://github.com/2026-softbank-1/iris-code-analyzer-agent/pull/1)(근거 검증·AI 기여 평가·빌드 인계)은 draft로 열려 있으나 커밋은 이미 `main`에 포함돼 있다.
+> **상태: 개발 중 — 정적 Analysis Gate는 iris-was Build Worker의 vendored wheel 호출 경로에 연동되어 있다.**
+> Gate는 모델 없이 배포 단위와 DB 후보를 분석한다. OpenCode LLM 검토는 별도 분석 경로이며 Gate의 `ai: true`는 아직 LLM을 호출하지 않는다. 실제 운영 활성화·클러스터 배포는 별도 검증이 필요하다.
 
 ## 시스템 내 위치
 
@@ -23,11 +22,11 @@ flowchart LR
   WAS -->|진단 결과| FIX[iris-code-fix-agent]
   FIX -.핫픽스 PR·자동 머지.-> REPO[(사용자 레포)]
   INFRA[iris-infra] -.프로비저닝.-> ARGO
-  ANA[iris-code-analyzer-agent<br/>개발 중 · 미연동]
+  WAS -->|정적 Gate · wheel subprocess| ANA[iris-code-analyzer-agent]
   style ANA fill:#f96,stroke:#333,stroke-width:2px
 ```
 
-- 예정된 호출자: [iris-was](https://github.com/2026-softbank-1/iris-was)의 Analysis/Pipeline Worker가 이 패키지를 wheel로 고정해 호출한다([연동 설계](docs/1002-integration-design.md)).
+- 호출자: [iris-was](https://github.com/2026-softbank-1/iris-was)의 Build Worker가 정적 Gate를 wheel로 고정해 호출한다([연동 설계](docs/1002-integration-design.md)).
 - 빌드 인계 대상: iris-was Build Worker(Railpack·CodeBuild). 분석기는 Dockerfile 생성·이미지 빌드·ECR push를 하지 않는다.
 
 ## 지원 대상과 안전 원칙
@@ -102,7 +101,7 @@ uv run iris-analyzer analyze --repo /path/to/repo --env-file .env --out artifact
 - 라이브러리: `analyze_with_report(repo, on_event=...)` → `AnalysisResult` v1. 이벤트 `queued → preprocessing → analyzing → validating → succeeded`(+ expanding, needs_input, unsupported, failed).
 - 스키마: `src/iris_analyzer/schemas/`, 공유 타입: `contracts/*.ts`.
 - 빌드 인계 v2: 기존 Dockerfile 보존, 없으면 Railpack 경로 추천 → [build-preparation.md](docs/build-preparation.md)
-- Analysis Gate: 단일 Dockerfile/Railpack 레포는 분석 생략(skip), 멀티 이미지 레포만 배포 단위·의존성 정적 추출(`iris-analysis-gate`) → [analysis-gate.md](docs/analysis-gate.md)
+- Analysis Gate: DB 검토가 필요 없는 단일 Dockerfile/Railpack 레포는 skip, 멀티 이미지 또는 DB 설정 검토가 필요한 레포는 analyze. 기존 v1 입출력 유지 → [analysis-gate.md](docs/analysis-gate.md), [DB·멀티 서비스 처리](docs/database-multi-service.md)
 - 로그 기반 개선 인계: draft 계약만 있음 → [remediation-handoff.md](docs/remediation-handoff.md)
 
 상세: [공통 계약](docs/implementation-contract.md), [WAS 연결 준비](docs/control-plane-readiness.md)
@@ -116,7 +115,7 @@ uv run iris-analyzer analyze --repo /path/to/repo --env-file .env --out artifact
 ## 현재 상태 / 한계
 
 - 구현: 전처리·정적 분석, OpenCode 경유 LLM 추가 제안, 스키마·의미 검증, 배포 계획·Terraform/Helm 템플릿 출력, 빌드 인계 v2, Organization 다중 레포 분석([문서](docs/1002-organization-system.md)).
-- 미연동: iris-was 운영 흐름, 플랫폼 공용 예산·DB 저장, 오류 에이전트·WAS 큐와의 개선 인계.
+- 미연동: OpenCode LLM 검토의 WAS Gate 호출 경로, 플랫폼 공용 모델 예산, 오류 에이전트·WAS 큐와의 개선 인계.
 - 한계: 동적 import·라우트·포트와 런타임 분기는 unresolved로 남긴다. 인증은 middleware 이름만으로 확정하지 않는다. 테스트는 모듈 단위이며 전체 배포 E2E를 뜻하지 않는다.
 
 ## 문서

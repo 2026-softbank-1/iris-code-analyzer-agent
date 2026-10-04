@@ -1,0 +1,10 @@
+services:
+  api:
+    build: ./api
+    environment:
+      MONGO_URI: mongodb://mongo:27017/demo
+    depends_on: [mongo]
+  metrics:
+    build: ./metrics
+  mongo:
+    image: mongo:8

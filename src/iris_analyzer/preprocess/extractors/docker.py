@@ -143,6 +143,9 @@ def extract_docker(selection: Selection, observations: Observations, components:
             runtime_component = _runtime_component(
                 component_roots, components, dockerfiles.get(docker_path, {})
             )
+            if not component_roots and not engine and not adjunct:
+                # Non-Node build contexts still own their container facts.
+                runtime_component = root
             if engine:
                 observations.current_candidate_id = None
                 owner = candidates[0]["root"] if candidates else "."
@@ -407,6 +410,9 @@ def extract_docker(selection: Selection, observations: Observations, components:
             for target_id in sorted(target_ids):
                 target_fact = copy.deepcopy(fact)
                 target_fact["candidateId"] = target_id
+                target = next(c for c in candidates if c["candidateId"] == target_id)
+                if not target["componentRoots"]:
+                    target_fact["component"] = target["root"]
                 replacement.append(target_fact)
         else:
             value = dict(fact)

@@ -197,7 +197,11 @@ def test_npm_workspaces_with_two_apps_analyze(tmp_path):
                 "scripts": {"start": "node index.js"},
                 "dependencies": {"fastify": "5", "pg": "8"},
             },
-            "apps/api/index.js": "app.listen({ port: process.env.PORT || 4000 })\n",
+            "apps/api/index.js": (
+                "import { Pool } from 'pg';\n"
+                "new Pool({connectionString: process.env.DATABASE_URL});\n"
+                "app.listen({ port: process.env.PORT || 4000 })\n"
+            ),
             "packages/ui/package.json": {"name": "@acme/ui", "main": "index.js", "exports": "./index.js"},
         },
     )
@@ -219,7 +223,7 @@ def test_npm_workspaces_with_two_apps_analyze(tmp_path):
             "database": None,
             "user": "postgres",
             "passwordInSource": False,
-            "evidence": [{"path": "apps/api/package.json", "line": 1}],
+            "evidence": [{"path": "apps/api/index.js", "line": 2}],
         }
     ]
 
@@ -251,7 +255,7 @@ def test_frontend_and_backend_roots_analyze_as_multi_language(tmp_path):
     assert port_questions == {"frontend", "backend"}
 
 
-def test_compose_single_build_with_postgres_still_skips(tmp_path):
+def test_compose_single_build_with_postgres_requires_analysis(tmp_path):
     repo = write(
         tmp_path / "repo",
         {
@@ -261,11 +265,11 @@ def test_compose_single_build_with_postgres_still_skips(tmp_path):
         },
     )
     result = gate(repo)
-    assert (result["decision"], result["complexity"]) == ("skip", "simple")
-    assert codes(result) == ["single_dockerfile", "has_image_dependencies"]
-    assert result["simpleBuild"] == {"builder": "dockerfile", "dockerfilePath": "Dockerfile"}
+    assert (result["decision"], result["complexity"]) == ("analyze", "complex")
+    assert codes(result) == ["database_configuration", "has_image_dependencies"]
+    assert result["simpleBuild"] is None
     assert result["signals"]["composeImageServices"] == ["db"]
-    assert result["units"] == [] and result["dependencies"] == [] and result["questions"] == []
+    assert len(result["units"]) == 1 and result["dependencies"][0]["id"] == "db"
 
 
 def test_empty_repository_is_unsupported(tmp_path):

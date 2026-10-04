@@ -28,7 +28,7 @@ from .config import ModelConfig
 from .pricing import pricing_for, usage_cost
 from .review_protocol import canonicalize_review, make_review_schema, review_template
 
-PROMPT_VERSION = "deployment_v2.1"
+PROMPT_VERSION = "deployment_v2.2"
 MODEL_PROPOSAL_SCHEMA = copy.deepcopy(MODEL_REPLY_SCHEMA)
 MODEL_PROPOSAL_SCHEMA["$defs"]["field"]["properties"]["status"]["enum"] = ["suggested", "unknown"]
 MODEL_PROPOSAL_SCHEMA["$comment"] = (

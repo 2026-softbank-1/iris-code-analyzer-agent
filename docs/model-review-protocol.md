@@ -1,6 +1,6 @@
 # AI 추가 검토 프로토콜 v2
 
-2026-10-02. 모델 전송 형식은 `iris.model-review.v2`, 외부 분석 결과는 기존 AnalysisResult v1이다. 모델은 전체 결과를 재작성하지 않고 추가 제안만 반환한다. 구현은 `opencode/review_protocol.py`, 운영 프롬프트는 `deployment_v2.1`이다.
+2026-10-04. 모델 전송 형식은 `iris.model-review.v2`, 외부 분석 결과는 기존 AnalysisResult v1이다. 모델은 전체 결과를 재작성하지 않고 추가 제안만 반환한다. 구현은 `opencode/review_protocol.py`, 운영 프롬프트는 `deployment_v2.2`이다. DB 사용·내부/외부 대상·SQLite 저장소·멀티 이미지 의존 관계를 검토하며 생성/배포 승인을 출력하지 않는다.
 
 ## 입력과 응답
 

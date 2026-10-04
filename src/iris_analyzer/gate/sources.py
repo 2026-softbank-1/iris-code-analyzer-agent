@@ -443,6 +443,19 @@ def env_example_keys(
     return rows
 
 
+def env_example_values(scan: RepositoryScan, directory: str) -> dict[str, str]:
+    """Internal host classification only. Never serialize these values."""
+    for name in ENV_EXAMPLES:
+        if name in scan.names(directory):
+            values = {}
+            for line in (scan.read(join(directory, name)) or "").splitlines():
+                match = re.match(r"\s*(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$", line)
+                if match:
+                    values[match[1]] = match[2].strip().strip("\"'")
+            return values
+    return {}
+
+
 def source_port(scan: RepositoryScan, directory: str, limit: int = 120) -> tuple[int, str, int] | None:
     """First literal port in a bounded set of source files under ``directory`` (excluded dirs pruned)."""
     checked = 0

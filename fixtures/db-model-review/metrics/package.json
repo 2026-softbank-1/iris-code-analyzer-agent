@@ -1,0 +1,5 @@
+{
+  "name": "metrics",
+  "scripts": {"start": "node index.js"},
+  "dependencies": {"express": "5"}
+}

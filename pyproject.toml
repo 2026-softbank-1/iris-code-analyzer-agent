@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "iris-analyzer"
-version = "0.1.0"
+version = "0.1.1"
 description = "Evidence-backed deterministic deployment analysis with an isolated OpenCode adapter"
 readme = "README.md"
 requires-python = ">=3.11"

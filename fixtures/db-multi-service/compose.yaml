@@ -1,0 +1,42 @@
+services:
+  web:
+    build: ./web
+    environment:
+      API_URL: http://api:3000
+    depends_on: [api]
+    ports: ["127.0.0.1::8080"]
+  api:
+    build: ./api
+    environment:
+      DATABASE_URL: postgres://fixture:fixture-password@postgres:5432/fixture
+      MONGO_URI: mongodb://fixture:fixture-password@mongo:27017/fixture?authSource=admin
+    depends_on:
+      postgres: {condition: service_healthy}
+      mongo: {condition: service_healthy}
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: fixture
+      POSTGRES_PASSWORD: fixture-password
+      POSTGRES_DB: fixture
+    volumes: ["pg-data:/var/lib/postgresql", "./init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fixture -d fixture"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  mongo:
+    image: mongo:8
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: fixture
+      MONGO_INITDB_ROOT_PASSWORD: fixture-password
+      MONGO_INITDB_DATABASE: fixture
+    volumes: ["mongo-data:/data/db"]
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+volumes:
+  pg-data:
+  mongo-data:
