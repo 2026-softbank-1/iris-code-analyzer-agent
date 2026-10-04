@@ -170,6 +170,8 @@ class Dockerfile:
     command: str | None = None
     copy_sources: list[str] = field(default_factory=list)
     parsed: bool = True
+    target: str | None = None
+    target_missing: bool = False
 
 
 def image_name(image: str) -> str:
@@ -184,8 +186,13 @@ def image_name(image: str) -> str:
     return tail.lower()
 
 
-def parse_dockerfile(scan: RepositoryScan, path: str) -> Dockerfile:
-    result = Dockerfile(path=path)
+def parse_dockerfile(scan: RepositoryScan, path: str, target: str | None = None) -> Dockerfile:
+    """Parse a Dockerfile; EXPOSE/ENV PORT/CMD/base image come from ``target`` (default: last stage).
+
+    A stage whose ``FROM`` names an earlier stage inherits that stage's EXPOSE, ENV and
+    CMD/ENTRYPOINT the way Docker does; the most derived stage's values win.
+    """
+    result = Dockerfile(path=path, target=target)
     text = scan.read(path)
     if text is None:
         result.parsed = False
@@ -207,41 +214,67 @@ def parse_dockerfile(scan: RepositoryScan, path: str) -> Dockerfile:
         if match:
             instructions.append((match[1].upper(), match[2].strip(), start))
         value = ""
-    final_start = max((index for index, item in enumerate(instructions) if item[0] == "FROM"), default=0)
-    entrypoint = None
-    for index, (name, argument, number) in enumerate(instructions):
-        final = index >= final_start
+    # stage = {"name", "base", "items": [(name, argument, line)]}
+    stages: list[dict] = []
+    for name, argument, number in instructions:
         if name == "FROM":
             parts = [part for part in argument.split() if not part.startswith("--")]
-            if parts:
-                result.stages.append(parts[0])
-                if final:
-                    result.final_image = parts[0]
+            if not parts:
+                continue
+            alias = None
+            if len(parts) >= 3 and parts[1].lower() == "as":
+                alias = parts[2].lower()
+            stages.append({"name": alias, "base": parts[0], "items": []})
+            result.stages.append(parts[0])
         elif name in {"COPY", "ADD"}:
             parts = argument.split()
-            if any(part.startswith("--from") for part in parts):
-                continue
-            sources = [part for part in parts if not part.startswith("--")][:-1]
-            result.copy_sources.extend(source.strip("\"'[],") for source in sources)
-        elif not final:
-            continue
-        elif name == "EXPOSE":
-            for token in argument.split():
-                port = port_number(token.split("/")[0])
-                if port is not None:
-                    result.exposed.append((port, number))
-        elif name == "ENV":
-            match = re.search(r"(?:^|\s)PORT(?:=|\s+)['\"]?(\d{2,5})\b", argument)
-            if match and port_number(match[1]) is not None:
-                result.env_port = (int(match[1]), number)
-        elif name in {"CMD", "ENTRYPOINT"}:
-            text_value = _command_text(argument)
-            if name == "ENTRYPOINT":
-                entrypoint = text_value
-            else:
-                result.command = " ".join(filter(None, [entrypoint, text_value]))
-    if result.command is None and entrypoint:
-        result.command = entrypoint
+            if not any(part.startswith("--from") for part in parts):
+                sources = [part for part in parts if not part.startswith("--")][:-1]
+                result.copy_sources.extend(source.strip("\"'[],") for source in sources)
+            if stages:
+                stages[-1]["items"].append((name, argument, number))
+        elif stages:
+            stages[-1]["items"].append((name, argument, number))
+        else:
+            stages.append({"name": None, "base": None, "items": [(name, argument, number)]})
+    if not stages:
+        return result
+    if target is None:
+        index = len(stages) - 1
+    else:
+        wanted = target.lower()
+        matches = [i for i, stage in enumerate(stages) if stage["name"] == wanted]
+        if not matches:
+            result.target_missing = True
+            return result
+        index = matches[-1]
+    chain = [index]
+    while True:
+        base = (stages[chain[0]]["base"] or "").lower()
+        earlier = [i for i in range(chain[0]) if stages[i]["name"] and stages[i]["name"] == base]
+        if not earlier:
+            break
+        chain.insert(0, earlier[-1])
+    result.final_image = stages[chain[0]]["base"]
+    entrypoint = command = None
+    for position in chain:
+        exposed: list[tuple[int, int]] = []
+        for name, argument, number in stages[position]["items"]:
+            if name == "EXPOSE":
+                for token in argument.split():
+                    port = port_number(token.split("/")[0])
+                    if port is not None:
+                        exposed.append((port, number))
+            elif name == "ENV":
+                match = re.search(r"(?:^|\s)PORT(?:=|\s+)['\"]?(\d{2,5})\b", argument)
+                if match and port_number(match[1]) is not None:
+                    result.env_port = (int(match[1]), number)
+            elif name == "ENTRYPOINT":
+                entrypoint, command = _command_text(argument), None
+            elif name == "CMD":
+                command = _command_text(argument)
+        result.exposed = exposed + result.exposed
+    result.command = " ".join(filter(None, [entrypoint, command])) or None
     return result
 
 

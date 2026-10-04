@@ -158,12 +158,10 @@ def test_compose_with_three_build_services_and_two_dependencies(tmp_path):
     assert found["api"]["dependsOn"] == ["postgres", "redis"]
     assert found["worker"]["dependsOn"] == ["redis"]
     api_env = {row["key"]: row for row in found["api"]["env"]}
-    assert api_env["DATABASE_URL"] == {
-        "key": "DATABASE_URL",
-        "stage": "runtime",
-        "required": True,
-        "binding": {"kind": "dependency", "targetId": "postgres", "property": "url"},
-    }
+    binding = api_env["DATABASE_URL"].pop("binding")
+    assert api_env["DATABASE_URL"] == {"key": "DATABASE_URL", "stage": "runtime", "required": True}
+    assert binding["kind"] == "dependency" and binding["targetId"] == "postgres"
+    assert binding["property"] == "url" and binding["hasCredentials"] is True
     assert api_env["REDIS_URL"]["required"] is True and api_env["NODE_ENV"]["required"] is False
     assert {
         "key": "VITE_API_BASE_URL",
@@ -464,16 +462,28 @@ def test_env_bindings_from_compose_values_siblings_and_key_names():
     result = gate(LINKS)
     found = units(result)
     api = {row["key"]: row["binding"] for row in found["api"]["env"]}
-    assert api["DATABASE_URL"] == {"kind": "dependency", "targetId": "postgres", "property": "url"}
+    assert api["DATABASE_URL"] == {
+        "kind": "dependency", "targetId": "postgres", "property": "url",
+        "scheme": "postgres", "urlSuffix": "/shop", "hasCredentials": True,
+    }
     # Compose service name `cache` differs from the engine; the host decides the target.
-    assert api["REDIS_URL"] == {"kind": "dependency", "targetId": "cache", "property": "url"}
-    assert api["MONGODB_URI"] == {"kind": "dependency", "targetId": "mongo", "property": "url"}
+    assert api["REDIS_URL"] == {
+        "kind": "dependency", "targetId": "cache", "property": "url",
+        "scheme": "redis", "urlSuffix": "", "hasCredentials": False,
+    }
+    assert api["MONGODB_URI"] == {
+        "kind": "dependency", "targetId": "mongo", "property": "url",
+        "scheme": "mongodb", "urlSuffix": "/audit", "hasCredentials": False,
+    }
     assert api["PORT"] is None
     worker = {row["key"]: row["binding"] for row in found["worker"]["env"]}
     assert worker["DB_HOST"] == {"kind": "dependency", "targetId": "postgres", "property": "host"}
     assert worker["DB_PORT"] == {"kind": "dependency", "targetId": "postgres", "property": "port"}
     assert worker["DB_USER"] == {"kind": "dependency", "targetId": "postgres", "property": "user"}
-    assert worker["API_URL"] == {"kind": "unit", "targetId": "api", "property": "url"}
+    assert worker["API_URL"] == {
+        "kind": "unit", "targetId": "api", "property": "url",
+        "scheme": "http", "urlSuffix": "", "hasCredentials": False,
+    }
     # `${REDIS_URL}` carries no host, so the key name picks the only redis dependency.
     assert worker["REDIS_URL"] == {"kind": "dependency", "targetId": "cache", "property": "url"}
     assert worker["SENTRY_DSN"] is None
@@ -736,3 +746,137 @@ def test_init_scripts_for_database_built_from_dockerfile(tmp_path):
         },
     )
     assert [s["path"] for s in init_scripts(gate(repo), "mongo")] == ["docker/init.js"]
+
+
+# -- build.target, build.args, URL suffix -----------------------------------------
+
+STAGED = (
+    "FROM node:22 AS base\nWORKDIR /app\nEXPOSE 3000\nCMD [\"node\", \"server.js\"]\n"
+    "FROM base AS api\nRUN npm ci\n"
+    "FROM node:22 AS builder\nRUN npm run build\n"
+    "FROM nginx:1.27 AS web\nEXPOSE 80\n"
+)
+
+
+def staged_repo(tmp_path: Path, compose: str) -> Path:
+    return write(
+        tmp_path / "repo",
+        {
+            "compose.yaml": compose,
+            "Dockerfile": STAGED,
+            "other/Dockerfile": "FROM node:22\nEXPOSE 9000\n",
+        },
+    )
+
+
+def test_build_target_selects_stage_port_role_and_inherits_expose(tmp_path):
+    repo = staged_repo(
+        tmp_path,
+        "services:\n  api:\n    build: {context: ., target: api}\n"
+        "  site:\n    build: {context: ., target: web}\n"
+        "  last:\n    build: {context: other}\n",
+    )
+    result = gate(repo)
+    found = units(result)
+    assert found["api"]["buildTarget"] == "api" and found["api"]["port"] == 3000
+    assert found["api"]["role"] == "api"
+    assert found["site"]["buildTarget"] == "web" and found["site"]["port"] == 80
+    assert found["site"]["role"] == "web"
+    assert found["last"]["buildTarget"] is None and found["last"]["port"] == 9000
+    assert "build_target_not_found" not in codes_of_questions(result)
+
+
+def codes_of_questions(result: dict) -> list[str]:
+    return [question["code"] for question in result["questions"]]
+
+
+def test_derived_stage_expose_wins_over_inherited_and_default_is_last_stage(tmp_path):
+    repo = write(
+        tmp_path / "repo",
+        {
+            "compose.yaml": "services:\n  a:\n    build: {context: ., target: child}\n  b:\n    build: ./b\n",
+            "Dockerfile": "FROM node:22 AS parent\nEXPOSE 3000\nFROM parent AS child\nEXPOSE 4000\n",
+            "b/Dockerfile": "FROM node:22 AS one\nEXPOSE 1111\nFROM node:22 AS two\nEXPOSE 2222\n",
+        },
+    )
+    found = units(gate(repo))
+    assert found["a"]["port"] == 4000
+    assert found["b"]["port"] == 2222 and found["b"]["buildTarget"] is None
+
+
+def test_missing_build_target_asks_and_leaves_port_null(tmp_path):
+    repo = staged_repo(
+        tmp_path,
+        "services:\n  api:\n    build: {context: ., target: nope}\n  w:\n    build: ./other\n",
+    )
+    result = gate(repo)
+    api = units(result)["api"]
+    assert api["port"] is None and api["buildTarget"] == "nope"
+    questions = [q for q in result["questions"] if q["unitId"] == "api"]
+    assert [q["code"] for q in questions] == ["build_target_not_found"]
+
+
+def test_build_args_report_keys_only(tmp_path):
+    repo = write(
+        tmp_path / "repo",
+        {
+            "compose.yaml": "services:\n  api:\n    build:\n      context: .\n      args:\n"
+            "        NPM_TOKEN: tok-secret-value\n"
+            "  w:\n    build:\n      context: ./other\n      args: [REGION=eu-secret, FLAG]\n",
+            "Dockerfile": "FROM node:22\nEXPOSE 3000\n",
+            "other/Dockerfile": "FROM node:22\nEXPOSE 3001\n",
+        },
+    )
+    result = gate(repo)
+    found = units(result)
+    assert found["api"]["buildArgs"] == ["NPM_TOKEN"]
+    assert found["w"]["buildArgs"] == ["FLAG", "REGION"]
+    present = [q for q in result["questions"] if q["code"] == "build_args_present"]
+    assert {q["unitId"] for q in present} == {"api", "w"}
+    dump = json.dumps(result)
+    assert "tok-secret-value" not in dump and "eu-secret" not in dump
+
+
+URL_COMPOSE = """\
+services:
+  api:
+    build: ./api
+    environment:
+      API_URL: http://web:8080/api/v1?tenant=demo#top
+      SELF_PG: postgresql+asyncpg://u:pw-leak-1@db:5432/app?sslmode=disable
+      PLAIN: http://web:8080
+      SRV: mongodb+srv://web/app
+      TOKENED: http://web:8080/x?token=abc
+      AUTHSRC: mongodb://u:p@db:27017/app?authSource=admin&retryWrites=true
+      UNRES: http://web:8080/${PATH_PART}
+  web:
+    build: ./web
+  db:
+    image: postgres:16
+"""
+
+
+def test_url_binding_keeps_scheme_and_exact_suffix_without_credentials(tmp_path):
+    repo = write(
+        tmp_path / "repo",
+        {
+            "compose.yaml": URL_COMPOSE,
+            "api/Dockerfile": "FROM node:22\nEXPOSE 3000\n",
+            "web/Dockerfile": "FROM node:22\nEXPOSE 8080\n",
+        },
+    )
+    result = gate(repo)
+    env = {row["key"]: row["binding"] for row in units(result)["api"]["env"]}
+    assert env["API_URL"] == {
+        "kind": "unit", "targetId": "web", "property": "url",
+        "scheme": "http", "urlSuffix": "/api/v1?tenant=demo#top", "hasCredentials": False,
+    }
+    assert env["SELF_PG"] == {
+        "kind": "dependency", "targetId": "db", "property": "url",
+        "scheme": "postgresql+asyncpg", "urlSuffix": "/app?sslmode=disable", "hasCredentials": True,
+    }
+    assert env["PLAIN"]["urlSuffix"] == ""
+    assert env["AUTHSRC"]["urlSuffix"] == "/app?authSource=admin&retryWrites=true"
+    assert env["AUTHSRC"]["scheme"] == "mongodb" and env["AUTHSRC"]["hasCredentials"] is True
+    assert env["SRV"] is None and env["TOKENED"] is None and env["UNRES"] is None
+    assert "pw-leak-1" not in json.dumps(result)

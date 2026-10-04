@@ -314,6 +314,20 @@
                             "password",
                             "database"
                           ]
+                        },
+                        "scheme": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9+.-]{0,31}$",
+                          "description": "URL scheme exactly as written (http, postgresql, postgres+asyncpg, redis, mongodb ...). Only with property=url from a written URL."
+                        },
+                        "urlSuffix": {
+                          "type": "string",
+                          "maxLength": 2048,
+                          "description": "Exact path+query+fragment after host:port (\"\" when none). Userinfo is never included."
+                        },
+                        "hasCredentials": {
+                          "type": "boolean",
+                          "description": "True when the written URL carried userinfo (user[:password]@). The credentials are never returned."
                         }
                       },
                       "required": [
@@ -444,6 +458,27 @@
                 "path",
                 "line"
               ]
+            }
+          },
+          "buildTarget": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Compose build.target (Dockerfile stage). Optional for older results; null when unset."
+          },
+          "buildArgs": {
+            "type": "array",
+            "description": "Compose build.args keys only; values are never returned. Optional for older results.",
+            "items": {
+              "type": "string",
+              "minLength": 1
             }
           }
         },
