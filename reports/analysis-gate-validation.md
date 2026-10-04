@@ -87,4 +87,4 @@ sha256: schema.sql `10c3dca9…1cd3`, seed.sql `d3195f26…a35f`, mongo-init.js 
 
 - wheel: `dist/iris_analyzer-0.1.0-py3-none-any.whl` (커밋 `f6679dd`에서 `uv build --wheel`)
 - sha256: `ed93a0a95488f31c8f526c1f2d1f1de9e08a8f7cfd5c3a707246d2c5a3abfc40`
-- 테스트: `uv run pytest -q` → 806 passed, 8 skipped (이전 800 → +6: 다단계 Dockerfile target api/web과 상속 EXPOSE, 파생 stage EXPOSE 우선·기본 마지막 stage, target 없음, build args 키만, URL path/query/fragment 보존 + DB `sslmode` + 자격 증명 미노출 + `mongodb+srv`·비밀 쿼리·미해석 보간 null). 기존 2건은 binding에 새 필드가 생겨 기대값만 갱신했다. `uv run ruff check .` → All checks passed.
+- 테스트: `uv run pytest -q` → 805 passed, 8 skipped (이전 800 → +5: 다단계 Dockerfile target api/web과 상속 EXPOSE, 파생 stage EXPOSE 우선·기본 마지막 stage, target 없음, build args 키만, URL path/query/fragment 보존 + DB `sslmode` + 자격 증명 미노출 + `mongodb+srv`·비밀 쿼리·미해석 보간 null). 기존 2건은 binding에 새 필드가 생겨 기대값만 갱신했다. `uv run ruff check .` → All checks passed.
