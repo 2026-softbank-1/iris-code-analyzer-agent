@@ -59,3 +59,19 @@ Temp_log (`54fa8072d9fb`): unit `app`의 `MONGO_URI` → dependency `mongo` url,
 - wheel: `dist/iris_analyzer-0.1.0-py3-none-any.whl` (커밋 `f6ff307`에서 `uv build --wheel`)
 - sha256: `c3be0a5ef1ea8e11c67f863a0b309b8557ab03ef51cb518504daee3c441ec0e1`
 - 테스트: `uv run pytest -q` → 790 passed, 8 skipped (Phase 1 783 → +7 신규, fixture `fixtures/gate-links`). `uv run ruff check .` → All checks passed. 기존 테스트 중 필드 완전 일치를 단언하던 2건(`env` 행, `dependencies` 행)은 새 필드를 포함하도록 기대값만 갱신했다.
+
+## 계약 F 검증 · DB 초기화 스크립트 `initScripts` (2026-10-04)
+
+기능 커밋 `5922112`로 같은 요청(`rootDirectory="."`, auto)을 재실행했다. decision/complexity/units는 이전 결과와 같고 `dependencies[].initScripts`만 추가됐다. 내용은 출력되지 않고 경로·종류·해시·크기·순서·지원 여부만 나온다.
+
+| 레포 | dependency | initScripts | 질문 |
+| --- | --- | --- | --- |
+| iris-multi-image-shop (`6836ce3da305`) | postgres (compose `./db/schema.sql:/docker-entrypoint-initdb.d/001-schema.sql`, `./db/seed.sql:/docker-entrypoint-initdb.d/002-seed.sql`) | `db/schema.sql` (sql, 1827 B, order 0, supported), `db/seed.sql` (sql, 595 B, order 1, supported) | 없음 |
+| iris-multi-image-shop | redis | 필드 없음(해당 없음) | 없음 |
+| Temp_log (`54fa8072d9fb`) | mongo (Dockerfile.mongo 빌드 DB, `./docker/mongo-init.js:/docker-entrypoint-initdb.d/init.js`) | `docker/mongo-init.js` (js, 223 B, order 0, supported) | 기존 `dependency_built_from_dockerfile`만 |
+
+sha256: schema.sql `10c3dca9…1cd3`, seed.sql `d3195f26…a35f`, mongo-init.js `3132a18c…f993e`. `mongo-health.js`는 `/opt/health.js`로 마운트되어 대상이 아니다. analysis durationMs 21 / 89.
+
+- wheel: `dist/iris_analyzer-0.1.0-py3-none-any.whl` (커밋 `5922112`에서 `uv build --wheel`)
+- sha256: `675acf6e3cda4e9acddb42878fa6f84e61d3e90d5051ff8d68a60793f64dc888`
+- 테스트: `uv run pytest -q` → 800 passed, 8 skipped (Phase 2 790 → +10: 디렉터리 마운트, 파일 마운트, 긴 문법+gz, 심볼릭 링크·레포 밖·절대 경로 무시, 요청 root 밖, `.sh` unsupported, 파일 oversize, 합계 oversize, mongo `.js`/redis 없음, Dockerfile 빌드 DB). `uv run ruff check .` → All checks passed.
