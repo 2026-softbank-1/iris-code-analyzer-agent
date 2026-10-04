@@ -88,3 +88,14 @@ sha256: schema.sql `10c3dca9…1cd3`, seed.sql `d3195f26…a35f`, mongo-init.js 
 - wheel: `dist/iris_analyzer-0.1.0-py3-none-any.whl` (커밋 `f6679dd`에서 `uv build --wheel`)
 - sha256: `ed93a0a95488f31c8f526c1f2d1f1de9e08a8f7cfd5c3a707246d2c5a3abfc40`
 - 테스트: `uv run pytest -q` → 805 passed, 8 skipped (이전 800 → +5: 다단계 Dockerfile target api/web과 상속 EXPOSE, 파생 stage EXPOSE 우선·기본 마지막 stage, target 없음, build args 키만, URL path/query/fragment 보존 + DB `sslmode` + 자격 증명 미노출 + `mongodb+srv`·비밀 쿼리·미해석 보간 null). 기존 2건은 binding에 새 필드가 생겨 기대값만 갱신했다. `uv run ruff check .` → All checks passed.
+
+## 계약 G 검증 · secrets / 소비 키 / URL 사용자 (2026-10-04)
+
+기능 커밋 `f4557f8`로 같은 요청(auto)을 재실행했다. durationMs Temp_log 43, iris-multi-image-shop 18.
+
+Temp_log (`54fa8072d9fb`): `secrets` = `MONGO_APP_PASSWORD`(random; unit `app` via url_password, dependency `mongo` via env), `SESSION_SECRET`(random; unit `app`), `MONGO_ROOT_PASSWORD`(generate null, `platformManaged {dependencyId: mongo, property: password}`, consumer dependency `mongo` key `MONGO_INITDB_ROOT_PASSWORD`). `app` env에 `MONGO_ROOT_PASSWORD` 없음. `MONGO_URI` 바인딩 = `{dependency, mongo, url, scheme mongodb, urlSuffix "/archlog?authSource=archlog", hasCredentials true, user "archlog", passwordSecretId "MONGO_APP_PASSWORD"}`. `dependencies[mongo].env` = `[{key MONGO_APP_PASSWORD, secretId MONGO_APP_PASSWORD}]`. 질문 `custom_database_image`에 새 문구.
+
+iris-multi-image-shop (`6836ce3da305`): `secrets` 없음(compose 비밀번호는 기본값 있는 `${…:-}`), unit env는 이전과 같다. 결과 JSON에 하드코딩 기본 비밀번호는 나타나지 않는다.
+
+- 테스트: `uv run pytest -q` → 810 passed, 8 skipped. `uv run ruff check .` → All checks passed. stdout에 값·기본값이 없음을 검사하는 테스트 포함.
+- wheel sha256: `c5b798a60a0fd90b99470e3727c66dec166aee9875ae255b1c5f70f99e1c0a6b` (`dist/iris_analyzer-0.1.0-py3-none-any.whl`, 커밋 `f4557f8`)
